@@ -1,9 +1,9 @@
-/* @flow */
 export function isPromise(data) {
     return typeof data === 'object' && typeof data.then === 'function'
 }
 
-export function getDebugPath(debugPath, name) {
+export function getDebugPath(args) {
+    const [debugPath, name] = args || []
     return  (debugPath || '') + '.' + (name || 'unk')
 }
 
