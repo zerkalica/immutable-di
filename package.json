@@ -11,15 +11,13 @@
   "license": "MIT",
   "dependencies": {
     "bluebird": "^2.9.7",
-    "debug": "^2.1.1",
-    "immutable": "^3.6.2"
+    "debug": "^2.1.1"
   },
   "devDependencies": {
     "6to5-core": "^3.5.3",
     "6to5-jest": "^3.0.0",
     "gulp": "^3.8.11",
     "gulp-6to5": "^3.0.0",
-    "gulp-notify": "^2.2.0",
     "gulp-util": "^3.0.3",
     "harmonize": "^1.33.7",
     "jest-cli": "^0.2.2",
@@ -27,7 +25,9 @@
     "through2": "^0.6.3"
   },
   "jest": {
-    "testPathDirs": ["<rootDir>"],
+    "testPathDirs": [
+      "<rootDir>"
+    ],
     "scriptPreprocessor": "<rootDir>/node_modules/6to5-jest",
     "testFileExtensions": [
       "es6",

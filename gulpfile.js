@@ -2,7 +2,6 @@ var gulp = require('gulp'),
     jest = require('jest-cli'),
     to5 = require('gulp-6to5'),
     notifier = require('node-notifier'),
-    notify = require('gulp-notify'),
     harmonize = require('harmonize');
 
 harmonize();
