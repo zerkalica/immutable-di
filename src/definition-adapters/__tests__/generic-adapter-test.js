@@ -1,7 +1,4 @@
-import proxyquire from 'proxyquire'
-let {extractMetaInfo, idFromDefinition} = proxyquire('../generic-adapter', {
-    '../utils': require('../../__mocks__/utils')
-})
+import {extractMetaInfo, idFromDefinition} from '../generic-adapter'
 
 describe('definition-adapters/generic-adapter', () => {
     describe('idFromDefinition', () => {
@@ -67,6 +64,24 @@ describe('definition-adapters/generic-adapter', () => {
                 name: 'testFunc'
             };
             extractMetaInfo(testFunc).should.to.deep.equal(meta);
+        })
+
+
+        it('should convert simple class definition to metainfo', () => {
+            class TestClass {}
+            TestClass.__class = ['TestClass'];
+            let meta = {
+                id: TestClass,
+                handler: TestClass,
+                deps: [],
+                waitFor: [],
+                name: 'TestClass'
+            };
+            const orig = extractMetaInfo(TestClass);
+
+            orig.should.include.keys(['id', 'handler', 'deps', 'waitFor', 'name'])
+
+            orig.handler().should.to.be.instanceOf(TestClass);
         })
 
         it('should convert factory definition with deps to metainfo', () => {

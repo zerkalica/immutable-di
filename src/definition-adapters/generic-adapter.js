@@ -1,4 +1,4 @@
-import {construct} from '../utils'
+import {classToFactory} from '../utils'
 
 function procesDeps(deps) {
     const resultDeps = []
@@ -35,7 +35,7 @@ export function extractMetaInfo(definition, debugPath) {
 
     return {
         id: id,
-        handler: isClass ? construct.bind(null, definition) : definition,
+        handler: isClass ? classToFactory(definition) : definition,
         name: di[0],
         waitFor: waitFor,
         deps: deps

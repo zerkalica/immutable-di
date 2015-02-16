@@ -7,11 +7,11 @@ export function getDebugPath(args) {
     return  (debugPath || '') + '.' + (name || 'unk')
 }
 
-export function construct(constructor, args) {
+export function classToFactory(Constructor, args) {
     function F() {
-        return constructor.apply(this, args);
+        return Constructor.apply(this, args);
     }
-    F.prototype = constructor.prototype;
+    F.prototype = Constructor.prototype;
 
-    return new F();
+    return () => new F();
 }
