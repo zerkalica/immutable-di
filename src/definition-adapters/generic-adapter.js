@@ -2,6 +2,7 @@ import {construct} from '../utils'
 
 function procesDeps(deps) {
     const resultDeps = []
+    deps = deps || []
     for(let i = 0; i < deps.length; i++) {
         const dep = deps[i]
         const isArray = Array.isArray(dep)
@@ -10,7 +11,7 @@ function procesDeps(deps) {
         const definition = {
             promiseHandler: isPromise ? (dep[1] || ((p) => p)) : null,
             path: isPath ? dep : [],
-            definition: isPromise ? dep[0] : dep,
+            definition: isPromise ? dep[0] : isPath ? null : dep,
         }
 
         resultDeps.push(definition)
@@ -29,7 +30,6 @@ export function extractMetaInfo(definition, debugPath) {
     if (!Array.isArray(di)) {
         throw new Error('Property .__factory or .__class is not an array in ' + debugPath)
     }
-
     const deps = procesDeps(di.slice(1))
     const waitFor = procesDeps(definition.__waitFor)
 

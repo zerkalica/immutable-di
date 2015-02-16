@@ -1,43 +1,59 @@
-var gulp = require('gulp'),
-    jest = require('jest-cli'),
-    to5 = require('gulp-babel'),
-    notifier = require('node-notifier'),
-    harmonize = require('harmonize');
+require('babel-core/register');
 
-harmonize();
+var gulp = require('gulp');
+var babel = require('gulp-babel');
+var gmocha = require('gulp-mocha');
+var notifier = require('node-notifier');
+var path = require('path');
+
+var chai = require('chai');
+var chaiAsPromised = require('chai-as-promised');
+chai.use(chaiAsPromised);
+chai.should();
+
+var iconPath = path.join(path.dirname(require.resolve('mocha')), 'images')
 
 var isDev = true;
-
 var config = {
     dirs: {
         src: 'src',
         dest: 'dist'
     },
-    to5: {
+    babel: {
         modules: 'common',
         runtime: false,
-        loose: isDev,
+        loose: !isDev,
         experimental: true
+    },
+    mocha: {
+        reporter: 'spec'
     }
 };
 
 
 gulp.task('test', function(done) {
-    jest.runCLI({}, __dirname, function(isOk, arg) {
-        var message = 'Tests ' + (isOk ? 'passed' : 'failed');
-        notifier.notify({title: message, message: message})
-        done();
-    });
+    return gulp.src(config.dirs.src + '/**/__tests__/*.js', {read: false})
+        .pipe(gmocha(config.mocha))
+        .on('error', function (arg) {
+            notifier.notify({
+                title: 'Test',
+                message: arg.message,
+                time: 500,
+                icon: iconPath + '/error.png'
+            });
+        });
 });
 
-gulp.task('tdd', ['test'], function(done) {
-    gulp.watch([config.dirs.src + '/**/*.js' ], [ 'test' ]);
+gulp.task('w:code', function() {
+    gulp.watch([config.dirs.src + '/**/*.js'], gulp.parallel('test'));
 });
+
+gulp.task('w', gulp.series('test', 'w:code'));
 
 gulp.task('build', function () {
     return gulp.src(config.dirs.src + '/**/*.js')
-        .pipe(to5(config.to5))
+        .pipe(babel(config.babel))
         .pipe(gulp.dest(config.dirs.dest));
 });
 
-gulp.task('default', ['build']);
+gulp.task('default', gulp.series('build'));
