@@ -10,9 +10,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "bluebird": "^2.9.7",
-    "debug": "^2.1.1",
-    "immutable": "^3.6.2"
+    "debug": "^2.1.1"
   },
   "devDependencies": {
     "babel-core": "^4.0.1",

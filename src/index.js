@@ -1,3 +1,4 @@
-import Container from './container'
+import ImmutableDi from './immutable-di'
 
-export default Container
+export default ImmutableDi
+
