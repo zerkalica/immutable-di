@@ -15,11 +15,10 @@
     "immutable": "^3.6.2"
   },
   "devDependencies": {
-    "6to5-core": "^3.5.3",
-    "6to5-jest": "^3.0.0",
+    "babel-core": "^4.0.1",
+    "babel-jest": "^4.0.0",
     "gulp": "^3.8.11",
-    "gulp-6to5": "^3.0.0",
-    "gulp-notify": "^2.2.0",
+    "gulp-babel": "^4.0.0",
     "gulp-util": "^3.0.3",
     "harmonize": "^1.33.7",
     "jest-cli": "^0.2.2",
@@ -27,8 +26,10 @@
     "through2": "^0.6.3"
   },
   "jest": {
-    "testPathDirs": ["<rootDir>"],
-    "scriptPreprocessor": "<rootDir>/node_modules/6to5-jest",
+    "testPathDirs": [
+      "<rootDir>"
+    ],
+    "scriptPreprocessor": "<rootDir>/node_modules/babel-jest",
     "testFileExtensions": [
       "es6",
       "js"
