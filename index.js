@@ -1,1 +1,3 @@
-modul.exports = require('./dist');
+require('babel-core/polyfill');
+
+module.exports = require('./dist');

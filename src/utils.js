@@ -4,14 +4,14 @@ export function isPromise(data) {
 
 export function getDebugPath(args) {
     const [debugPath, name] = args || []
-    return  (debugPath || '') + '.' + (name || 'unk')
+    return  (debugPath ? (debugPath + '.') : '') + (name ? name : 'unk')
 }
 
-export function classToFactory(Constructor, args) {
-    function F() {
+export function classToFactory(Constructor) {
+    function F(args) {
         return Constructor.apply(this, args);
     }
     F.prototype = Constructor.prototype;
 
-    return () => new F();
+    return (...args) => new F(args);
 }

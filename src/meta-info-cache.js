@@ -17,15 +17,16 @@ export default class MetaInfoCache {
             debugPath = getDebugPath([debugCtx[0], meta.name])
             const statePaths = new Map()
             const deps = meta.deps
-            for(let i = 0; i = deps.length; i++) {
+            for(let i = 0; i < deps.length; i++) {
                 const dep = deps[i]
-                if (dep.path) {
+                if (dep.path && dep.path.length) {
                     statePaths.set(dep.path.join('.'), dep.path)
+                } else {
+                    const depMeta = this.get(dep.definition, [debugPath, i])
+                    depMeta.statePaths.forEach(path => statePaths.set(path.join('.'), path))
                 }
-                const depMeta = this.get(dep.definition, [debugPath, i])
-                depMeta.statePaths.forEach(path => statePaths.set(path.join('.'), path))
             }
-            meta.statePaths = statePaths.values()
+            meta.statePaths = Array.from(statePaths.values())
             this._meta.set(id, meta)
         }
 

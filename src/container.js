@@ -14,13 +14,6 @@ export default class Container {
         this._locks = new Map()
     }
 
-    clearStateCache(ids) {
-        const cache = this._cache.get('state')
-        for(let j = 0; j < ids.length; j++) {
-            cache.delete(ids[j])
-        }
-    }
-
     get(definition, debugCtx) {
         const {id, deps, debugPath, handler, statePaths} = this._meta.get(definition, debugCtx)
         const cache = this._cache.get(statePaths.length ? 'state' : 'global')

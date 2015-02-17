@@ -20,31 +20,44 @@ function procesDeps(deps) {
     return resultDeps
 }
 
-export function extractMetaInfo(definition, debugPath) {
-    const id = idFromDefinition(definition, debugPath)
-    const isClass = definition.__class
-    const di = isClass ? definition.__class : definition.__factory
-    if (!di) {
-        throw new Error('Property .__factory or .__class not exist in ' + debugPath)
-    }
-    if (!Array.isArray(di)) {
-        throw new Error('Property .__factory or .__class is not an array in ' + debugPath)
-    }
-    const deps = procesDeps(di.slice(1))
-    const waitFor = procesDeps(definition.__waitFor)
+export default class GenericAdapter {
+    static extractMetaInfo(definition, debugPath) {
+        const id = GenericAdapter.idFromDefinition(definition, debugPath)
+        const isClass = definition.__class
+        const di = isClass ? definition.__class : definition.__factory
+        const deps = procesDeps(di.slice(1))
+        const waitFor = procesDeps(definition.__waitFor)
 
-    return {
-        id: id,
-        handler: isClass ? classToFactory(definition) : definition,
-        name: di[0],
-        waitFor: waitFor,
-        deps: deps
+        return {
+            id: id,
+            handler: isClass ? classToFactory(definition) : definition,
+            name: di[0],
+            waitFor: waitFor,
+            deps: deps
+        }
     }
-}
 
-export function idFromDefinition(definition, debugPath) {
-    if (typeof definition !== 'function') {
-        throw new Error('Getter is not a function in ' + debugPath)
+    static idFromDefinition(definition, debugPath) {
+        if (typeof definition !== 'function') {
+            if (!debugPath) {
+                debugPath = 'arg'
+            }
+            throw new Error('Getter is not a definition in ' + debugPath)
+        }
+
+        if (definition && !debugPath) {
+            debugPath = definition.toString()
+        }
+
+        const di = definition.__factory || definition.__class
+
+        if (!di) {
+            throw new Error('Property .__factory or .__class not exist in ' + debugPath)
+        }
+        if (!Array.isArray(di)) {
+            throw new Error('Property .__factory or .__class is not an array in ' + debugPath)
+        }
+
+        return di[0]
     }
-    return definition
 }
