@@ -1,10 +1,4 @@
-import MetaInfoCache from './meta-info-cache'
-import {isPromise} from './utils'
-
 export default class Container {
-    /**
-     * @param  {StateAdapter} state
-     */
     constructor({state, metaInfoCache, globalCache}) {
         const cache = this._cache = new Map()
         cache.set('global', globalCache || new Map())
@@ -28,11 +22,10 @@ export default class Container {
         this._locks.set(id, true)
 
         const args = []
-        let hasPromise = false
         for (let i = 0; i < deps.length; i++) {
             const dep = deps[i]
             let value
-            if (dep.path) {
+            if (dep.path.length) {
                 value = this._state.getIn(dep.path)
             } else {
                 value = this.get(dep.definition, [debugPath, i])
@@ -40,18 +33,11 @@ export default class Container {
                     value = dep.promiseHandler(value)
                 }
             }
-            if (isPromise(value)) {
-                hasPromise = true
-            }
 
             args.push(value)
         }
 
-        if (hasPromise) {
-            result = Promise.all(args).then(resolvedArgs => handler.apply(null, resolvedArgs))
-        } else {
-            result = handler.apply(null, args) || null
-        }
+        result = Promise.all(args).then(resolvedArgs => handler.apply(null, resolvedArgs))
 
         this._locks.set(id, false)
         cache.set(id, result)
