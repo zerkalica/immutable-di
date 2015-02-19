@@ -1,5 +1,3 @@
-require('babel-core/register');
-
 var gulp = require('gulp');
 var babel = require('gulp-babel');
 var gmocha = require('gulp-mocha');
@@ -32,9 +30,9 @@ function getConfig(args) {
         dest: 'dist',
         babel: {
             modules: 'common',
-            runtime: false,
-            loose: !isDebug,
-            experimental: true
+            loose: isDebug ? 'all' : [],
+            experimental: true,
+            playground: true
         },
         mocha: {
             reporter: 'spec'
@@ -47,6 +45,8 @@ function getConfig(args) {
 };
 
 var config = getConfig(process.argv.slice(2));
+
+require('babel-core/register')(config.babel);
 
 gulp.task('test', function(done) {
     return gulp.src(config.src + '/**/__tests__/*.js', {read: false})

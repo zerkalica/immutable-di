@@ -13,7 +13,7 @@
     "debug": "^2.1.1"
   },
   "devDependencies": {
-    "babel-core": "^4.0.1",
+    "babel-core": "^4.3.0",
     "chai": "^2.0.0",
     "chai-as-promised": "^4.2.0",
     "gulp": "git+https://github.com/gulpjs/gulp.git#4.0",

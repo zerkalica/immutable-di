@@ -30,8 +30,8 @@ export default class Invoker {
                 }
             }))
             .then(data => {
-                return depsMutations.reduce((acc, mutation) => {
-                    return mutation ? acc.concat(mutation) : acc
+                return depsMutations.reduce((mutations, mutation) => {
+                    return mutation ? mutations.concat(mutation) : mutations
                 }, data ? [data] : [])
             })
         })
