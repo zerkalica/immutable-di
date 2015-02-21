@@ -5,10 +5,16 @@ var notifier = require('node-notifier');
 var path = require('path');
 var minimist = require('minimist');
 
+var sinon = require('sinon');
 var chai = require('chai');
 var chaiAsPromised = require('chai-as-promised');
+var sinonChai = require('sinon-chai');
+
 global.expect = chai.expect;
+global.sinon = sinon;
+global.spy = sinon.spy;
 chai.use(chaiAsPromised);
+chai.use(sinonChai);
 chai.should();
 
 var knownOptions = {

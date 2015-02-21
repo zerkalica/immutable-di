@@ -8,6 +8,10 @@ export default class Container {
         this._locks = new Map()
     }
 
+    clear(scope) {
+        this._cache.get(scope).clear()
+    }
+
     get(definition, debugCtx) {
         const {id, deps, debugPath, handler, statePaths} = this._meta.get(definition, debugCtx)
         const cache = this._cache.get(statePaths.length ? 'state' : 'global')
