@@ -1,14 +1,18 @@
 {
   "name": "immutable-di",
-  "version": "1.0.0",
-  "description": "Immutable di",
+  "version": "1.0.1",
+  "description": "Simple, promise-based dependency injection container with some state handling functions (for facebook flux-like state-management)",
   "scripts": {
     "build": "gulp build",
     "w": "gulp w",
     "test": "gulp test"
   },
-  "author": "",
+  "author": "Stefan Zerkalica <zerkalica@gmail.com>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/zerkalica/immutable-di.git"
+  },
   "dependencies": {
     "debug": "^2.1.1"
   },
