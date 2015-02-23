@@ -1,5 +1,5 @@
 //simple-example.js
-import {Builder, NativeAdapter} from 'immutable-di'
+import {Builder, NativeAdapter} from '../src'
 class Logger {
     // babel + playground feature enabled
     static __class = ['Logger']
@@ -7,4 +7,4 @@ class Logger {
 
 const ImmutableDi = Builder()
 const di = ImmutableDi(new NativeAdapter({}))
-di.get(Logger).then(logger => logger instanceOf Logger) // true
+di.get(Logger).then(logger => console.log(logger instanceof Logger)) // true

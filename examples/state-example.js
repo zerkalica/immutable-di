@@ -1,12 +1,11 @@
 //state-example.js
-import {Builder, NativeAdapter} from 'immutable-di'
+import {Builder, NativeAdapter} from '../src'
 
 const config = {
     logger: {
         level: 'debug'
-        }
     }
-}
+};
 
 function ConsoleOut() {
     return (message) => console.log(message)
@@ -29,7 +28,7 @@ class Logger {
     }
 
     warn(message) {
-        this.out.log('[WARN] ' + message + ' (' + this.query + ')')
+        this.out('[WARN] .' + this.level + '. ' + message + ' (' + this.query + ')')
     }
 }
 //Use Logger.__class =, if properties in classes is not supported by tsranspiler
@@ -47,7 +46,10 @@ function middleware(req) {
 
     const di = ImmutableDi(new NativeAdapter(state))
 
-    di.get(Logger).then(logger => logger.warn('test-string'))
+    di.get(Logger)
+        .then(logger => logger.warn('test-string'))
+        .catch(err => console.log(err.stack))
+    // [WARN] .debug. test-string (test-query)
 }
 
 middleware({

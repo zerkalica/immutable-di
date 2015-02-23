@@ -1,11 +1,13 @@
 //promise-example.js
-import {Builder, NativeAdapter} from 'immutable-di'
+import {Builder, NativeAdapter} from '../src'
 import fs from 'fs'
-import Promise from 'bluebird'
-Promise.promisifyAll(fs)
 
 function Reader(name) {
-    return fs.readFileAsync(name)
+    return new Promise((resolve, reject) => {
+        fs.readFile(name, (err, data) => {
+            return err ? reject(err) : resolve(data.toString())
+        })
+    })
 }
 Reader.__factory = ['Reader', ['reader', 'name']]
 
@@ -13,7 +15,7 @@ Reader.__factory = ['Reader', ['reader', 'name']]
  * di auto resolves promise and return data from Reader
  */
 function GetFileData(data) {
-    return new Promise.resolve(data)
+    return Promise.resolve(data)
 }
 GetFileData.__factory = ['GetFileData', Reader];
 
@@ -24,4 +26,6 @@ const state  = {
 }
 const ImmutableDi = Builder()
 const di = ImmutableDi(new NativeAdapter(state))
-di.get(GetFileData).then(data => console.log(data)) // file data
+di.get(GetFileData)
+    .then(data => console.log(data))
+    .catch(err => console.log(err.stack))

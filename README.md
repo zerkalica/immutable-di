@@ -1,6 +1,11 @@
 # immutable-di
-    Simple, promise-based dependency injection container with some state handling functions (for facebook flux-like state-management).
-    For interface docs see immutable-di.d.ts
+
+Simple, promise-based dependency injection container with some state handling functions (for facebook flux-like state-management).
+For interface docs see immutable-di.d.ts
+
+Install: npm install --save immutable-di
+Tests: npm test
+Examples: node examples/run.js [simple, promise, invoker, state]-example.js
 
 ## Dictionary
 * Definition - factory function or class with meta info
@@ -13,9 +18,9 @@
 * WaitFor - analog of waitFor in facebook flux dispatcher
 
 ## Meta info structure: 
-T.__class = [NameOfDefinition, dep1, dep2, ...]
-or T.__factory = [NameOfDefinition, dep1, dep2, ...]
-dep1..N can be another definition or [definition, promiseHandlerFunction] array
+* T.__class = [NameOfDefinition, dep1, dep2, ...]
+* or T.__factory = [NameOfDefinition, dep1, dep2, ...]
+* dep1..N can be another definition or [definition, promiseHandlerFunction] array
 
 ## Simple example
 ```js
