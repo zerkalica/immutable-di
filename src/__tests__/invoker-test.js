@@ -127,9 +127,9 @@ describe('invoker', () => {
                 invoker.handle(TestDep2),
                 invoker.handle(TestDep1)
             ]).then(d => {
-                d[0].should.to.be.deep.equal('mut')
-                d[1].should.to.be.deep.equal('mut2')
-                d[2].should.to.be.deep.equal('mut1')
+                d[0].should.to.be.equal('mut')
+                d[1].should.to.be.equal('mut2')
+                d[2].should.to.be.equal('mut1')
             })
         })
     })

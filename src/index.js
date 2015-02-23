@@ -1,4 +1,7 @@
-import ImmutableDi from './immutable-di'
+import ImmutableDiBuilder from './immutable-di-builder'
+import NativeAdapter from './state-adapters/native-adapter'
 
-export default ImmutableDi
-
+export default {
+    Builder: ImmutableDiBuilder,
+    NativeAdapter: NativeAdapter
+}
