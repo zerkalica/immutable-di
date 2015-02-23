@@ -3,9 +3,9 @@
 Simple, promise-based dependency injection container with some state handling functions (for facebook flux-like state-management).
 For interface docs see immutable-di.d.ts
 
-* Install: npm install --save immutable-di
-* Tests: npm test
-* Examples: node examples/run.js [simple, promise, invoker, state]-example.js
+* Install: `npm install --save immutable-di`
+* Tests: `npm test`
+* Examples: `node examples/run.js [simple, promise, invoker, state]-example.js`
 
 ## Dictionary
 * Definition - factory function or class with meta info
