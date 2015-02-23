@@ -29,3 +29,4 @@ const di = ImmutableDi(new NativeAdapter(state))
 di.get(GetFileData)
     .then(data => console.log(data))
     .catch(err => console.log(err.stack))
+// test

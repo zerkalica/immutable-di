@@ -49,9 +49,9 @@ function middleware(req) {
     di.get(Logger)
         .then(logger => logger.warn('test-string'))
         .catch(err => console.log(err.stack))
-    // [WARN] .debug. test-string (test-query)
 }
 
 middleware({
     query: 'test-query'
 })
+// [WARN] .debug. test-string (test-query)
