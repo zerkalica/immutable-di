@@ -3,11 +3,14 @@
 [![NPM](https://nodei.co/npm/immutable-di.png?downloads=true&stars=true)](https://nodei.co/npm/immutable-di/)
 
 Simple, promise-based dependency injection container with some state handling functions (for facebook flux-like state-management).
-For interface docs see immutable-di.d.ts
+For interface docs see [immutable-di.d.ts](https://github.com/zerkalica/immutable-di/blob/master/immutable-di.d.ts)
 
-* Install: npm install --save immutable-di
-* Tests: npm test
-* Examples: node examples/run.js [simple, promise, invoker, state]-example.js
+
+## General
+* Install: `npm install --save immutable-di`
+* Tests: `npm test`
+* Examples: `node examples/run.js [simple, promise, invoker, state]-example.js`
+
 
 ## Dictionary
 * Definition - factory function or class with meta info
