@@ -1,4 +1,6 @@
-# immutable-di
+# immutable-di [![Build Status](https://secure.travis-ci.org/zerkalica/immutable-di.png)](http://travis-ci.org/zerkalica/immutable-di)
+
+[![NPM](https://nodei.co/npm/immutable-di.png?downloads=true&stars=true)](https://nodei.co/npm/immutable-di/)
 
 Simple, promise-based dependency injection container with some state handling functions (for facebook flux-like state-management).
 For interface docs see immutable-di.d.ts

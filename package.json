@@ -13,10 +13,8 @@
     "type": "git",
     "url": "http://github.com/zerkalica/immutable-di.git"
   },
-  "dependencies": {
-    "debug": "^2.1.1"
-  },
   "devDependencies": {
+    "debug": "^2.1.1",
     "babel-core": "^4.3.0",
     "chai": "^2.0.0",
     "chai-as-promised": "^4.2.0",
@@ -32,20 +30,5 @@
     "sinon": "^1.12.2",
     "sinon-chai": "^2.7.0",
     "through2": "^0.6.3"
-  },
-  "jest": {
-    "testPathDirs": [
-      "<rootDir>"
-    ],
-    "scriptPreprocessor": "<rootDir>/node_modules/babel-jest",
-    "testFileExtensions": [
-      "es6",
-      "js"
-    ],
-    "moduleFileExtensions": [
-      "js",
-      "json",
-      "es6"
-    ]
   }
 }
