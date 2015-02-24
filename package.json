@@ -1,19 +1,21 @@
 {
   "name": "immutable-di",
-  "version": "1.0.0",
-  "description": "Immutable di",
+  "version": "1.0.2",
+  "description": "Simple, promise-based dependency injection container with some state handling functions (for facebook flux-like state-management)",
   "scripts": {
     "build": "gulp build",
     "w": "gulp w",
     "test": "gulp test"
   },
-  "author": "",
+  "author": "Stefan Zerkalica <zerkalica@gmail.com>",
   "license": "MIT",
-  "dependencies": {
-    "debug": "^2.1.1"
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/zerkalica/immutable-di.git"
   },
   "devDependencies": {
-    "babel-core": "^4.3.0",
+    "debug": "^2.1.1",
+    "babel-core": "^4.4.5",
     "chai": "^2.0.0",
     "chai-as-promised": "^4.2.0",
     "gulp": "git+https://github.com/gulpjs/gulp.git#4.0",
@@ -25,21 +27,8 @@
     "mocha": "^2.1.0",
     "node-notifier": "^4.1.0",
     "proxyquire": "^1.3.1",
+    "sinon": "^1.12.2",
+    "sinon-chai": "^2.7.0",
     "through2": "^0.6.3"
-  },
-  "jest": {
-    "testPathDirs": [
-      "<rootDir>"
-    ],
-    "scriptPreprocessor": "<rootDir>/node_modules/babel-jest",
-    "testFileExtensions": [
-      "es6",
-      "js"
-    ],
-    "moduleFileExtensions": [
-      "js",
-      "json",
-      "es6"
-    ]
   }
 }

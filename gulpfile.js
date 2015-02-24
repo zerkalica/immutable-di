@@ -5,10 +5,17 @@ var notifier = require('node-notifier');
 var path = require('path');
 var minimist = require('minimist');
 
+var sinon = require('sinon');
 var chai = require('chai');
 var chaiAsPromised = require('chai-as-promised');
+var sinonChai = require('sinon-chai');
+
+
 global.expect = chai.expect;
+global.sinon = sinon;
+global.spy = sinon.spy;
 chai.use(chaiAsPromised);
+chai.use(sinonChai);
 chai.should();
 
 var knownOptions = {
@@ -32,6 +39,7 @@ function getConfig(args) {
             modules: 'common',
             loose: isDebug ? 'all' : [],
             experimental: true,
+            externalHelpers: true,
             playground: true
         },
         mocha: {
@@ -47,6 +55,7 @@ function getConfig(args) {
 var config = getConfig(process.argv.slice(2));
 
 require('babel-core/register')(config.babel);
+require('babel-core/external-helpers')
 
 gulp.task('test', function(done) {
     return gulp.src(config.src + '/**/__tests__/*.js', {read: false})

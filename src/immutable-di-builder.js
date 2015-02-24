@@ -2,17 +2,20 @@ import Container from './container'
 import Invoker from './invoker'
 import MetaInfoCache from './meta-info-cache'
 import GenericAdapter from './definition-adapters/generic-adapter'
-import NativeAdapter from './state-adapters/native-adapter'
 
 class ImmutableDi {
     constructor ({state, globalCache, metaInfoCache}) {
         this._meta = metaInfoCache
 
         this._container = new Container({
-            state: new NativeAdapter(state),
+            state: state,
             metaInfoCache: this._meta,
             globalCache: globalCache
         })
+    }
+
+    clear(scope) {
+        this._container.clear(scope)
     }
 
     createMethod(actionType, payload) {
@@ -33,5 +36,9 @@ export default function ImmutableDiBuilder() {
     const cache = new Map()
     const meta = new MetaInfoCache(GenericAdapter)
 
-    return state => new ImmutableDi({state: state, globalCache: cache, metaInfoCache: meta})
+    return state => new ImmutableDi({
+        state: state,
+        globalCache: cache,
+        metaInfoCache: meta
+    })
 }

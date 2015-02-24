@@ -39,31 +39,31 @@ describe('container', () => {
       it('should throw exception if not service prototype passed', () => {
         function TestService() {
         }
-        (() => container.get(container, TestService)).should.throw();
+        (() => container.get(container, TestService)).should.throw()
       })
 
       it('should throw exception if no service name defined', () => {
         function TestService() {
-            return 123;
+            return 123
         }
-        (() => container.get(TestService)).should.throw('Property .__factory or .__class not exist in unk');
+        (() => container.get(TestService)).should.throw('Property .__factory or .__class not exist in unk')
       })
     })
 
     describe('if correct service prototype passed', () => {
         it('should instance simple service as promise', () => {
             function TestService() {
-                return 1234;
+                return 1234
             }
-            TestService.__factory = ['TestService'];
-            container.get(TestService).should.instanceOf(Promise);
+            TestService.__factory = ['TestService']
+            container.get(TestService).should.instanceOf(Promise)
         })
 
         it('should resolve deps for simple class', () => {
             function testFactory() {
                 return new Promise(resolve => resolve('testFactory.value'));
             }
-            testFactory.__factory = ['testFactory'];
+            testFactory.__factory = ['testFactory']
 
             class TestClass {
                 static __class = ['TestClass', testFactory]
@@ -88,12 +88,12 @@ describe('container', () => {
             var exampleValue = 'test-va';
 
             function Dep(pa) {
-              return exampleValue + '.' + pa;
+              return exampleValue + '.' + pa
             }
-            Dep.__factory = ['Dep', ['p', 'a']];
+            Dep.__factory = ['Dep', ['p', 'a']]
 
-            return container.get(Dep).should.eventually.equal(exampleValue + '.' + state.p.a);
-        });
+            return container.get(Dep).should.eventually.equal(exampleValue + '.' + state.p.a)
+        })
 
         it('should instance simple service and put it in global cache', () => {
             let exampleValue = 'test';
@@ -101,18 +101,18 @@ describe('container', () => {
               return new Promise(resolve => resolve(exampleValue));
             }
             TestService2.__factory = ['TestService2'];
-            container.get(TestService2);
+            container.get(TestService2)
 
-            return globalCache.get('TestService2').should.eventually.equal(exampleValue);
-        });
+            return globalCache.get('TestService2').should.eventually.equal(exampleValue)
+        })
 
         it('should instance simple service and put it in state cache', () => {
             var exampleValue = 'test-va';
 
             function Dep(pa) {
-              return exampleValue + '.' + pa;
+              return exampleValue + '.' + pa
             }
-            Dep.__factory = ['Dep', ['p', 'a']];
+            Dep.__factory = ['Dep', ['p', 'a']]
 
             container.get(Dep);
 
@@ -120,8 +120,79 @@ describe('container', () => {
 
             localCache.should.to.be.instanceOf(Map)
 
-            return localCache.get('Dep').should.eventually.equal(exampleValue + '.' + state.p.a);
-        });
+            return localCache.get('Dep').should.eventually.equal(exampleValue + '.' + state.p.a)
+        })
 
+        it('should use cache, if called twice or more', () => {
+            const Dep = spy()
+            Dep.__factory = ['Dep', ['p', 'a']]
+
+            return container.get(Dep).then(d => {
+                return container.get(Dep)
+            }).then(d => {
+                Dep.should.have.been.calledOnce;
+            });
+        })
+
+        it('should compute state-depended value again after clear cache', () => {
+            const Dep = spy()
+            Dep.__factory = ['Dep', ['p', 'a']]
+
+            return container.get(Dep).then(d => {
+                container.clear('state')
+                return container.get(Dep)
+            }).then(d => {
+                Dep.should.have.been.calledTwice;
+            })
+        })
+
+        it('should compute global-depended value again after clear cache', () => {
+            const Dep = spy()
+            Dep.__factory = ['Dep']
+
+            return container.get(Dep).then(d => {
+                container.clear('global')
+                return container.get(Dep)
+            }).then(d => {
+                Dep.should.have.been.calledTwice;
+            })
+        })
    })
+
+    describe('exception handling', () => {
+        it('should return empty data, if service throws exception', () => {
+            const exampleValue = 'test-va';
+            const testFallback = {
+                test: '123'
+            }
+            function Dep(context) {
+              throw new Error('test')
+              return exampleValue
+            }
+            Dep.__factory = ['Dep', ['p', 'a']]
+
+            function TestService(dep) {
+              return new Promise.resolve(dep);
+            }
+            TestService.__factory = ['TestService', [Dep, p => p.catch(err => testFallback)]]
+            expect(container.get(TestService)).eventually.deep.equal(testFallback)
+        })
+
+        it('should filter exception, if service throws custom exception', () => {
+            const testErr = {test: 123};
+            function Dep() {
+                throw new ReferenceError('test')
+            }
+            Dep.__factory = ['Dep'];
+            function TestService(dep) {
+              return new Promise.resolve(dep);
+            }
+            TestService.__factory = [
+                'TestService',
+                [Dep, p => p.catch(ReferenceError, err => testErr)]
+            ]
+
+            expect(container.get(TestService)).eventually.deep.equal(testErr);
+        })
+    })
 })

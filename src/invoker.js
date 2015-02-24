@@ -7,7 +7,7 @@ export default class Invoker {
         this._cache = new Map()
     }
 
-    invoke(definition, debugCtx) {
+    handle(definition, debugCtx) {
         const {id, waitFor, debugPath} = this._meta.get(definition, debugCtx)
 
         if(this._cache.has(id)) {
@@ -16,25 +16,13 @@ export default class Invoker {
         const args = []
         for (let i = 0, j = waitFor.length; i < j; i++) {
             const dep = waitFor[i]
-            args.push(dep.promiseHandler(this.invoke(dep.definition, [debugPath, i])))
+            const value = this.handle(dep.definition, [debugPath, i])
+            args.push(dep.promiseHandler ? dep.promiseHandler(value) : value)
         }
 
-        const result = Promise.all(args).then((depsMutations) => {
-            const instance = this._container.get(definition, debugCtx)
-
-            return (new Promise((resolve, reject) => {
-                try {
-                    resolve(instance.handle(this._actionType, this._payload))
-                } catch(e) {
-                    reject(e)
-                }
-            }))
-            .then(data => {
-                return depsMutations.reduce((mutations, mutation) => {
-                    return mutation ? mutations.concat(mutation) : mutations
-                }, data ? [data] : [])
-            })
-        })
+        const result = Promise.all(args)
+            .then(depsMutations => this._container.get(definition, debugCtx))
+            .then(instance => instance.handle(this._actionType, this._payload))
 
         this._cache.set(id, result)
 
