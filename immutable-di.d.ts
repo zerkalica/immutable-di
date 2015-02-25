@@ -53,11 +53,11 @@ declare type DefinitionMeta = {
 /**
  * State adapter interface - gets part of state by array path
  */
-declare interface IStateAdapter<T> {
+declare interface IStateAdapter {
     /**
      * Get state part by path array
      */
-    getIn(path: string[]): T;
+    getIn(path: string[]): any;
 }
 
 /**
@@ -74,6 +74,13 @@ declare interface IDefinitionAdapter {
 declare class MetaInfoCache {
     constructor(definitionAdapter: IDefinitionAdapter);
     get(definition: Definition): DefinitionMeta;
+}
+
+/**
+ * Provide get object part by array path for raw object
+ */
+declare class NativeAdapter implements IStateAdapter {
+    getIn(path: string[]): any;
 }
 
 /**
@@ -117,8 +124,29 @@ declare class ImmutableDi {
         globalCache: Map;
         metaInfoCache: MetaInfoCache;
     });
+
+    /**
+     * Clear state cache in di by scope name
+     *
+     * @param {string} scope Available scopes: 'state', 'global'
+     */
     clear(scope: string): void;
+
+    /**
+     * Get Promise with definition data by definition prototype
+     *
+     * @param  {Definition} definition Definition prototyp
+     * @return {Promise}               Promise with factory definition data or object
+     */
     get(definition: Definition): Promise;
+
+    /**
+     * Create invoker instance
+     *
+     * @param  {string}  actionType action type string
+     * @param  {any}     payload    data object to handler
+     * @return {Invoker}            method invoker instance
+     */
     createMethod(actionType: string, payload: any): Invoker;
 }
 
