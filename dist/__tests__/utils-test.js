@@ -1,5 +1,9 @@
 "use strict";
 
+var _prototypeProperties = function (child, staticProps, instanceProps) { if (staticProps) Object.defineProperties(child, staticProps); if (instanceProps) Object.defineProperties(child.prototype, instanceProps); };
+
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+
 var _utils = require("../utils");
 
 var isPromise = _utils.isPromise;
@@ -17,7 +21,7 @@ describe("utils", function () {
         });
         it("should return false if argument is no then property", function () {
             var testClass = function testClass() {
-                babelHelpers.classCallCheck(this, testClass);
+                _classCallCheck(this, testClass);
             };
 
             isPromise(new testClass()).should.to.be.not.ok;
@@ -25,16 +29,17 @@ describe("utils", function () {
         it("should return true if argument is a object with then property", function () {
             var testClass = (function () {
                 function testClass() {
-                    babelHelpers.classCallCheck(this, testClass);
+                    _classCallCheck(this, testClass);
                 }
 
-                babelHelpers.prototypeProperties(testClass, null, {
+                _prototypeProperties(testClass, null, {
                     then: {
                         value: function then() {},
                         writable: true,
                         configurable: true
                     }
                 });
+
                 return testClass;
             })();
 
@@ -44,11 +49,11 @@ describe("utils", function () {
 
     describe("classToFactory", function () {
         var TestC = function TestC() {
-            babelHelpers.classCallCheck(this, TestC);
+            _classCallCheck(this, TestC);
         };
 
         var TestC1 = function TestC1(a, b) {
-            babelHelpers.classCallCheck(this, TestC1);
+            _classCallCheck(this, TestC1);
 
             if (a !== 1 || b !== 2) {
                 throw new Error("Invalid arguments");

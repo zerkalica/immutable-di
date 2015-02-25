@@ -1,5 +1,9 @@
 "use strict";
 
+var _prototypeProperties = function (child, staticProps, instanceProps) { if (staticProps) Object.defineProperties(child, staticProps); if (instanceProps) Object.defineProperties(child.prototype, instanceProps); };
+
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+
 var classToFactory = require("../utils").classToFactory;
 
 function procesDeps(deps) {
@@ -25,10 +29,10 @@ function procesDeps(deps) {
 
 var GenericAdapter = (function () {
     function GenericAdapter() {
-        babelHelpers.classCallCheck(this, GenericAdapter);
+        _classCallCheck(this, GenericAdapter);
     }
 
-    babelHelpers.prototypeProperties(GenericAdapter, {
+    _prototypeProperties(GenericAdapter, {
         extractMetaInfo: {
             value: function extractMetaInfo(definition, debugPath) {
                 var id = GenericAdapter.idFromDefinition(definition, debugPath);
@@ -76,6 +80,7 @@ var GenericAdapter = (function () {
             configurable: true
         }
     });
+
     return GenericAdapter;
 })();
 

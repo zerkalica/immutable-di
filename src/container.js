@@ -30,7 +30,15 @@ export default class Container {
             const dep = deps[i]
             let value
             if (dep.path.length) {
-                value = this._state.getIn(dep.path)
+                try {
+                    value = this._state.getIn(dep.path)
+                    if (value === void 0) {
+                        throw new Error('Value is undefined')
+                    }
+                } catch (e) {
+                    e.message = e.message + ' in ' + debugPath + ' [' + dep.path.join('.') + ']'
+                    throw e
+                }
             } else {
                 value = this.get(dep.definition, [debugPath, i])
                 if (dep.promiseHandler) {

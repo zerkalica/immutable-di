@@ -1,9 +1,18 @@
 "use strict";
 
-var Container = babelHelpers.interopRequire(require("../container"));
-var MetaInfoCache = babelHelpers.interopRequire(require("../meta-info-cache"));
-var NativeAdapter = babelHelpers.interopRequire(require("../state-adapters/native-adapter"));
-var GenericAdapter = babelHelpers.interopRequire(require("../definition-adapters/generic-adapter"));
+var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+
+var _prototypeProperties = function (child, staticProps, instanceProps) { if (staticProps) Object.defineProperties(child, staticProps); if (instanceProps) Object.defineProperties(child.prototype, instanceProps); };
+
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+
+var Container = _interopRequire(require("../container"));
+
+var MetaInfoCache = _interopRequire(require("../meta-info-cache"));
+
+var NativeAdapter = _interopRequire(require("../state-adapters/native-adapter"));
+
+var GenericAdapter = _interopRequire(require("../definition-adapters/generic-adapter"));
 
 var testFunc = require("../__mocks__/fixture-definition").testFunc;
 
@@ -85,13 +94,14 @@ describe("container", function () {
 
             var TestClass = (function () {
                 function TestClass(testFactoryValue) {
-                    babelHelpers.classCallCheck(this, TestClass);
+                    _classCallCheck(this, TestClass);
 
                     this.tfv = testFactoryValue;
                 }
 
                 TestClass.__class = ["TestClass", testFactory];
-                babelHelpers.prototypeProperties(TestClass, null, {
+
+                _prototypeProperties(TestClass, null, {
                     get: {
                         value: function get() {
                             return "TestClass." + this.tfv;
@@ -100,6 +110,7 @@ describe("container", function () {
                         configurable: true
                     }
                 });
+
                 return TestClass;
             })();
 

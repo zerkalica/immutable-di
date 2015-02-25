@@ -1,16 +1,20 @@
 "use strict";
 
+var _prototypeProperties = function (child, staticProps, instanceProps) { if (staticProps) Object.defineProperties(child, staticProps); if (instanceProps) Object.defineProperties(child.prototype, instanceProps); };
+
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+
 var getDebugPath = require("./utils").getDebugPath;
 
 var MetaInfoCache = (function () {
     function MetaInfoCache(adapter) {
-        babelHelpers.classCallCheck(this, MetaInfoCache);
+        _classCallCheck(this, MetaInfoCache);
 
         this._adapter = adapter;
         this._meta = new Map();
     }
 
-    babelHelpers.prototypeProperties(MetaInfoCache, null, {
+    _prototypeProperties(MetaInfoCache, null, {
         get: {
             value: function get(definition, debugCtx) {
                 var _this = this;
@@ -49,6 +53,7 @@ var MetaInfoCache = (function () {
             configurable: true
         }
     });
+
     return MetaInfoCache;
 })();
 

@@ -1,7 +1,11 @@
 "use strict";
 
-var ImmutableDiBuilder = babelHelpers.interopRequire(require("./immutable-di-builder"));
-var NativeAdapter = babelHelpers.interopRequire(require("./state-adapters/native-adapter"));
+var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+
+var ImmutableDiBuilder = _interopRequire(require("./immutable-di-builder"));
+
+var NativeAdapter = _interopRequire(require("./state-adapters/native-adapter"));
+
 module.exports = {
     Builder: ImmutableDiBuilder,
     NativeAdapter: NativeAdapter

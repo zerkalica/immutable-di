@@ -1,12 +1,15 @@
 "use strict";
 
-var GenericAdapter = babelHelpers.interopRequire(require("../definition-adapters/generic-adapter"));
+var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+
+var GenericAdapter = _interopRequire(require("../definition-adapters/generic-adapter"));
 
 var _mocks__FixtureDefinition = require("../__mocks__/fixture-definition");
 
 var testFuncMeta = _mocks__FixtureDefinition.testFuncMeta;
 var testFunc = _mocks__FixtureDefinition.testFunc;
-var MetaInfoCache = babelHelpers.interopRequire(require("../meta-info-cache"));
+
+var MetaInfoCache = _interopRequire(require("../meta-info-cache"));
 
 describe("meta-info-cache", function () {
     var meta = undefined;

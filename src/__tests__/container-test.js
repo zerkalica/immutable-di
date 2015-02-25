@@ -6,6 +6,7 @@ import {testFunc} from '../__mocks__/fixture-definition'
 
 describe('container', () => {
     let state = {
+        state: {a: {b: 1, b1: 2}},
         p: {
             a: 'test-state-val'
         }
@@ -93,6 +94,16 @@ describe('container', () => {
             Dep.__factory = ['Dep', ['p', 'a']]
 
             return container.get(Dep).should.eventually.equal(exampleValue + '.' + state.p.a)
+        })
+
+        it('should throw error, if path not found in state', () => {
+            var exampleValue = 'test-va';
+
+            function Dep(pa) {
+                return exampleValue + '.' + pa
+            }
+            Dep.__factory = ['Dep', ['f', 'a']];
+            (() => container.get(Dep)).should.throw();
         })
 
         it('should instance simple service and put it in global cache', () => {

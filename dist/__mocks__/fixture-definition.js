@@ -1,5 +1,9 @@
 "use strict";
 
+var _prototypeProperties = function (child, staticProps, instanceProps) { if (staticProps) Object.defineProperties(child, staticProps); if (instanceProps) Object.defineProperties(child.prototype, instanceProps); };
+
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+
 exports.depFn = depFn;
 exports.waitFn1 = waitFn1;
 exports.waitFn2 = waitFn2;
@@ -13,10 +17,10 @@ depFn.__factory = ["depFn"];
 
 var DepClass = exports.DepClass = (function () {
     function DepClass() {
-        babelHelpers.classCallCheck(this, DepClass);
+        _classCallCheck(this, DepClass);
     }
 
-    babelHelpers.prototypeProperties(DepClass, null, {
+    _prototypeProperties(DepClass, null, {
         test: {
             value: function test() {
                 return "DepClass.value";
@@ -25,6 +29,7 @@ var DepClass = exports.DepClass = (function () {
             configurable: true
         }
     });
+
     return DepClass;
 })();
 

@@ -1,10 +1,20 @@
 "use strict";
 
-var Invoker = babelHelpers.interopRequire(require("../invoker"));
-var Container = babelHelpers.interopRequire(require("../container"));
-var MetaInfoCache = babelHelpers.interopRequire(require("../meta-info-cache"));
-var NativeAdapter = babelHelpers.interopRequire(require("../state-adapters/native-adapter"));
-var GenericAdapter = babelHelpers.interopRequire(require("../definition-adapters/generic-adapter"));
+var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+
+var _prototypeProperties = function (child, staticProps, instanceProps) { if (staticProps) Object.defineProperties(child, staticProps); if (instanceProps) Object.defineProperties(child.prototype, instanceProps); };
+
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+
+var Invoker = _interopRequire(require("../invoker"));
+
+var Container = _interopRequire(require("../container"));
+
+var MetaInfoCache = _interopRequire(require("../meta-info-cache"));
+
+var NativeAdapter = _interopRequire(require("../state-adapters/native-adapter"));
+
+var GenericAdapter = _interopRequire(require("../definition-adapters/generic-adapter"));
 
 describe("invoker", function () {
     var state = {
@@ -41,11 +51,12 @@ describe("invoker", function () {
 
         var TestStore = (function () {
             function TestStore() {
-                babelHelpers.classCallCheck(this, TestStore);
+                _classCallCheck(this, TestStore);
             }
 
             TestStore.__class = ["TestStore"];
-            babelHelpers.prototypeProperties(TestStore, null, {
+
+            _prototypeProperties(TestStore, null, {
                 handle: {
                     value: function handle(actionType, payload) {
                         return Promise.resolve(fakeHandle(actionType, payload));
@@ -54,6 +65,7 @@ describe("invoker", function () {
                     configurable: true
                 }
             });
+
             return TestStore;
         })();
 
@@ -73,11 +85,12 @@ describe("invoker", function () {
 
         var TestDep1 = (function () {
             function TestDep1() {
-                babelHelpers.classCallCheck(this, TestDep1);
+                _classCallCheck(this, TestDep1);
             }
 
             TestDep1.__class = ["TestDep1"];
-            babelHelpers.prototypeProperties(TestDep1, null, {
+
+            _prototypeProperties(TestDep1, null, {
                 handle: {
                     value: function handle(actionType, payload) {
                         return Promise.resolve(fakeHandle1(actionType, payload));
@@ -86,17 +99,19 @@ describe("invoker", function () {
                     configurable: true
                 }
             });
+
             return TestDep1;
         })();
 
         var TestDep2 = (function () {
             function TestDep2() {
-                babelHelpers.classCallCheck(this, TestDep2);
+                _classCallCheck(this, TestDep2);
             }
 
             TestDep2.__class = ["TestDep2"];
             TestDep2.__waitFor = [TestDep1];
-            babelHelpers.prototypeProperties(TestDep2, null, {
+
+            _prototypeProperties(TestDep2, null, {
                 handle: {
                     value: function handle(actionType, payload) {
                         return Promise.resolve(fakeHandle2(actionType, payload));
@@ -105,17 +120,19 @@ describe("invoker", function () {
                     configurable: true
                 }
             });
+
             return TestDep2;
         })();
 
         var TestStore = (function () {
             function TestStore() {
-                babelHelpers.classCallCheck(this, TestStore);
+                _classCallCheck(this, TestStore);
             }
 
             TestStore.__class = ["TestStore"];
             TestStore.__waitFor = [TestDep2, TestDep1];
-            babelHelpers.prototypeProperties(TestStore, null, {
+
+            _prototypeProperties(TestStore, null, {
                 handle: {
                     value: function handle(actionType, payload) {
                         return Promise.resolve(fakeHandle(actionType, payload));
@@ -124,6 +141,7 @@ describe("invoker", function () {
                     configurable: true
                 }
             });
+
             return TestStore;
         })();
 

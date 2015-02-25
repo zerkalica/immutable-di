@@ -1,11 +1,16 @@
 "use strict";
 
+var _prototypeProperties = function (child, staticProps, instanceProps) { if (staticProps) Object.defineProperties(child, staticProps); if (instanceProps) Object.defineProperties(child.prototype, instanceProps); };
+
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+
 var Container = (function () {
     function Container(_ref) {
         var state = _ref.state;
         var metaInfoCache = _ref.metaInfoCache;
         var globalCache = _ref.globalCache;
-        babelHelpers.classCallCheck(this, Container);
+
+        _classCallCheck(this, Container);
 
         var cache = this._cache = new Map();
         cache.set("global", globalCache || new Map());
@@ -15,7 +20,7 @@ var Container = (function () {
         this._locks = new Map();
     }
 
-    babelHelpers.prototypeProperties(Container, null, {
+    _prototypeProperties(Container, null, {
         clear: {
             value: function clear(scope) {
                 this._cache.get(scope).clear();
@@ -73,6 +78,7 @@ var Container = (function () {
             configurable: true
         }
     });
+
     return Container;
 })();
 

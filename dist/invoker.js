@@ -1,12 +1,17 @@
 "use strict";
 
+var _prototypeProperties = function (child, staticProps, instanceProps) { if (staticProps) Object.defineProperties(child, staticProps); if (instanceProps) Object.defineProperties(child.prototype, instanceProps); };
+
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+
 var Invoker = (function () {
     function Invoker(_ref) {
         var metaInfoCache = _ref.metaInfoCache;
         var container = _ref.container;
         var actionType = _ref.actionType;
         var payload = _ref.payload;
-        babelHelpers.classCallCheck(this, Invoker);
+
+        _classCallCheck(this, Invoker);
 
         this._meta = metaInfoCache;
         this._actionType = actionType;
@@ -15,7 +20,7 @@ var Invoker = (function () {
         this._cache = new Map();
     }
 
-    babelHelpers.prototypeProperties(Invoker, null, {
+    _prototypeProperties(Invoker, null, {
         handle: {
             value: function handle(definition, debugCtx) {
                 var _this = this;
@@ -50,6 +55,7 @@ var Invoker = (function () {
             configurable: true
         }
     });
+
     return Invoker;
 })();
 

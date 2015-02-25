@@ -1,5 +1,7 @@
 "use strict";
 
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+
 var _genericAdapter = require("../generic-adapter");
 
 var extractMetaInfo = _genericAdapter.extractMetaInfo;
@@ -118,7 +120,7 @@ describe("definition-adapters/generic-adapter", function () {
 
         it("should convert simple class definition to metainfo", function () {
             var TestClass = function TestClass() {
-                babelHelpers.classCallCheck(this, TestClass);
+                _classCallCheck(this, TestClass);
             };
 
             TestClass.__class = ["TestClass"];

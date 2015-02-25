@@ -1,6 +1,10 @@
 "use strict";
 
-function getIn(obj, bits) {
+var _prototypeProperties = function (child, staticProps, instanceProps) { if (staticProps) Object.defineProperties(child, staticProps); if (instanceProps) Object.defineProperties(child.prototype, instanceProps); };
+
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+
+function getInPath(obj, bits) {
     for (var i = 0, j = bits.length; i < j; ++i) {
         var bit = bits[i];
         if (!obj.hasOwnProperty(bit)) {
@@ -13,30 +17,21 @@ function getIn(obj, bits) {
 
 var NativeAdapter = (function () {
     function NativeAdapter(state) {
-        babelHelpers.classCallCheck(this, NativeAdapter);
+        _classCallCheck(this, NativeAdapter);
 
         this._state = state || {};
     }
 
-    babelHelpers.prototypeProperties(NativeAdapter, null, {
+    _prototypeProperties(NativeAdapter, null, {
         getIn: {
-            value: (function (_getIn) {
-                var _getInWrapper = function getIn() {
-                    return _getIn.apply(this, arguments);
-                };
-
-                _getInWrapper.toString = function () {
-                    return _getIn.toString();
-                };
-
-                return _getInWrapper;
-            })(function (path) {
-                return getIn(this._state, path);
-            }),
+            value: function getIn(path) {
+                return getInPath(this._state, path);
+            },
             writable: true,
             configurable: true
         }
     });
+
     return NativeAdapter;
 })();
 

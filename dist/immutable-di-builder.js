@@ -1,17 +1,28 @@
 "use strict";
 
+var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+
+var _prototypeProperties = function (child, staticProps, instanceProps) { if (staticProps) Object.defineProperties(child, staticProps); if (instanceProps) Object.defineProperties(child.prototype, instanceProps); };
+
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+
 module.exports = ImmutableDiBuilder;
-var Container = babelHelpers.interopRequire(require("./container"));
-var Invoker = babelHelpers.interopRequire(require("./invoker"));
-var MetaInfoCache = babelHelpers.interopRequire(require("./meta-info-cache"));
-var GenericAdapter = babelHelpers.interopRequire(require("./definition-adapters/generic-adapter"));
+
+var Container = _interopRequire(require("./container"));
+
+var Invoker = _interopRequire(require("./invoker"));
+
+var MetaInfoCache = _interopRequire(require("./meta-info-cache"));
+
+var GenericAdapter = _interopRequire(require("./definition-adapters/generic-adapter"));
 
 var ImmutableDi = (function () {
     function ImmutableDi(_ref) {
         var state = _ref.state;
         var globalCache = _ref.globalCache;
         var metaInfoCache = _ref.metaInfoCache;
-        babelHelpers.classCallCheck(this, ImmutableDi);
+
+        _classCallCheck(this, ImmutableDi);
 
         this._meta = metaInfoCache;
 
@@ -22,7 +33,7 @@ var ImmutableDi = (function () {
         });
     }
 
-    babelHelpers.prototypeProperties(ImmutableDi, null, {
+    _prototypeProperties(ImmutableDi, null, {
         clear: {
             value: function clear(scope) {
                 this._container.clear(scope);
@@ -50,6 +61,7 @@ var ImmutableDi = (function () {
             configurable: true
         }
     });
+
     return ImmutableDi;
 })();
 
