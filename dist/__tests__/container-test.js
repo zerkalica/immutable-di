@@ -18,6 +18,7 @@ var testFunc = require("../__mocks__/fixture-definition").testFunc;
 
 describe("container", function () {
     var state = {
+        state: { a: { b: 1, b1: 2 } },
         p: {
             a: "test-state-val"
         }
@@ -134,6 +135,18 @@ describe("container", function () {
             Dep.__factory = ["Dep", ["p", "a"]];
 
             return container.get(Dep).should.eventually.equal(exampleValue + "." + state.p.a);
+        });
+
+        it("should throw error, if path not found in state", function () {
+            var exampleValue = "test-va";
+
+            function Dep(pa) {
+                return exampleValue + "." + pa;
+            }
+            Dep.__factory = ["Dep", ["f", "a"]];
+            (function () {
+                return container.get(Dep);
+            }).should["throw"]();
         });
 
         it("should instance simple service and put it in global cache", function () {

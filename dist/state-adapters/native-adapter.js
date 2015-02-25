@@ -6,11 +6,7 @@ var _classCallCheck = function (instance, Constructor) { if (!(instance instance
 
 function getInPath(obj, bits) {
     for (var i = 0, j = bits.length; i < j; ++i) {
-        var bit = bits[i];
-        if (!obj.hasOwnProperty(bit)) {
-            obj[bit] = {};
-        }
-        obj = obj[bit];
+        obj = obj[bits[i]];
     }
     return obj;
 }
