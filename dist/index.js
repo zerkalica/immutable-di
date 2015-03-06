@@ -6,7 +6,10 @@ var ImmutableDiBuilder = _interopRequire(require("./immutable-di-builder"));
 
 var NativeAdapter = _interopRequire(require("./state-adapters/native-adapter"));
 
+var Container = _interopRequire(require("./container"));
+
 module.exports = {
     Builder: ImmutableDiBuilder,
-    NativeAdapter: NativeAdapter
+    NativeAdapter: NativeAdapter,
+    Container: Container
 };

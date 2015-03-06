@@ -62,8 +62,12 @@ describe("container", function () {
         it("should throw exception if not service prototype passed", function () {
             function TestService() {}
             (function () {
-                return container.get(container, TestService);
+                return container.get(TestService);
             }).should["throw"]();
+        });
+
+        it("should not throw exception if Container passed as prototype", function () {
+            container.get(Container).should.equal(container);
         });
 
         it("should throw exception if no service name defined", function () {
