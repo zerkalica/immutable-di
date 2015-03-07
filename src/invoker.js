@@ -23,6 +23,7 @@ export default class Invoker {
         const result = Promise.all(args)
             .then(depsMutations => this._container.get(definition, debugCtx))
             .then(instance => instance.handle(this._actionType, this._payload))
+            .then(data => ({id, data}))
 
         this._cache.set(id, result)
 

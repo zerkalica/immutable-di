@@ -51,6 +51,25 @@ describe('invoker', () => {
         })
     })
 
+    it('should produce mutation with id and data', () => {
+        const testAction = 'testAction'
+        const testPayload = {a: 1, b: 2}
+        const id = 'TestStore'
+        const data = 'testResult'
+
+        class TestStore {
+            static __class = [id]
+            handle(actionType, payload) {
+                return Promise.resolve(data)
+            }
+        }
+
+        const invoker = getInvoker(testAction, testPayload)
+        return invoker.handle(TestStore).then(d => {
+            d.should.to.be.deep.equal({id, data})
+        })
+    })
+
     describe('deps and waitFor', () => {
         let fakeHandle
         let fakeHandle1
@@ -127,9 +146,9 @@ describe('invoker', () => {
                 invoker.handle(TestDep2),
                 invoker.handle(TestDep1)
             ]).then(d => {
-                d[0].should.to.be.equal('mut')
-                d[1].should.to.be.equal('mut2')
-                d[2].should.to.be.equal('mut1')
+                d[0].data.should.to.be.equal('mut')
+                d[1].data.should.to.be.equal('mut2')
+                d[2].data.should.to.be.equal('mut1')
             })
         })
     })
