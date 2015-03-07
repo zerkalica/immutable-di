@@ -27,7 +27,7 @@ describe('invoker', () => {
                 metaInfoCache: meta,
                 container: container,
                 actionType: actionType,
-                payload: payload
+                getPayload: id => payload
             })
         }
     })

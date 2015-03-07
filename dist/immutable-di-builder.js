@@ -42,12 +42,12 @@ var ImmutableDi = (function () {
             configurable: true
         },
         createMethod: {
-            value: function createMethod(actionType, payload) {
+            value: function createMethod(actionType, getPayload) {
                 return new Invoker({
                     metaInfoCache: this._meta,
                     container: this._container,
                     actionType: actionType,
-                    payload: payload
+                    getPayload: getPayload
                 });
             },
             writable: true,

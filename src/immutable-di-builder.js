@@ -18,12 +18,12 @@ class ImmutableDi {
         this._container.clear(scope)
     }
 
-    createMethod(actionType, payload) {
+    createMethod(actionType, getPayload) {
         return new Invoker({
             metaInfoCache: this._meta,
             container: this._container,
             actionType: actionType,
-            payload: payload
+            getPayload: getPayload
         })
     }
 

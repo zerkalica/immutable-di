@@ -67,7 +67,7 @@ describe('immutable-di-builder', () => {
         di.createMethod(testAction, testPayload).should.be.instanceOf(FakeInvoker.constructor);
         FakeInvoker.constructor.should.have.been.calledWith(
             m.has('actionType', testAction)
-                .and(m.has('payload', testPayload))
+                .and(m.has('getPayload', testPayload))
                 .and(m.has('container', m.instanceOf(FakeContainer.constructor)))
                 .and(m.has('metaInfoCache', m.instanceOf(FakeMetaInfoCache.constructor)))
         )
