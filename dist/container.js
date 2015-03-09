@@ -14,7 +14,6 @@ var Container = (function () {
 
         var cache = this._cache = new Map();
         cache.set("global", globalCache || new Map());
-        cache.set("state", new Map());
         this._meta = metaInfoCache;
         this._state = state;
         this._locks = new Map();
@@ -23,7 +22,19 @@ var Container = (function () {
     _prototypeProperties(Container, null, {
         clear: {
             value: function clear(scope) {
-                this._cache.get(scope).clear();
+                this._getScope(scope).clear();
+            },
+            writable: true,
+            configurable: true
+        },
+        _getScope: {
+            value: function _getScope(scope) {
+                var cache = this._cache.get(scope);
+                if (cache === void 0) {
+                    cache = new Map();
+                    this._cache.set(scope, cache);
+                }
+                return cache;
             },
             writable: true,
             configurable: true
@@ -38,7 +49,9 @@ var Container = (function () {
                 var handler = _meta$get.handler;
                 var statePaths = _meta$get.statePaths;
 
-                var cache = this._cache.get(statePaths.length ? "state" : "global");
+                //@todo think about scopes
+                var scope = statePaths.length ? statePaths[0][0] : "global";
+                var cache = this._getScope(scope);
                 var result = cache.get(id);
                 if (result !== void 0) {
                     return result;

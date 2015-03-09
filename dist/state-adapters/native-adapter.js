@@ -25,6 +25,31 @@ var NativeAdapter = (function () {
             },
             writable: true,
             configurable: true
+        },
+        get: {
+            value: function get(id) {
+                return this._state[id];
+            },
+            writable: true,
+            configurable: true
+        },
+        transformState: {
+            value: function transformState(mutations) {
+                var updatedScopes = [];
+                for (var i = 0; i < mutations.length; i++) {
+                    var _mutations$i = mutations[i];
+                    var id = _mutations$i.id;
+                    var data = _mutations$i.data;
+
+                    if (data !== void 0) {
+                        updatedScopes.push(id);
+                        this._state[id] = data;
+                    }
+                }
+                return updatedScopes;
+            },
+            writable: true,
+            configurable: true
         }
     });
 
