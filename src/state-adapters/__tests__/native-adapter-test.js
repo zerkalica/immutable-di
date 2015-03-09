@@ -1,23 +1,34 @@
 import NativeAdapter from '../native-adapter'
 
 describe('state-adapters/native-adapter', () => {
-    const testState = {
-        a: {
-            b: {
-                name: 'test-name'
+    let testState
+
+    beforeEach(() => {
+        testState = {
+            a: {
+                b: {
+                    name: 'test-name'
+                }
             }
         }
-    }
-    describe('#getIn', () => {
-        it('should get part of object by path', () => {
-            const nativeAdapter = new NativeAdapter(testState)
-            nativeAdapter.getIn(['a', 'b']).should.to.be.deep.equal(testState.a.b)
-        })
+    })
 
-        it('should throw error, if data in path not exists', () => {
-            const nativeAdapter = new NativeAdapter(testState);
-            (() => nativeAdapter.getIn(['a', 'c', 'b'])).should.throw();
-            expect(nativeAdapter.getIn(['a', 'c'])).to.be.undefined;
-        })
+    it('should get part of object by path', () => {
+        const nativeAdapter = new NativeAdapter(testState)
+        nativeAdapter.getIn(['a', 'b']).should.to.be.deep.equal(testState.a.b)
+    })
+
+    it('should throw error, if data in path not exists', () => {
+        const nativeAdapter = new NativeAdapter(testState);
+        (() => nativeAdapter.getIn(['a', 'c', 'b'])).should.throw();
+        expect(nativeAdapter.getIn(['a', 'c'])).to.be.undefined;
+    })
+
+    it('should transformState', () => {
+        const mutation = {id: 'a', data: {c: 'test'}}
+        const nativeAdapter = new NativeAdapter(testState)
+        nativeAdapter.getIn(['a', 'b']).should.to.be.deep.equal(testState.a.b)
+        nativeAdapter.transformState([mutation])
+        nativeAdapter.getIn(['a', 'c']).should.to.equal('test')
     })
 })

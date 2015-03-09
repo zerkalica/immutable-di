@@ -127,8 +127,7 @@ describe('container', () => {
 
             container.get(Dep);
 
-            const localCache = container._cache.get('state');
-
+            const localCache = container._cache.get('p');
             localCache.should.to.be.instanceOf(Map)
 
             return localCache.get('Dep').should.eventually.equal(exampleValue + '.' + state.p.a)
@@ -150,7 +149,7 @@ describe('container', () => {
             Dep.__factory = ['Dep', ['p', 'a']]
 
             return container.get(Dep).then(d => {
-                container.clear('state')
+                container.clear('p')
                 return container.get(Dep)
             }).then(d => {
                 Dep.should.have.been.calledTwice;

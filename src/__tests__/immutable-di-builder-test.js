@@ -1,4 +1,5 @@
 import proxyquire from 'proxyquire'
+import NativeAdapter from '../state-adapters/native-adapter'
 
 function getClass(methods) {
     let Class = spy();
@@ -11,14 +12,15 @@ function getClass(methods) {
 }
 
 describe('immutable-di-builder', () => {
-    let Builder, FakeContainer, FakeInvoker, FakeMetaInfoCache, FakeGenericAdapter
-    const testState = {
-        a: {
-            b: 123
-        }
-    }
+    let Builder, FakeContainer, FakeInvoker, FakeMetaInfoCache, FakeGenericAdapter, testState
 
     beforeEach(() => {
+        testState = new NativeAdapter({
+            a: {
+                b: 123
+            }
+        })
+
         FakeContainer = getClass(['get', 'clear'])
         FakeInvoker = getClass()
         FakeMetaInfoCache = getClass()
@@ -47,10 +49,20 @@ describe('immutable-di-builder', () => {
         );
     })
 
-    it('should call clear scope of container', () => {
-        const di = Builder()(testState)
-        di.clear('test')
-        FakeContainer.clear.should.have.been.calledWith('test');
+    it('should transform state', () => {
+        const listener = spy()
+        const mutations = [
+            {id: 'a', data: {test: 123}},
+            {id: 'b', data: undefined}
+        ]
+
+        const di = Builder([listener])(testState)
+        const updatedScopes = di.transformState(mutations)
+        FakeContainer.clear.should.to.be.calledOnce
+            .and.to.be.calledWith('a')
+
+        FakeContainer.get.should.to.be.calledOnce
+            .and.to.be.calledWith(listener)
     })
 
     it('should call get method of container', () => {
@@ -67,7 +79,7 @@ describe('immutable-di-builder', () => {
         di.createMethod(testAction, testPayload).should.be.instanceOf(FakeInvoker.constructor);
         FakeInvoker.constructor.should.have.been.calledWith(
             m.has('actionType', testAction)
-                .and(m.has('getPayload', testPayload))
+                .and(m.has('getPayload'))
                 .and(m.has('container', m.instanceOf(FakeContainer.constructor)))
                 .and(m.has('metaInfoCache', m.instanceOf(FakeMetaInfoCache.constructor)))
         )
