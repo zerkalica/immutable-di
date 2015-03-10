@@ -8,7 +8,7 @@ For interface docs see [immutable-di.d.ts](./immutable-di.d.ts)
 ## General
 * Install: `npm install --save immutable-di`
 * Tests: `npm test`
-* Examples: `node examples/run.js [simple, promise, invoker, state]-example.js`
+* Examples: `node examples/run.js [simple, promise, invoker, state, transform-state]-example.js`
 To run immutable-di without transpiler, you need a polyfill for Map and Promise.
 
 ## Dictionary
@@ -198,4 +198,48 @@ method.handle(Store1).then(data => console.log(data)) // {a1: 'testAction', p1: 
 
 method.handle(Store2).then(data => console.log(data)) // {a2: 'testAction', p2: 1}
 
+```
+
+## Transform state example
+```js
+//transform-state-example.js
+import {Builder, NativeAdapter} from 'immutable-di/es6'
+
+class Logger {
+    // babel + playground feature enabled
+    static __class = ['Logger']
+    log(message) {
+        console.log('msg: ' + message)
+    }
+}
+
+function SrvFactory2(logger, message) {
+    return logger.log(message)
+}
+SrvFactory2.__factory = ['SrvFactory2', Logger, ['TestStore', 'a', 'message']]
+
+const states = [
+    {},
+    {
+        a: {
+            message: 'test-message-1'
+        }
+    },
+    {
+        a: {
+            message: 'test-message-2'
+        }
+    }
+]
+
+const ImmutableDi = Builder([SrvFactory2])
+const di = ImmutableDi(new NativeAdapter({TestStore: states[0]}))
+di.transformState([{id: 'TestStore', data: states[1]}])
+//output: msg: test-message-1
+
+di.get(SrvFactory2)
+//output: nothing
+
+di.transformState([{id: 'TestStore', data: states[2]}])
+//output: msg: test-message-2
 ```

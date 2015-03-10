@@ -4,26 +4,32 @@ import MetaInfoCache from './meta-info-cache'
 import GenericAdapter from './definition-adapters/generic-adapter'
 
 class ImmutableDi {
-    constructor ({state, globalCache, metaInfoCache}) {
+    constructor({state, globalCache, metaInfoCache, listeners}) {
         this._meta = metaInfoCache
-
+        this._state = state
         this._container = new Container({
-            state: state,
             metaInfoCache: this._meta,
-            globalCache: globalCache
+            state,
+            globalCache
         })
+        this._listeners = listeners || []
     }
 
-    clear(scope) {
-        this._container.clear(scope)
+    transformState(mutations) {
+        const container = this._container
+        const updatedScopes = this._state.transformState(mutations)
+        updatedScopes.forEach(scope => container.clear(scope))
+        this._listeners.forEach(listener => container.get(listener))
     }
 
     createMethod(actionType, payload) {
+        const getPayload = payload === void 0 ? (id => this._state.get(id)) : (id => this._payload)
+
         return new Invoker({
             metaInfoCache: this._meta,
             container: this._container,
-            actionType: actionType,
-            payload: payload
+            actionType,
+            getPayload
         })
     }
 
@@ -32,13 +38,14 @@ class ImmutableDi {
     }
 }
 
-export default function ImmutableDiBuilder() {
-    const cache = new Map()
-    const meta = new MetaInfoCache(GenericAdapter)
+export default function ImmutableDiBuilder(listeners) {
+    const globalCache = new Map()
+    const metaInfoCache = new MetaInfoCache(GenericAdapter)
 
     return state => new ImmutableDi({
-        state: state,
-        globalCache: cache,
-        metaInfoCache: meta
+        state,
+        listeners,
+        globalCache,
+        metaInfoCache
     })
 }

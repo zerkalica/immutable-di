@@ -1,25 +1,32 @@
 export default class Container {
+    static __class = ['Container']
+
     constructor({state, metaInfoCache, globalCache}) {
         const cache = this._cache = new Map()
         cache.set('global', globalCache || new Map())
-        cache.set('state', new Map())
         this._meta = metaInfoCache
         this._state = state
         this._locks = new Map()
     }
 
-    static __class = ['Container']
-
     clear(scope) {
-        this._cache.get(scope).clear()
+        this._getScope(scope).clear()
+    }
+
+    _getScope(scope) {
+        let cache = this._cache.get(scope)
+        if (cache === void 0) {
+            cache = new Map()
+            this._cache.set(scope, cache)
+        }
+        return cache
     }
 
     get(definition, debugCtx) {
-        if (definition instanceof Container) {
-            return this
-        }
         const {id, deps, debugPath, handler, statePaths} = this._meta.get(definition, debugCtx)
-        const cache = this._cache.get(statePaths.length ? 'state' : 'global')
+        //@todo think about scopes
+        const scope = statePaths.length ? statePaths[0][0] : 'global'
+        const cache = this._getScope(scope)
         let result = cache.get(id)
         if (result !== void 0) {
             return result

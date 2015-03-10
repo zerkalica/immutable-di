@@ -21,33 +21,50 @@ var ImmutableDi = (function () {
         var state = _ref.state;
         var globalCache = _ref.globalCache;
         var metaInfoCache = _ref.metaInfoCache;
+        var listeners = _ref.listeners;
 
         _classCallCheck(this, ImmutableDi);
 
         this._meta = metaInfoCache;
-
+        this._state = state;
         this._container = new Container({
-            state: state,
             metaInfoCache: this._meta,
+            state: state,
             globalCache: globalCache
         });
+        this._listeners = listeners || [];
     }
 
     _prototypeProperties(ImmutableDi, null, {
-        clear: {
-            value: function clear(scope) {
-                this._container.clear(scope);
+        transformState: {
+            value: function transformState(mutations) {
+                var container = this._container;
+                var updatedScopes = this._state.transformState(mutations);
+                updatedScopes.forEach(function (scope) {
+                    return container.clear(scope);
+                });
+                this._listeners.forEach(function (listener) {
+                    return container.get(listener);
+                });
             },
             writable: true,
             configurable: true
         },
         createMethod: {
             value: function createMethod(actionType, payload) {
+                var _this = this;
+
+                var getPayload = payload === void 0 ? function (id) {
+                    return _this._state.get(id);
+                } : function (id) {
+                    return _this._payload;
+                };
+
                 return new Invoker({
                     metaInfoCache: this._meta,
                     container: this._container,
                     actionType: actionType,
-                    payload: payload
+                    getPayload: getPayload
                 });
             },
             writable: true,
@@ -65,15 +82,16 @@ var ImmutableDi = (function () {
     return ImmutableDi;
 })();
 
-function ImmutableDiBuilder() {
-    var cache = new Map();
-    var meta = new MetaInfoCache(GenericAdapter);
+function ImmutableDiBuilder(listeners) {
+    var globalCache = new Map();
+    var metaInfoCache = new MetaInfoCache(GenericAdapter);
 
     return function (state) {
         return new ImmutableDi({
             state: state,
-            globalCache: cache,
-            metaInfoCache: meta
+            listeners: listeners,
+            globalCache: globalCache,
+            metaInfoCache: metaInfoCache
         });
     };
 }
