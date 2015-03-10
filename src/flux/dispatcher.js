@@ -2,9 +2,10 @@ import actionToPromise from './action-to-promise'
 import PromiseSeries from './promise-series'
 
 export default class Dispatcher {
-    constructor({container, stores}) {
+    constructor({container, stores, listeners}) {
         this._container = container
         this._stores = stores
+        this._listeners = listeners
         this._series = new PromiseSeries()
     }
 
@@ -16,6 +17,11 @@ export default class Dispatcher {
         return actionToPromise(actionType, payload)
             .then(action => this._getMutations(action))
             .then(mutations => this._container.transformState(mutations))
+            .then(a => this._listeners.forEach(listener => this._container.get(listener)))
+    }
+
+    reset() {
+        return this.dispatch('reset')
     }
 
     _getMutations({actionType, payload, isError, isPromise}) {
@@ -25,9 +31,5 @@ export default class Dispatcher {
         const mutations = this._stores.map(store => method.handle(store))
 
         return Promise.all(mutations)
-    }
-
-    reset(state) {
-        return this.dispatch('reset')
     }
 }

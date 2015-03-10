@@ -1,3 +1,5 @@
+import Invoker from './invoker'
+
 export default class Container {
     static __class = ['Container']
 
@@ -20,6 +22,22 @@ export default class Container {
             this._cache.set(scope, cache)
         }
         return cache
+    }
+
+    transformState() {
+        const updatedScopes = this._state.transformState(mutations)
+        updatedScopes.forEach(scope => this.clear(scope))
+    }
+
+    createMethod(actionType, payload) {
+        const getPayload = payload === void 0 ? (id => this._state.get(id)) : (id => this._payload)
+
+        return new Invoker({
+            metaInfoCache: this._meta,
+            container: this,
+            actionType,
+            getPayload
+        })
     }
 
     get(definition, debugCtx) {

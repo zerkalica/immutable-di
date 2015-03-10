@@ -168,6 +168,31 @@ describe('container', () => {
                 Dep.should.have.been.calledTwice;
             })
         })
+
+
+        it('should create invoker instance', () => {
+            const testPayload = {test: 123};
+            const testAction = 'testAction';
+            container.createMethod(testAction, testPayload).handle.should.be.a.function
+            //container.createMethod(testAction, testPayload).handle(store)
+            //  container.createMethod(testAction, testPayload).handle.should
+        })
+
+        it.skip('should transform state', () => {
+            const listener = spy()
+            const mutations = [
+                {id: 'a', data: {test: 123}},
+                {id: 'b', data: undefined}
+            ]
+
+            const di = Builder([listener])(testState)
+            const updatedScopes = di.transformState(mutations)
+            FakeContainer.clear.should.to.be.calledOnce
+                .and.to.be.calledWith('a')
+
+            FakeContainer.get.should.to.be.calledOnce
+                .and.to.be.calledWith(listener)
+        })
    })
 
     describe('exception handling', () => {

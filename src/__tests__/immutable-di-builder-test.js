@@ -49,39 +49,9 @@ describe('immutable-di-builder', () => {
         );
     })
 
-    it('should transform state', () => {
-        const listener = spy()
-        const mutations = [
-            {id: 'a', data: {test: 123}},
-            {id: 'b', data: undefined}
-        ]
-
-        const di = Builder([listener])(testState)
-        const updatedScopes = di.transformState(mutations)
-        FakeContainer.clear.should.to.be.calledOnce
-            .and.to.be.calledWith('a')
-
-        FakeContainer.get.should.to.be.calledOnce
-            .and.to.be.calledWith(listener)
-    })
-
     it('should call get method of container', () => {
         const di = Builder()(testState)
         di.get('test2')
         FakeContainer.get.should.have.been.calledWith('test2');
-    })
-
-    it('should create invoker instance', () => {
-        const m = sinon.match;
-        const di = Builder()(testState);
-        const testPayload = {test: 123};
-        const testAction = 'testAction';
-        di.createMethod(testAction, testPayload).should.be.instanceOf(FakeInvoker.constructor);
-        FakeInvoker.constructor.should.have.been.calledWith(
-            m.has('actionType', testAction)
-                .and(m.has('getPayload'))
-                .and(m.has('container', m.instanceOf(FakeContainer.constructor)))
-                .and(m.has('metaInfoCache', m.instanceOf(FakeMetaInfoCache.constructor)))
-        )
     })
 });
