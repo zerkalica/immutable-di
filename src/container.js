@@ -1,4 +1,6 @@
 export default class Container {
+    static __class = ['Container']
+
     constructor({state, metaInfoCache, globalCache}) {
         const cache = this._cache = new Map()
         cache.set('global', globalCache || new Map())
@@ -34,7 +36,6 @@ export default class Container {
             throw new Error('Recursive call detected in ' + debugPath);
         }
         this._locks.set(id, true)
-
         const args = []
         for (let i = 0; i < deps.length; i++) {
             const dep = deps[i]

@@ -19,6 +19,8 @@ var Container = (function () {
         this._locks = new Map();
     }
 
+    Container.__class = ["Container"];
+
     _prototypeProperties(Container, null, {
         clear: {
             value: function clear(scope) {
@@ -61,7 +63,6 @@ var Container = (function () {
                     throw new Error("Recursive call detected in " + debugPath);
                 }
                 this._locks.set(id, true);
-
                 var args = [];
                 for (var i = 0; i < deps.length; i++) {
                     var dep = deps[i];

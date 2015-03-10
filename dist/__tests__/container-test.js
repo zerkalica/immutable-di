@@ -62,7 +62,7 @@ describe("container", function () {
         it("should throw exception if not service prototype passed", function () {
             function TestService() {}
             (function () {
-                return container.get(container, TestService);
+                return container.get(TestService);
             }).should["throw"]();
         });
 

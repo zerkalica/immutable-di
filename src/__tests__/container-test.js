@@ -40,8 +40,9 @@ describe('container', () => {
       it('should throw exception if not service prototype passed', () => {
         function TestService() {
         }
-        (() => container.get(container, TestService)).should.throw()
+        (() => container.get(TestService)).should.throw()
       })
+
 
       it('should throw exception if no service name defined', () => {
         function TestService() {

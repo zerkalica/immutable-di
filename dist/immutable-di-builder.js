@@ -16,12 +16,17 @@ var MetaInfoCache = _interopRequire(require("./meta-info-cache"));
 
 var GenericAdapter = _interopRequire(require("./definition-adapters/generic-adapter"));
 
+var Dispatcher = _interopRequire(require("./flux/dispatcher"));
+
 var ImmutableDi = (function () {
     function ImmutableDi(_ref) {
+        var _this = this;
+
         var state = _ref.state;
         var globalCache = _ref.globalCache;
         var metaInfoCache = _ref.metaInfoCache;
         var listeners = _ref.listeners;
+        var stores = _ref.stores;
 
         _classCallCheck(this, ImmutableDi);
 
@@ -33,6 +38,12 @@ var ImmutableDi = (function () {
             globalCache: globalCache
         });
         this._listeners = listeners || [];
+        this._dispatcher = new Dispatcher({
+            container: this._container,
+            stores: (stores || []).map(function (store) {
+                return _this._container.get(store);
+            })
+        });
     }
 
     _prototypeProperties(ImmutableDi, null, {
@@ -46,6 +57,13 @@ var ImmutableDi = (function () {
                 this._listeners.forEach(function (listener) {
                     return container.get(listener);
                 });
+            },
+            writable: true,
+            configurable: true
+        },
+        getDispatcher: {
+            value: function getDispatcher() {
+                return this._dispatcher;
             },
             writable: true,
             configurable: true
@@ -82,7 +100,7 @@ var ImmutableDi = (function () {
     return ImmutableDi;
 })();
 
-function ImmutableDiBuilder(listeners) {
+function ImmutableDiBuilder(listeners, stores) {
     var globalCache = new Map();
     var metaInfoCache = new MetaInfoCache(GenericAdapter);
 
@@ -90,6 +108,7 @@ function ImmutableDiBuilder(listeners) {
         return new ImmutableDi({
             state: state,
             listeners: listeners,
+            stores: stores,
             globalCache: globalCache,
             metaInfoCache: metaInfoCache
         });
