@@ -39,7 +39,9 @@ describe("invoker", function () {
                 metaInfoCache: meta,
                 container: container,
                 actionType: actionType,
-                payload: payload
+                getPayload: function (id) {
+                    return payload;
+                }
             });
         };
     });
@@ -72,6 +74,38 @@ describe("invoker", function () {
         var invoker = getInvoker(testAction, testPayload);
         return invoker.handle(TestStore).then(function (d) {
             fakeHandle.should.have.been.calledOnce.and.calledWith(testAction, testPayload);
+        });
+    });
+
+    it("should produce mutation with id and data", function () {
+        var testAction = "testAction";
+        var testPayload = { a: 1, b: 2 };
+        var id = "TestStore";
+        var data = "testResult";
+
+        var TestStore = (function () {
+            function TestStore() {
+                _classCallCheck(this, TestStore);
+            }
+
+            TestStore.__class = [id];
+
+            _prototypeProperties(TestStore, null, {
+                handle: {
+                    value: function handle(actionType, payload) {
+                        return Promise.resolve(data);
+                    },
+                    writable: true,
+                    configurable: true
+                }
+            });
+
+            return TestStore;
+        })();
+
+        var invoker = getInvoker(testAction, testPayload);
+        return invoker.handle(TestStore).then(function (d) {
+            d.should.to.be.deep.equal({ id: id, data: data });
         });
     });
 
@@ -179,9 +213,9 @@ describe("invoker", function () {
             };
 
             return Promise.all([invoker.handle(TestStore), invoker.handle(TestDep2), invoker.handle(TestDep1)]).then(function (d) {
-                d[0].should.to.be.equal("mut");
-                d[1].should.to.be.equal("mut2");
-                d[2].should.to.be.equal("mut1");
+                d[0].data.should.to.be.equal("mut");
+                d[1].data.should.to.be.equal("mut2");
+                d[2].data.should.to.be.equal("mut1");
             });
         });
     });

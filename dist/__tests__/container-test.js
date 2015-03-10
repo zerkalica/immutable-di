@@ -172,8 +172,7 @@ describe("container", function () {
 
             container.get(Dep);
 
-            var localCache = container._cache.get("state");
-
+            var localCache = container._cache.get("p");
             localCache.should.to.be.instanceOf(Map);
 
             return localCache.get("Dep").should.eventually.equal(exampleValue + "." + state.p.a);
@@ -195,7 +194,7 @@ describe("container", function () {
             Dep.__factory = ["Dep", ["p", "a"]];
 
             return container.get(Dep).then(function (d) {
-                container.clear("state");
+                container.clear("p");
                 return container.get(Dep);
             }).then(function (d) {
                 Dep.should.have.been.calledTwice;

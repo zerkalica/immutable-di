@@ -9,13 +9,13 @@ var Invoker = (function () {
         var metaInfoCache = _ref.metaInfoCache;
         var container = _ref.container;
         var actionType = _ref.actionType;
-        var payload = _ref.payload;
+        var getPayload = _ref.getPayload;
 
         _classCallCheck(this, Invoker);
 
         this._meta = metaInfoCache;
         this._actionType = actionType;
-        this._payload = payload;
+        this._getPayload = getPayload;
         this._container = container;
         this._cache = new Map();
     }
@@ -34,17 +34,19 @@ var Invoker = (function () {
                 if (this._cache.has(id)) {
                     return this._cache.get(id);
                 }
+
                 var args = [];
                 for (var i = 0, j = waitFor.length; i < j; i++) {
                     var dep = waitFor[i];
                     var value = this.handle(dep.definition, [debugPath, i]);
                     args.push(dep.promiseHandler ? dep.promiseHandler(value) : value);
                 }
-
                 var result = Promise.all(args).then(function (depsMutations) {
                     return _this._container.get(definition, debugCtx);
                 }).then(function (instance) {
-                    return instance.handle(_this._actionType, _this._payload);
+                    return instance.handle(_this._actionType, _this._getPayload(id));
+                }).then(function (data) {
+                    return { id: id, data: data };
                 });
 
                 this._cache.set(id, result);
