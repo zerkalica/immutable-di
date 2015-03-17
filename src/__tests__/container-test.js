@@ -178,20 +178,34 @@ describe('container', () => {
             //  container.createMethod(testAction, testPayload).handle.should
         })
 
-        it.skip('should transform state', () => {
-            const listener = spy()
+        it('should transform state', () => {
+            const depFn = spy()
+            const Dep = (state) => {
+                depFn();
+                return state;
+            }
+            Dep.__factory = ['Dep', ['state']]
             const mutations = [
-                {id: 'a', data: {test: 123}},
-                {id: 'b', data: undefined}
+                {
+                    id: 'state', data: {a: {b: 2}}
+                }
             ]
 
-            const di = Builder([listener])(testState)
-            const updatedScopes = di.transformState(mutations)
-            FakeContainer.clear.should.to.be.calledOnce
-                .and.to.be.calledWith('a')
+            return container.get(Dep)
+                .then(function(data) {
+                    data.should.be.deep.equal({a: {b: 1, b1: 2}})
 
-            FakeContainer.get.should.to.be.calledOnce
-                .and.to.be.calledWith(listener)
+                    container.transformState(mutations)
+                    return container.get(Dep)
+                })
+                .then(function (data) {
+                    container.get(Dep)
+                    depFn.should.be.calledTwice
+                    return data
+                })
+                .then(function (data) {
+                    data.should.deep.equal({a: {b: 2}})
+                })
         })
    })
 
