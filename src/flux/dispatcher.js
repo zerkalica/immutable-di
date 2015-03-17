@@ -20,6 +20,14 @@ export default class Dispatcher {
             .then(a => this._listeners.forEach(listener => this._container.get(listener)))
     }
 
+    mount(listener) {
+        this._listeners.push(listener)
+    }
+
+    unmount(targetListener) {
+        this._listeners = this._listeners.filter(listener => targetListener === listener)
+    }
+
     reset() {
         return this.dispatch('reset')
     }
