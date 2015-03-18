@@ -2,7 +2,13 @@ import React from 'react'
 import PageActions from './page-actions'
 
 export default class Page extends React.Component {
-    static __deps = ['Page', ['state', 'todos'], ['state', 'currentTodo'], ['state', 'status']]
+    static __deps = [
+        'Page',
+        ['state', 'PageStore', 'todos'],
+        ['state', 'PageStore', 'currentTodo'],
+        ['state', 'PageStore', 'status']
+    ]
+
     static __definition = (todos, currentTodo, status) => ({
         todos,
         status,

@@ -16,7 +16,7 @@ export default class Dispatcher {
 
     dispatchAsync(actionType, payload) {
         return actionToPromise(actionType, payload)
-            .then(action => this._getMutations(action))
+            .then(action => this._getMutationsFromStores(action))
             .then(mutations => this._container.transformState(mutations))
             .then(() => this._listeners.forEach(listener => this._container.get(listener)))
     }
@@ -44,7 +44,7 @@ export default class Dispatcher {
         return this.dispatch('reset')
     }
 
-    _getMutations({actionType, payload, isError, isPromise}) {
+    _getMutationsFromStores({actionType, payload, isError, isPromise}) {
         const action = actionType + (isError ? 'Fail' : (isPromise ? 'Success' : ''))
 
         const method = this._container.createMethod(action, payload)
