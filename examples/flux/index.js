@@ -1,11 +1,11 @@
 import React from 'react'
 import {DiBuilder, NativeState, ReactRenderer} from '../..'
-import Store  from './store'
+import PageStore  from './page-store'
 import Page from './page.react'
 
 const state = new NativeState({
     state: {
-        page: {
+        PageStore: {
             status: 'initial',
             todos: [],
             currentTodo: {
@@ -16,7 +16,7 @@ const state = new NativeState({
     }
 })
 
-const builder = DiBuilder([Store], new ReactRenderer(React, document.body))
+const builder = DiBuilder([PageStore], new ReactRenderer(React, document.body))
 
 const di = builder(state)
 

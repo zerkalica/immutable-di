@@ -1,4 +1,5 @@
 import React from 'react'
+import PageActions from './page-actions'
 
 export default class Page extends React.Component {
     static __deps = ['Page', ['state', 'todos'], ['state', 'currentTodo'], ['state', 'status']]
@@ -8,6 +9,7 @@ export default class Page extends React.Component {
         currentTodo,
         todoCount: todos.length
     })
+    static __actions = PageActions
 
     getInitialState() {
         return this.props.stateHandler.getInitialState()
@@ -28,7 +30,7 @@ export default class Page extends React.Component {
                 <div class="page__status">
                     Status: {this.state.status}
                 </div>
-                <button class="page__button" onClick={this.props.actions.click}>Click me</button>
+                <button class="page__button__add" onClick={this.props.actions.addTodo}>Add empty todo</button>
             </div>
         )
     }

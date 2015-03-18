@@ -1,22 +1,23 @@
 export default class StateHandler {
-    constructor({dispatcher, Getter, initialState}) {
+    constructor({dispatcher, definition, initialState, actions}) {
         this._dispatcher = dispatcher
         this._StateUpdater = null
-        this._Getter = Getter
+        this._definition = definition
         this._initialState = initialState
+        this.actions = actions
     }
 
     getInitialState() {
         return this._initialState
     }
 
-    _createStateUpdater(updateState, Getter) {
+    _createStateUpdater(updateState, definition) {
         function StateUpdater(state) {
             updateState(state)
             // undefined values do not store into di-cache
             return 1
         }
-        StateUpdater.__factory = ['StateUpdater', Getter]
+        StateUpdater.__factory = ['StateUpdater', definition]
 
         return StateUpdater
     }
@@ -25,7 +26,7 @@ export default class StateHandler {
         if (this._StateUpdater) {
             throw new Error('Unmount state updater first')
         }
-        this._StateUpdater = this._createStateUpdater(updateState, this._Getter)
+        this._StateUpdater = this._createStateUpdater(updateState, this._definition)
         this._dispatcher.mount(this._StateUpdater)
     }
 

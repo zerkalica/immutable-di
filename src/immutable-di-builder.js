@@ -21,7 +21,7 @@ class ImmutableDi {
 
     render(Widget) {
         return this._dispatcher.createStateHandler(this._renderAdapter.getDefinition(Widget))
-            .then(stateHandler => this._renderAdapter.render(Widget, stateHandler))
+            .then(this._renderAdapter.render(Widget))
     }
 
     dispatch(actionType, payload) {

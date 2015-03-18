@@ -7,6 +7,7 @@ export default class ReactRenderer {
     getDefinition(Widget) {
         let Definition = Widget.__definition
         Definition.__factory = Widget.__deps
+        Definition.__actions = Widget.__actions
 
         return Definition
     }
@@ -17,7 +18,7 @@ export default class ReactRenderer {
 
         return (stateHandlerProvider) => (
             stateHandlerProvider
-                .then(stateHandler => React.createElement(Widget, {stateHandler}))
+                .then(({stateHandler, actions}) => React.createElement(Widget, {stateHandler, actions}))
                 .then(widget => (
                     target ?
                         new Promise(resolve => React.render(widget, target, resolve))

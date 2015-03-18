@@ -18,12 +18,18 @@ export default class Dispatcher {
         return actionToPromise(actionType, payload)
             .then(action => this._getMutations(action))
             .then(mutations => this._container.transformState(mutations))
-            .then(a => this._listeners.forEach(listener => this._container.get(listener)))
+            .then(() => this._listeners.forEach(listener => this._container.get(listener)))
     }
 
     createStateHandler(definition) {
-        return this._container.get(definition)
-            .then(initialState => new StateHandler({definition, dispatcher: this, initialState}))
+        return Promise.all([
+            this._container.get(definition),
+            this._container.get(definition.__actions)
+        ])
+        .then(({initialState, actions}) => ({
+            stateHandler: new StateHandler({definition, dispatcher: this, initialState}),
+            actions: actions
+        }))
     }
 
     mount(listener) {
