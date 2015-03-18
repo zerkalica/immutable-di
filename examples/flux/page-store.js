@@ -1,18 +1,21 @@
 export default class PageStore {
     static __class = ['PageStore']
+    state = null
     handle(actionType, payload) {
         if (this[actionType]) {
             return this[actionType].call(this, payload)
         }
     }
 
-    reset(PageStoreData) {
-        this._state = PageStoreData
+    reset(pageStoreData) {
+        this.state = pageStoreData
+
+        return pageStoreData
     }
 
     addTodo(todo) {
-        this.state.page.todos.push(todo)
+        this.state.todos.push(todo)
 
-        return this.state.page
+        return this.state
     }
 }

@@ -19,5 +19,6 @@ const state = new NativeState({
 const builder = DiBuilder([PageStore], new ReactRenderer(React, document.body))
 
 const di = builder(state)
-
-di.render(Page)
+//Fill storages and render page
+di.reset()
+    .then(() => di.render(Page))
