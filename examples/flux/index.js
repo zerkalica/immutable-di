@@ -1,21 +1,23 @@
-import {Builder, NativeAdapter} from '../..'
+import React from 'react'
+import {DiBuilder, NativeState, ReactRenderer} from '../..'
 import Store  from './store'
-import Listener  from './listener'
+import Page from './page.react'
 
-import Page from './page'
-
-const state = new NativeAdapter({
-    status: 'initial'
+const state = new NativeState({
+    state: {
+        page: {
+            status: 'initial',
+            todos: [],
+            currentTodo: {
+                name: 'todo 1',
+                text: 'todo text'
+            }
+        }
+    }
 })
 
-React.createElement(Page)
-React.render(Page({}), document.body);
-
-function Listener() {
-
-}
-
-const builder = Builder([Listener], [Store])
+const builder = DiBuilder([Store], new ReactRenderer(React, document.body))
 
 const di = builder(state)
-di.reset()
+
+di.render(Page)

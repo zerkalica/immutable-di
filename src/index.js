@@ -1,9 +1,9 @@
-import Builder from './immutable-di-builder'
-import NativeAdapter from './state-adapters/native-adapter'
-import Container from './container'
+import DiBuilder from './immutable-di-builder'
+import NativeState from './state-adapters/native-adapter'
+import ReactRenderer from './flux/renderers/react-renderer'
 
 export default {
-    Container,
-    Builder,
-    NativeAdapter
+    DiBuilder,
+    NativeState,
+    ReactRenderer
 }

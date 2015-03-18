@@ -4,7 +4,7 @@ import GenericAdapter from './definition-adapters/generic-adapter'
 import Dispatcher from './flux/dispatcher'
 
 class ImmutableDi {
-    constructor({state, globalCache, metaInfoCache, listeners, stores}) {
+    constructor({state, globalCache, metaInfoCache, stores, renderAdapter}) {
         const container = this._container = new Container({
             metaInfoCache,
             state,
@@ -13,9 +13,15 @@ class ImmutableDi {
 
         this._dispatcher = new Dispatcher({
             container,
-            listeners,
             stores
         })
+
+        this._renderAdapter = renderAdapter
+    }
+
+    render(Widget) {
+        return this._dispatcher.createStateHandler(this._renderAdapter.getDefinition(Widget))
+            .then(stateHandler => this._renderAdapter.render(Widget, stateHandler))
     }
 
     dispatch(actionType, payload) {
@@ -35,14 +41,14 @@ class ImmutableDi {
     }
 }
 
-export default function ImmutableDiBuilder(listeners, stores) {
+export default function ImmutableDiBuilder(stores, renderAdapter) {
     const globalCache = new Map()
     const metaInfoCache = new MetaInfoCache(GenericAdapter)
 
     return state => new ImmutableDi({
         state,
-        listeners,
         stores,
+        renderAdapter,
         globalCache,
         metaInfoCache
     })

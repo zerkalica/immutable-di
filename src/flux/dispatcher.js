@@ -1,11 +1,12 @@
 import actionToPromise from './action-to-promise'
 import PromiseSeries from './promise-series'
+import StateHandler from './state-handler'
 
 export default class Dispatcher {
-    constructor({container, stores, listeners}) {
+    constructor({container, stores}) {
         this._container = container
         this._stores = stores
-        this._listeners = listeners
+        this._listeners = []
         this._series = new PromiseSeries()
     }
 
@@ -20,12 +21,17 @@ export default class Dispatcher {
             .then(a => this._listeners.forEach(listener => this._container.get(listener)))
     }
 
+    createStateHandler(definition) {
+        return this._container.get(definition)
+            .then(initialState => new StateHandler({definition, dispatcher: this, initialState}))
+    }
+
     mount(listener) {
         this._listeners.push(listener)
     }
 
     unmount(targetListener) {
-        this._listeners = this._listeners.filter(listener => targetListener === listener)
+        this._listeners = this._listeners.filter(listener => targetListener !== listener)
     }
 
     reset() {
