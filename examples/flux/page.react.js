@@ -1,33 +1,56 @@
 import React from 'react'
 import PageActions from './page-actions'
 
-export default class Page extends React.Component {
-    static __deps = [
-        'Page',
-        ['state', 'PageStore', 'todos'],
-        ['state', 'PageStore', 'currentTodo'],
-        ['state', 'PageStore', 'status']
-    ]
-
-    static __definition = (todos, currentTodo, status) => ({
-        todos,
-        status,
-        currentTodo,
-        todoCount: todos.length
-    })
-    static __actions = PageActions
-
+class BaseComponent extends React.Component {
     getInitialState() {
-        return this.props.stateHandler.getInitialState()
+        this.__stateHandler = this.props.context.createStateHandler(this.displayName, this.definition)
+        if (this.actions) {
+            this.actions = this.props.context.get(this.actions)
+        }
+        return this.__stateHandler.getInitialState()
     }
 
     componentDidMount() {
-        this.props.stateHandler.mount(state => this.setState(state))
+        this.__stateHandler.mount(state => this.setState(state))
     }
 
     componentWillUnmount() {
-        this.props.stateHandler.unmount()
+        this.__stateHandler.unmount()
     }
+}
+
+class TodoView extends BaseComponent {
+    definition = [
+        ['state', 'PageStore', 'currentTodo'],
+        ['state', 'PageStore', 'isEditCurrentTodo'],
+        currentTodo, isEditCurrentTodo => ({currentTodo, isEditCurrentTodo})
+    ]
+
+    render() {
+        return (
+            <div>
+                <h1>TodoView</h1>
+                {this.state.isEditCurrentTodo
+                    ? <input
+                        onChange={this.actions.changeTodoTitle}
+                        value={this.state.currentTodo.title}
+                        onUnfocus={() => this.actions.editTodoTitle(false)}
+                    />
+                    : <button
+                        onClick={() => this.actions.editTodoTitle(true)}>{this.state.currentTodo.title}</button>
+                }
+
+            </div>
+        )
+    }
+}
+
+export default class Page extends BaseComponent {
+    definition = [
+        ['state', 'PageStore', 'status'],
+        status => status
+    ]
+    actions = PageActions
 
     render() {
         return (
@@ -36,7 +59,8 @@ export default class Page extends React.Component {
                 <div class="page__status">
                     Status: {this.state.status}
                 </div>
-                <button class="page__button__add" onClick={this.props.actions.addTodo}>Add empty todo</button>
+                <TodoView context={this.props.context}/>
+                <button class="page__button__add" onClick={this.actions.addTodo}>Add empty todo</button>
             </div>
         )
     }
