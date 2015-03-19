@@ -54,20 +54,20 @@ class TodoView extends React.Component {
 }
 
 export default class Page extends BaseComponent {
-    static definition = [
-        ['state', 'PageStore', 'status'],
-        ['state', 'PageStore', 'currentTodo'],
-        ['state', 'PageStore', 'isEditCurrentTodo'],
-        (status, currentTodo, isEditCurrentTodo) => ({isEditCurrentTodo, currentTodo, status})
-    ]
+    static definition = {
+        status: ['state', 'PageStore', 'status'],
+        currentTodo: ['state', 'PageStore', 'currentTodo'],
+        isEditCurrentTodo: ['state', 'PageStore', 'isEditCurrentTodo'],
+        state => state
+    }
     static actions = PageActions
-    markup = ({currentTodo, isEditCurrentTodo, status}, actions) => (
+    markup = ({currentTodo, isEditCurrentTodo, status, actions}) => (
         <div class="page">
             <h1 class="page__header">Test page</h1>
             <div class="page__status">
                 Status: {status}
             </div>
-            <TodoView todo={currentTodo} isEdit={isEditCurrentTodo} actions={{actions}}/>
+            <TodoView todo={currentTodo} isEdit={isEditCurrentTodo} actions={actions}/>
             <button class="page__button__add" onClick={actions.addTodo}>Add empty todo</button>
         </div>
     )

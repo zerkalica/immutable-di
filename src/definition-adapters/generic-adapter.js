@@ -2,13 +2,17 @@ import {classToFactory} from '../utils'
 
 function procesDeps(deps) {
     const resultDeps = []
-    deps = deps || []
-    for(let i = 0; i < deps.length; i++) {
-        const dep = deps[i]
+    const isArray = Array.isArray(deps)
+    const names = isArray ? [] : Object.keys(deps)
+    const len = isArray ? deps.length : names.length
+    for(let i = 0; i < len; i++) {
+        const name = isArray ? void 0 : names[i]
+        const dep = deps[name]
         const isArray = Array.isArray(dep)
         const isPromise = (isArray && dep.length === 2 && typeof dep[1] === 'function')
         const isPath = isArray && !isPromise
         const definition = {
+            name: name,
             promiseHandler: isPromise ? (dep[1] || ((p) => p)) : null,
             path: isPath ? dep : [],
             definition: isPromise ? dep[0] : isPath ? null : dep,
@@ -25,7 +29,7 @@ export default class GenericAdapter {
         const id = GenericAdapter.idFromDefinition(definition, debugPath)
         const isClass = definition.__class
         const di = isClass ? definition.__class : definition.__factory
-        const deps = procesDeps(di.slice(1))
+        const deps = procesDeps(typeof di[1] === 'object' ? di[1] : di.slice(1))
         const waitFor = procesDeps(definition.__waitFor)
 
         return {

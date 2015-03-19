@@ -1,5 +1,13 @@
 import Invoker from './invoker'
 
+function convertArgsToOptions(args, argsNames) {
+    const obj = {}
+    for(let i = 0; i < args.length; i++) {
+        obj[argsNames[i]] = args[i]
+    }
+    return obj
+}
+
 export default class Container {
     static __class = ['Container']
 
@@ -55,6 +63,7 @@ export default class Container {
         }
         this._locks.set(id, true)
         const args = []
+        const argNames = []
         for (let i = 0; i < deps.length; i++) {
             const dep = deps[i]
             let value
@@ -76,9 +85,14 @@ export default class Container {
             }
 
             args.push(value)
+            if (dep.name) {
+                argNames.push(dep.name)
+            }
         }
 
-        result = Promise.all(args).then(resolvedArgs => handler.apply(null, resolvedArgs))
+        result = Promise.all(args).then(resolvedArgs => (
+            handler.apply(null, argNames ? [convertArgsToOptions(resolvedArgs, argsNames)] : resolvedArgs)
+        ))
 
         this._locks.set(id, false)
         cache.set(id, result)
