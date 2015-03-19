@@ -4,26 +4,24 @@ export default class ReactRenderer {
         this._target = target
     }
 
-    getDefinition(Widget) {
-        let Definition = Widget.__definition
-        Definition.__factory = Widget.__deps
-        Definition.__actions = Widget.__actions
+    getActions(Widget) {
+        return Widget.actions
+    }
 
+    getDefinition(Widget) {
+        const len = Widget.definition.length - 1
+        let Definition = Widget.definition[len]
+        Definition.__factory = [Widget.displayName || 'Definition', Widget.definition.slice(0, len)]
         return Definition
     }
 
-    render(Widget) {
-        const React = this._React
-        const target = this._target
+    render(Widget, options) {
+        const el = this._React.createElement(Widget, options)
 
-        return (stateHandlerProvider) => (
-            stateHandlerProvider
-                .then(({stateHandler, actions}) => React.createElement(Widget, {stateHandler, actions}))
-                .then(widget => (
-                    target ?
-                        new Promise(resolve => React.render(widget, target, resolve))
-                        : React.renderToString(widget)
-                ))
-        )
+        return new Promise(resolve => (
+            this._target ?
+                this._React.render(el, this._target, resolve) :
+                resolve(this._React.renderToString(el))
+        ))
     }
 }

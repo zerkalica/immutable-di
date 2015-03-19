@@ -1,13 +1,25 @@
 import actionToPromise from './action-to-promise'
 import PromiseSeries from './promise-series'
-import StateHandler from './state-handler'
 
 export default class Dispatcher {
     constructor({container, stores}) {
         this._container = container
+        this._series = new PromiseSeries()
+
         this._stores = stores
         this._listeners = []
-        this._series = new PromiseSeries()
+    }
+
+    mount(definition) {
+        this._listeners.push(definition)
+    }
+
+    unmount(definition) {
+        this._listeners = this._listeners.filter(d => definition === d)
+    }
+
+    _update() {
+        this._listeners.forEach(listener => this._container.get(listener))
     }
 
     dispatch(actionType, payload) {
@@ -18,26 +30,7 @@ export default class Dispatcher {
         return actionToPromise(actionType, payload)
             .then(action => this._getMutationsFromStores(action))
             .then(mutations => this._container.transformState(mutations))
-            .then(() => this._listeners.forEach(listener => this._container.get(listener)))
-    }
-
-    createStateHandler(definition) {
-        return Promise.all([
-            this._container.get(definition),
-            this._container.get(definition.__actions)
-        ])
-        .then(({initialState, actions}) => ({
-            stateHandler: new StateHandler({definition, dispatcher: this, initialState}),
-            actions: actions
-        }))
-    }
-
-    mount(listener) {
-        this._listeners.push(listener)
-    }
-
-    unmount(targetListener) {
-        this._listeners = this._listeners.filter(listener => targetListener !== listener)
+            .then(() => this._update())
     }
 
     reset() {

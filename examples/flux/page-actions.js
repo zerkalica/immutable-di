@@ -1,11 +1,5 @@
-import {WrapActionMethods, Dispatcher} from '../../src'
-
 export default class PageActions {
-    static __class = ['PageActions', Dispatcher]
-    constructor(dispatcher) {
-        this._dispatcher = dispatcher
-    }
-
+    static __class = ['PageActions']
     addTodo(todo) {
         return todo
     }

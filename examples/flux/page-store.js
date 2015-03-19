@@ -7,7 +7,19 @@ export default class PageStore {
         }
     }
 
-    reset(pageStoreData) {
+    getInitialState() {
+        return {
+            status: 'initial',
+            todos: [],
+            currentTodo: {
+                name: 'todo 1',
+                text: 'todo text'
+            }
+        }
+    }
+
+    reset() {
+        const pageStoreData = getInitialState()
         this.state = pageStoreData
 
         return pageStoreData

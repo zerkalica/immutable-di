@@ -16,7 +16,8 @@ const state = new NativeState({
     }
 })
 
-const builder = DiBuilder([PageStore], new ReactRenderer(React, document.body))
+const target = typeof document !== 'undefined' ? document.querySelector('body') : null
+const builder = DiBuilder([PageStore], new ReactRenderer(React, target))
 
 const di = builder(state)
 //Fill stores and render page

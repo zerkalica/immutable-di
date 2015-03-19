@@ -2,42 +2,52 @@ import React from 'react'
 import PageActions from './page-actions'
 
 class BaseComponent extends React.Component {
-    getInitialState() {
-        this.__stateHandler = this.props.context.createStateHandler(this.displayName, this.definition)
-        if (this.actions) {
-            this.actions = this.props.context.get(this.actions)
-        }
-        return this.__stateHandler.getInitialState()
+    constructor(options) {
+        super(options.props)
+        this.context = options.context
+        this.actions = options.actions
     }
 
     componentDidMount() {
-        this.__stateHandler.mount(state => this.setState(state))
+        this.context.mount()
     }
 
     componentWillUnmount() {
-        this.__stateHandler.unmount()
+        this.context.unmount()
+    }
+}
+
+class StatefullBaseComponent extends React.Component {
+    constructor(options) {
+        super(options.props)
+        this.context = options.context
+        this.actions = options.actions
+        this.state = options.props
+    }
+
+    componentDidMount() {
+        this.context.mount(state => this.setState(state))
+    }
+
+    componentWillUnmount() {
+        this.context.unmount()
     }
 }
 
 class TodoView extends BaseComponent {
-    definition = [
-        ['state', 'PageStore', 'currentTodo'],
-        ['state', 'PageStore', 'isEditCurrentTodo'],
-        currentTodo, isEditCurrentTodo => ({currentTodo, isEditCurrentTodo})
-    ]
-
     render() {
+        const {isEdit, todo} = this.props
+        const actions = this.props.actions
         return (
             <div>
                 <h1>TodoView</h1>
-                {this.state.isEditCurrentTodo
+                {isEditCurrentTodo
                     ? <input
-                        onChange={this.actions.changeTodoTitle}
-                        value={this.state.currentTodo.title}
-                        onUnfocus={() => this.actions.editTodoTitle(false)}
+                        value={currentTodo.title}
+                        onChange={() => actions.editTodoTitleComplete()}
                     />
                     : <button
-                        onClick={() => this.actions.editTodoTitle(true)}>{this.state.currentTodo.title}</button>
+                        onClick={() => actions.editTodoTitleStart()}>{currentTodo.title}</button>
                 }
 
             </div>
@@ -46,21 +56,25 @@ class TodoView extends BaseComponent {
 }
 
 export default class Page extends BaseComponent {
-    definition = [
+    static definition = [
         ['state', 'PageStore', 'status'],
-        status => status
+        ['state', 'PageStore', 'currentTodo'],
+        ['state', 'PageStore', 'isEditCurrentTodo'],
+        (status, currentTodo, isEditCurrentTodo) => ({isEditCurrentTodo, currentTodo, status})
     ]
-    actions = PageActions
+    static actions = PageActions
 
     render() {
+        const {currentTodo, isEditCurrentTodo, status} = this.props
+        const actions = this.actions
         return (
             <div class="page">
                 <h1 class="page__header">Test page</h1>
                 <div class="page__status">
-                    Status: {this.state.status}
+                    Status: {status}
                 </div>
-                <TodoView context={this.props.context}/>
-                <button class="page__button__add" onClick={this.actions.addTodo}>Add empty todo</button>
+                <TodoView todo={currentTodo} isEdit={isEditCurrentTodo} actions={actions}/>
+                <button class="page__button__add" onClick={actions.addTodo}>Add empty todo</button>
             </div>
         )
     }
