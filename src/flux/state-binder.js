@@ -1,33 +1,31 @@
 import Context from './context'
 import wrapActionMethods from './wrap-action-methods'
+import {bindAll} from '../utils'
 
 export default class StateBinder {
-    constructor({renderer, container, dispatcher}) {
-        this._renderer = renderer
+    constructor({container, dispatcher}) {
         this._container = container
         this._dispatcher = dispatcher
+        bindAll(this)
     }
+
+    setRenderer(renderer) {
+        this._renderer = renderer
+        return this
+    }
+
+    _widgetToDefinition(Widget) {
+        const renderer = this._renderer
+        function WidgetProvider(options) {
+            return renderer.getElement(Widget, options)
+        }
+        WidgetProvider.__factory = Widget.__props
+
+        return WidgetProvider
+    }
+
     render(Widget) {
-        const actions = this._renderer.getActions(Widget)
-        const definition = this._renderer.getDefinition(Widget)
-        wrapActionMethods(actions)
-
-        return Promise.all([
-            actions ? this._container.get(actions) : null,
-            this._container.get(definition)
-        ]).then(function([actions, props]) {
-            actions.__dispatcher = this._dispatcher
-
-            return this._renderer.render(Widget, {
-                actions,
-                props,
-                context: new Context({
-                    definition,
-                    actions,
-                    dispatcher: this._dispatcher,
-                    onUpdate: options => this._renderer.render(Widget, options)
-                })
-            })
-        }.bind(this))
+        return this._container.get(this._widgetToDefinition(Widget))
+            .then(el => this._renderer.render(el))
     }
 }

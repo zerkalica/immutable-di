@@ -1,32 +1,27 @@
+import Dispatcher from './dispatcher'
+
 export default class Context {
-    constructor({dispatcher, definition, actions, onUpdate}) {
+    constructor(dispatcher) {
         this._dispatcher = dispatcher
-        this._definition = definition
-        this._actions = actions
-        this._onUpdate = onUpdate
         this._updaterDefinition = null
     }
 
-    _getDefinition(onUpdate) {
-        let updaterDefinition = (props) => {
-            onUpdate({
-                props,
-                actions: this._actions,
-                context: this
-            })
+    _getDefinition(definition, onUpdate) {
+        function updater(props) {
+            onUpdate(props)
             // undefined values do not store into di-cache
             return 1
         }
-        updaterDefinition.__factory = ['StateUpdater', this._definition]
+        updater.__factory = definition.__props
 
         return updaterDefinition
     }
 
-    mount(onUpdate) {
+    mount(definition, onUpdate) {
         if (this._updaterDefinition) {
             throw new Error('Do unmount first')
         }
-        this._updaterDefinition = this._getDefinition(onUpdate || this._onUpdate)
+        this._updaterDefinition = this._getDefinition(definition, onUpdate)
         this._dispatcher.mount(this._updaterDefinition)
     }
 
@@ -36,5 +31,10 @@ export default class Context {
         }
         this._dispatcher.unmount(this._updaterDefinition)
         this._updaterDefinition = null
+    }
+
+    static Factory(displayName, deps, Provider) {
+        Provider = Provider || state => state
+        Provider.__factory = [displayName, deps]
     }
 }

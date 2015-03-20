@@ -1,4 +1,5 @@
 import Invoker from './invoker'
+import {bindAll} from './utils'
 
 function convertArgsToOptions(args, argsNames) {
     const obj = {}
@@ -17,6 +18,7 @@ export default class Container {
         this._meta = metaInfoCache
         this._state = state
         this._locks = new Map()
+        bindAll(this)
     }
 
     clear(scope) {
@@ -49,6 +51,9 @@ export default class Container {
     }
 
     get(definition, debugCtx) {
+        if (this instanceof definition) {
+            return this
+        }
         const {id, deps, debugPath, handler, statePaths} = this._meta.get(definition, debugCtx)
         //@todo think about scopes
         const scope = statePaths.length ? statePaths[0][0] : 'global'

@@ -1,36 +1,6 @@
 import React from 'react'
 import PageActions from './page-actions'
-
-class BaseComponent extends React.Component {
-    constructor(options) {
-        super(options.props)
-        this.context = options.context
-        this.actions = options.actions
-    }
-
-    componentDidMount() {
-        this.context.mount()
-    }
-
-    componentWillUnmount() {
-        this.context.unmount()
-    }
-
-    render() {
-        return this.markup(this.props, this.actions, this.state)
-    }
-}
-
-class StatefullBaseComponent extends BaseComponent {
-    constructor(options) {
-        super(options)
-        this.state = options.props
-    }
-
-    componentDidMount() {
-        this.context.mount(state => this.setState(state))
-    }
-}
+import {Context} from '../../src'
 
 class TodoView extends React.Component {
     render() {
@@ -53,15 +23,18 @@ class TodoView extends React.Component {
     }
 }
 
-export default class Page extends BaseComponent {
-    static definition = {
-        status: ['state', 'PageStore', 'status'],
-        currentTodo: ['state', 'PageStore', 'currentTodo'],
-        isEditCurrentTodo: ['state', 'PageStore', 'isEditCurrentTodo'],
-        state => state
-    }
-    static actions = PageActions
-    markup = ({currentTodo, isEditCurrentTodo, status, actions}) => (
+export default class Page extends React.Component {
+    static __class = ['Page', {
+        actions: PageActions,
+        context: Context.Factory('PageContext', Context),
+        initialState: Context.Factory('PageProvider', {
+            status: ['state', 'PageStore', 'status'],
+            currentTodo: ['state', 'PageStore', 'currentTodo'],
+            isEditCurrentTodo: ['state', 'PageStore', 'isEditCurrentTodo']
+        })
+    }]
+
+    markup = ({actions}, {currentTodo, isEditCurrentTodo, status}) => (
         <div class="page">
             <h1 class="page__header">Test page</h1>
             <div class="page__status">
@@ -71,4 +44,16 @@ export default class Page extends BaseComponent {
             <button class="page__button__add" onClick={actions.addTodo}>Add empty todo</button>
         </div>
     )
+
+    getInitialState = () => this.props.initialState
+
+    componentDidMount() {
+        this.props.context.mount(Page.__class.initialState, state => this.setState(state))
+    }
+
+    componentWillUnmount() {
+        this.props.context.unmount()
+    }
+
+    render = () => this.markup(this.props, this.state)
 }

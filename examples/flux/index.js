@@ -1,9 +1,9 @@
 import React from 'react'
-import {DiBuilder, NativeState, ReactRenderer} from '../..'
+import {ContainerCreator, NativeState, ReactRenderer, Dispatcher, StateBinder} from '../..'
 import PageStore  from './page-store'
 import Page from './page.react'
 
-const state = new NativeState({
+const state = {
     state: {
         PageStore: {
             status: 'initial',
@@ -14,12 +14,21 @@ const state = new NativeState({
             }
         }
     }
+}
+
+const selector = 'body'
+
+const containerCreator = new ContainerCreator({
+    stores: [PageStore],
+    renderer: new ReactRenderer(React, typeof document !== 'undefined' ? document.querySelector(selector) : null)
 })
 
-const target = typeof document !== 'undefined' ? document.querySelector('body') : null
-const builder = DiBuilder([PageStore], new ReactRenderer(React, target))
+const di = containerCreator.create(new NativeState(state)).get
 
-const di = builder(state)
 //Fill stores and render page
-di.reset()
-    .then(() => di.render(Page))
+di(Dispatcher)
+    .then(dispatcher => dispatcher.reset())
+    .then(() => di(StateBinder))
+    .then(stateBinder => stateBinder.render(Page))
+    .then(() => console.log('render complete...'))
+    .catch(err => console.error('render error:', err.message, err.stack()))

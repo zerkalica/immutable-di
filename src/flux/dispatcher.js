@@ -1,13 +1,21 @@
 import actionToPromise from './action-to-promise'
 import PromiseSeries from './promise-series'
+import Container from './container'
+import {bindAll} from '../utils'
 
 export default class Dispatcher {
-    constructor({container, stores}) {
+    static __class = ['Dispatcher', Container]
+
+    constructor({container}) {
         this._container = container
         this._series = new PromiseSeries()
-
-        this._stores = stores
         this._listeners = []
+        bindAll(this)
+    }
+
+    setStores(stores) {
+        this._stores = stores
+        return this
     }
 
     mount(definition) {

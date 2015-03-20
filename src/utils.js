@@ -15,3 +15,11 @@ export function classToFactory(Constructor) {
 
     return (...args) => new F(args);
 }
+
+export function bindAll(object) {
+    const keys = Object.keys(object)
+    for(let i = 0; i < keys.length; i++) {
+        const name = keys[i]
+        object[name] = object[name].bind(object)
+    }
+}
