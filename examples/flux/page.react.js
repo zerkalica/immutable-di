@@ -24,15 +24,37 @@ class TodoView extends React.Component {
 }
 
 export default class Page extends React.Component {
-    static __class = ['Page', {
+    static __props = {
         actions: PageActions,
-        context: Context.Factory('PageContext', Context),
-        initialState: Context.Factory('PageProvider', {
-            status: ['state', 'PageStore', 'status'],
-            currentTodo: ['state', 'PageStore', 'currentTodo'],
-            isEditCurrentTodo: ['state', 'PageStore', 'isEditCurrentTodo']
-        })
-    }]
+        dispatcher: Dispatcher
+    }
+
+    static __state = {
+        status: ['state', 'PageStore', 'status'],
+        currentTodo: ['state', 'PageStore', 'currentTodo'],
+        isEditCurrentTodo: ['state', 'PageStore', 'isEditCurrentTodo']
+    }
+
+    constructor({props, state}) {
+        super(props)
+        this.state = state
+    }
+
+    componentDidMount() {
+        this._updaterDefinition = this.props.dispatcher.mount(
+            this.displayName,
+            this.constructor.__state,
+            state => this.setState(state)
+        )
+    }
+
+    componentWillUnmount() {
+        this.props.dispatcher.unmount(this._updaterDefinition)
+    }
+
+    render() {
+        return this.markup(this.props, this.state)
+    }
 
     markup = ({actions}, {currentTodo, isEditCurrentTodo, status}) => (
         <div class="page">
@@ -44,16 +66,4 @@ export default class Page extends React.Component {
             <button class="page__button__add" onClick={actions.addTodo}>Add empty todo</button>
         </div>
     )
-
-    getInitialState = () => this.props.initialState
-
-    componentDidMount() {
-        this.props.context.mount(Page.__class.initialState, state => this.setState(state))
-    }
-
-    componentWillUnmount() {
-        this.props.context.unmount()
-    }
-
-    render = () => this.markup(this.props, this.state)
 }

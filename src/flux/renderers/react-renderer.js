@@ -8,6 +8,10 @@ export default class ReactRenderer {
         return this._React.createElement(Widget, options)
     }
 
+    getName(Widget) {
+        return Widget.displayName
+    }
+
     render(el) {
         return new Promise(resolve => (
             this._target ?

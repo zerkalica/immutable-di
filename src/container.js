@@ -21,6 +21,14 @@ export default class Container {
         bindAll(this)
     }
 
+    factory(name, deps, fn) {
+        return this._meta.factory(name, deps, fn)
+    }
+
+    createStateDefinition(name, Widget) {
+        return this._meta.createStateDefinition(name, Widget)
+    }
+
     clear(scope) {
         this._getScope(scope).clear()
     }

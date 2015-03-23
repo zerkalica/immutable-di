@@ -19,7 +19,7 @@ export default class ContainerCreator {
             globalCache: this._globalCache
         })
         container.get(Dispatcher).setStores(this._stores)
-        container.get(StateBinder).setRenderer(this._renderer)
+        container.get(StateBinder).setAdapter(this._renderer)
 
         return container
     }
