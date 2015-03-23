@@ -20,9 +20,11 @@ export default class Renderer {
     _widgetToDefinition(Widget) {
         const name = this._renderer.getName(Widget)
 
-        return this._container.factory(name + '__Element', {
-            props: this._container.createStateDefinition(name, Widget)
-        }, {props} => this._renderer.getElement(Widget, props))
+        return this._container.factory(
+            name + '__Element',
+            this._container.createStateDefinition(name, Widget),
+            {props} => this._renderer.getElement(Widget, props)
+        )
     }
 
     render(Widget) {
