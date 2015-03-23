@@ -8,7 +8,6 @@ import WrapActionMethods from './flux/wrap-action-methods'
 
 import Dispatcher from './flux/dispatcher'
 import Renderer from './flux/renderer'
-import Context from './flux/context'
 
 export default {
     ContainerCreator,
@@ -16,6 +15,5 @@ export default {
     NativeState,
     ReactRenderer,
     Dispatcher,
-    Renderer,
-    Context
+    Renderer
 }
