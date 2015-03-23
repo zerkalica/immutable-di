@@ -1,5 +1,3 @@
-import Context from './context'
-import wrapActionMethods from './wrap-action-methods'
 import {bindAll} from '../utils'
 import Container from '../container'
 
@@ -17,18 +15,20 @@ export default class Renderer {
         return this
     }
 
-    _widgetToDefinition(Widget) {
-        const name = this._renderer.getName(Widget)
-
-        return this._container.factory(
+    _widgetToDefinition(name, Widget) {
+        const factory = this._container.factory
+        return factory(
             name + '__Element',
-            this._container.createStateDefinition(name, Widget),
+            factory(name, {
+                props: factory(name + '__Props', Widget.__props),
+                state: factory(name + '__State', Widget.__state, Widget.__transducer)
+            }),
             {props} => this._renderer.getElement(Widget, props)
         )
     }
 
     render(Widget) {
-        return this._container.get(this._widgetToDefinition(Widget))
+        return this._container.get(this._widgetToDefinition(this._renderer.getName(Widget), Widget))
             .then(el => this._renderer.render(el))
     }
 }

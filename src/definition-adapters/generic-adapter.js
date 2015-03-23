@@ -32,13 +32,6 @@ export default class GenericAdapter {
         return fn
     }
 
-    static createStateDefinition(name, Widget) {
-        return GenericAdapter.factory(name, {
-            props: GenericAdapter.factory(name + '__Props', Widget.__props),
-            state: GenericAdapter.factory(name + '__State', Widget.__state, Widget.__transducer)
-        })
-    }
-
     static extractMetaInfo(definition, debugPath) {
         const id = GenericAdapter.idFromDefinition(definition, debugPath)
         const isClass = definition.__class
