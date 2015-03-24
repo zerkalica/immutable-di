@@ -11,8 +11,8 @@ function getClass(methods) {
     return Class.prototype;
 }
 
-describe('immutable-di-builder', () => {
-    let Builder, FakeContainer, FakeInvoker, FakeMetaInfoCache, FakeGenericAdapter, testState
+describe('container-creator', () => {
+    let Creator, FakeContainer, FakeMetaInfoCache, FakeGenericAdapter, testState
 
     beforeEach(() => {
         testState = new NativeAdapter({
@@ -22,26 +22,25 @@ describe('immutable-di-builder', () => {
         })
 
         FakeContainer = getClass(['get', 'clear'])
-        FakeInvoker = getClass()
         FakeMetaInfoCache = getClass()
         FakeGenericAdapter = getClass()
-        Builder = proxyquire('../immutable-di-builder', {
+        Creator = proxyquire('../container-creator', {
             './container': FakeContainer.constructor,
-            './invoker': FakeInvoker.constructor,
             './meta-info-cache': FakeMetaInfoCache.constructor,
             './definition-adapters/generic-adapter': FakeGenericAdapter.constructor
         })
     })
 
     it('should return factory for building ImmutableDi containers', () => {
-        const fn = Builder()
-        fn.should.a('function')
+        const creator = new Creator()
+
+        creator.create.should.be.a('function')
     })
 
     it('should build ImmutableDi container', () => {
-        const fn = Builder();
+        const creator = new Creator()
         const m = sinon.match;
-        fn(testState)
+        creator.create(testState)
         FakeContainer.constructor.should.calledWith(
             m.has('state', testState)
                 .and(m.has('globalCache', m.instanceOf(Map)))
@@ -50,7 +49,7 @@ describe('immutable-di-builder', () => {
     })
 
     it('should call get method of container', () => {
-        const di = Builder()(testState)
+        const di = (new Creator()).create(testState)
         di.get('test2')
         FakeContainer.get.should.have.been.calledWith('test2');
     })

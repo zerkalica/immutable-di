@@ -9,19 +9,21 @@ var classToFactory = require("../utils").classToFactory;
 function procesDeps(deps) {
     var resultDeps = [];
     deps = deps || [];
-    for (var i = 0; i < deps.length; i++) {
-        var dep = deps[i];
-        var isArray = Array.isArray(dep);
-        var isPromise = isArray && dep.length === 2 && typeof dep[1] === "function";
-        var isPath = isArray && !isPromise;
-        var definition = {
+    var isArray = Array.isArray(deps);
+    var names = isArray ? [] : Object.keys(deps);
+    var len = isArray ? deps.length : names.length;
+    for (var i = 0; i < len; i++) {
+        var _name = names.length ? names[i] : void 0;
+        var dep = deps[_name || i];
+        var isPromise = Array.isArray(dep) && dep.length === 2 && typeof dep[1] === "function";
+        var isPath = typeof dep === "string";
+        resultDeps.push({
+            name: _name,
             promiseHandler: isPromise ? dep[1] || function (p) {
                 return p;
             } : null,
-            path: isPath ? dep : [],
-            definition: isPromise ? dep[0] : isPath ? null : dep };
-
-        resultDeps.push(definition);
+            path: isPath ? dep.split(".") : [],
+            definition: isPromise ? dep[0] : isPath ? null : dep });
     }
 
     return resultDeps;
@@ -33,12 +35,38 @@ var GenericAdapter = (function () {
     }
 
     _prototypeProperties(GenericAdapter, {
+        factory: {
+            value: function factory(name, deps, fn) {
+                fn = fn || function (state) {
+                    return state;
+                };
+                fn.__factory = [name, deps];
+
+                return fn;
+            },
+            writable: true,
+            configurable: true
+        },
         extractMetaInfo: {
+            /**
+             *
+             * @example
+             *
+             * definition:
+             *
+             * ['TestFn', Dep1, Dep2]
+             * ['TestFn', Dep1, 'state.path.1']
+             * ['TestFn', [Dep1, p => p.catch({})], 'state.path.2']
+             * ['TestFn', {dep1: Dep1}]
+             * ['TestFn', {dep1: [Dep1, p => p.catch({})]}]
+             */
+
             value: function extractMetaInfo(definition, debugPath) {
                 var id = GenericAdapter.idFromDefinition(definition, debugPath);
                 var isClass = definition.__class;
                 var di = isClass ? definition.__class : definition.__factory;
-                var deps = procesDeps(di.slice(1));
+                var first = di[1];
+                var deps = procesDeps(typeof first === "object" && !Array.isArray(first) ? first : di.slice(1));
                 var waitFor = procesDeps(definition.__waitFor);
 
                 return {

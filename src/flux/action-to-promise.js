@@ -1,10 +1,6 @@
-function isPromise(data) {
-    return typeof data === 'object' && typeof data.then === 'function'
-}
-
 export default function actionToPromise(actionType, payload) {
     let actionItem
-    if (isPromise(payload)) {
+    if (typeof payload === 'object' && typeof payload.then === 'function') {
         actionItem = payload
             .then(payload => ({
                 actionType: actionType,

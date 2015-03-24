@@ -26,14 +26,17 @@ class TodoView extends React.Component {
 export default class Page extends React.Component {
     static __props = {
         actions: PageActions,
-        dispatcher: Dispatcher
+        dispatcher: Dispatcher,
+        'config.Page'
     }
 
     static __state = {
-        status: ['state', 'PageStore', 'status'],
-        currentTodo: ['state', 'PageStore', 'currentTodo'],
-        isEditCurrentTodo: ['state', 'PageStore', 'isEditCurrentTodo']
+
+        status: 'PageStore.status',
+        currentTodo: 'PageStore.currentTodo',
+        isEditCurrentTodo: 'PageStore.isEditCurrentTodo'
     }
+    static __s = state => state.get('PageStore')
 
     constructor({props, state}) {
         super(props)

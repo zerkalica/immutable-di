@@ -2,7 +2,7 @@ import Container from '../container'
 import MetaInfoCache from '../meta-info-cache'
 import NativeAdapter from '../state-adapters/native-adapter'
 import GenericAdapter from '../definition-adapters/generic-adapter'
-import {testFunc} from '../__mocks__/fixture-definition'
+import {testFunc, testObjectDeps} from '../__mocks__/fixture-definition'
 
 describe('container', () => {
     let state = {
@@ -86,13 +86,17 @@ describe('container', () => {
             return container.get(testFunc).should.eventually.to.equal('testFunc.value.DepClass.value.depFn.value')
         })
 
+        it('should instance complex service with deps as object and return value', () => {
+            return container.get(testObjectDeps).should.eventually.to.equal('testFunc.value.DepClass.value.depFn.value')
+        })
+
         it('should resolve state path as dep', () => {
             var exampleValue = 'test-va';
 
             function Dep(pa) {
               return exampleValue + '.' + pa
             }
-            Dep.__factory = ['Dep', ['p', 'a']]
+            Dep.__factory = ['Dep', 'p.a']
 
             return container.get(Dep).should.eventually.equal(exampleValue + '.' + state.p.a)
         })
@@ -124,7 +128,7 @@ describe('container', () => {
             function Dep(pa) {
               return exampleValue + '.' + pa
             }
-            Dep.__factory = ['Dep', ['p', 'a']]
+            Dep.__factory = ['Dep', 'p.a']
 
             container.get(Dep);
 
@@ -136,7 +140,7 @@ describe('container', () => {
 
         it('should use cache, if called twice or more', () => {
             const Dep = spy()
-            Dep.__factory = ['Dep', ['p', 'a']]
+            Dep.__factory = ['Dep', 'p.a']
 
             return container.get(Dep).then(d => {
                 return container.get(Dep)
@@ -147,7 +151,7 @@ describe('container', () => {
 
         it('should compute state-depended value again after clear cache', () => {
             const Dep = spy()
-            Dep.__factory = ['Dep', ['p', 'a']]
+            Dep.__factory = ['Dep', 'p.a']
 
             return container.get(Dep).then(d => {
                 container.clear('p')
@@ -184,7 +188,7 @@ describe('container', () => {
                 depFn();
                 return state;
             }
-            Dep.__factory = ['Dep', ['state']]
+            Dep.__factory = ['Dep', 'state']
             const mutations = [
                 {
                     id: 'state', data: {a: {b: 2}}
@@ -219,7 +223,7 @@ describe('container', () => {
               throw new Error('test')
               return exampleValue
             }
-            Dep.__factory = ['Dep', ['p', 'a']]
+            Dep.__factory = ['Dep', 'p.a']
 
             function TestService(dep) {
               return new Promise.resolve(dep);

@@ -9,12 +9,13 @@ function constToMethod(methodName) {
   return methodName;
 }
 
-function wrapActionMethods(Actions) {
-  if (Actions.__wrapped__) {
+function wrapActionMethods(o) {
+  if (o.__wrapped) {
     return;
   }
+  o.__wrapped = true;
 
-  var obj = Actions.prototype;
+  var obj = o.prototype;
   var keys = Object.keys(obj);
 
   for (var i = 0, l = keys.length; i < l; ++i) {
@@ -26,11 +27,10 @@ function wrapActionMethods(Actions) {
         return (function (a1, a2, a3, a4, a5) {
           var result = fn(a1, a2, a3, a4, a5);
           if (result !== void 0) {
-            this.dispatch(key, result);
+            this.__dispatcher.dispatch(key, result);
           }
         })(key);
       };
     })(i, l);
   }
-  Actions.__wrapped__ = true;
 }

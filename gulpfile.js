@@ -18,11 +18,12 @@ chai.use(sinonChai);
 chai.should();
 
 var knownOptions = {
-  string: 'env',
+  string: ['env', 'tests'],
   boolean: 'debug',
   default: {
     env: process.env.NODE_ENV || 'production',
-    debug: false
+    debug: false,
+    tests: '**/__tests__/*.js'
   }
 };
 
@@ -34,11 +35,11 @@ function getConfig(args) {
     return {
         src: {
             scripts: 'src/**/*.js',
-            tests: 'src/**/__tests__/*.js'
+            tests: 'src/' + options.tests
         },
         dest: {
             scripts: 'dist',
-            tests: 'dist/**/__tests__/*.js'
+            tests: 'dist/' + options.tests
         },
         babel: {
             modules: 'common',

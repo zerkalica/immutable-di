@@ -1,7 +1,31 @@
-import {extractMetaInfo, idFromDefinition} from '../generic-adapter'
-import {testFuncMeta, testFunc} from '../../__mocks__/fixture-definition'
+import {factory, extractMetaInfo, idFromDefinition} from '../generic-adapter'
+import {testFuncMeta, testFunc, testObjectDeps, testObjectDepsMeta} from '../../__mocks__/fixture-definition'
 
 describe('definition-adapters/generic-adapter', () => {
+    describe('factory', () => {
+        let fn, deps
+        beforeEach(() => {
+            let dep1 = s => s
+            dep1.__factory = ['dep1']
+            deps = [dep1]
+            fn = factory('test', deps)
+        })
+
+        it('should build __factory definition from params', () => {
+            fn.should.include.keys('__factory')
+        })
+
+        it('should bind name and deps to __factory definition', () => {
+            fn.__factory.should.to.be.deep.equal(['test', deps])
+        })
+
+        it('should bind function to __factory from arguments', () => {
+            let fn = p => p
+            const fn2 = factory('test', deps, fn)
+            fn2.should.to.be.equal(fn)
+        })
+    })
+
     describe('idFromDefinition', () => {
         it('should not accept empty or null', () => {
             let message = 'Getter is not a definition in arg';
@@ -69,7 +93,6 @@ describe('definition-adapters/generic-adapter', () => {
             extractMetaInfo(testFunc).should.to.deep.equal(meta);
         })
 
-
         it('should convert simple class definition to metainfo', () => {
             class TestClass {}
             TestClass.__class = ['TestClass'];
@@ -87,7 +110,11 @@ describe('definition-adapters/generic-adapter', () => {
             orig.handler().should.to.be.instanceOf(TestClass);
         })
 
-        it('should convert factory definition with deps to metainfo', () => {
+        it('should convert factory definition with deps as object to metainfo', () => {
+            extractMetaInfo(testObjectDeps).should.to.deep.equal(testObjectDepsMeta);
+        })
+
+        it('should convert factory definition with deps as array to metainfo', () => {
             extractMetaInfo(testFunc).should.to.deep.equal(testFuncMeta);
         })
     })

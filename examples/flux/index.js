@@ -16,19 +16,18 @@ const state = {
     }
 }
 
+const stores = [PageStore]
 const selector = 'body'
 const target = typeof document !== 'undefined' ? document.querySelector(selector) : null
-const containerCreator = new ContainerCreator({
-    stores: [PageStore],
-    renderer: new ReactRenderer(React, target)
-})
+const reactRenderer = new ReactRenderer(React, target)
 
+const containerCreator = new ContainerCreator()
 const di = containerCreator.create(new NativeState(state)).get
 
 //Fill stores and render page
 di(Dispatcher)
-    .then(dispatcher => dispatcher.reset())
+    .then(dispatcher => dispatcher.setStores(stores).reset())
     .then(() => di(Renderer))
-    .then(renderer => renderer.render(Page))
-    .then(() => console.log('render complete...'))
+    .then(renderer => renderer.setAdapter(reactRenderer).render(Page))
+    .then(data => console.log('render complete...', data))
     .catch(err => console.error('render error:', err.message, err.stack()))

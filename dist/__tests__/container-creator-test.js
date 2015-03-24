@@ -16,10 +16,9 @@ function getClass(methods) {
     return Class.prototype;
 }
 
-describe("immutable-di-builder", function () {
-    var Builder = undefined,
+describe("container-creator", function () {
+    var Creator = undefined,
         FakeContainer = undefined,
-        FakeInvoker = undefined,
         FakeMetaInfoCache = undefined,
         FakeGenericAdapter = undefined,
         testState = undefined;
@@ -32,31 +31,30 @@ describe("immutable-di-builder", function () {
         });
 
         FakeContainer = getClass(["get", "clear"]);
-        FakeInvoker = getClass();
         FakeMetaInfoCache = getClass();
         FakeGenericAdapter = getClass();
-        Builder = proxyquire("../immutable-di-builder", {
+        Creator = proxyquire("../container-creator", {
             "./container": FakeContainer.constructor,
-            "./invoker": FakeInvoker.constructor,
             "./meta-info-cache": FakeMetaInfoCache.constructor,
             "./definition-adapters/generic-adapter": FakeGenericAdapter.constructor
         });
     });
 
     it("should return factory for building ImmutableDi containers", function () {
-        var fn = Builder();
-        fn.should.a("function");
+        var creator = new Creator();
+
+        creator.create.should.be.a("function");
     });
 
     it("should build ImmutableDi container", function () {
-        var fn = Builder();
+        var creator = new Creator();
         var m = sinon.match;
-        fn(testState);
+        creator.create(testState);
         FakeContainer.constructor.should.calledWith(m.has("state", testState).and(m.has("globalCache", m.instanceOf(Map))).and(m.has("metaInfoCache", m.instanceOf(FakeMetaInfoCache.constructor))));
     });
 
     it("should call get method of container", function () {
-        var di = Builder()(testState);
+        var di = new Creator().create(testState);
         di.get("test2");
         FakeContainer.get.should.have.been.calledWith("test2");
     });

@@ -1,6 +1,6 @@
 import actionToPromise from './action-to-promise'
 import PromiseSeries from './promise-series'
-import Container from './container'
+import Container from '../container'
 import {bindAll} from '../utils'
 
 export default class Dispatcher {

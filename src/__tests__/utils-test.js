@@ -1,29 +1,6 @@
 import {isPromise, getDebugPath, classToFactory} from '../utils'
 
 describe('utils', () => {
-    describe('isPromise', () => {
-        it('should return false if argument is not an object', () => {
-            isPromise().should.to.be.not.ok;
-            isPromise({}).should.to.be.not.ok;
-            isPromise('').should.to.be.not.ok;
-            isPromise(0).should.to.be.not.ok;
-            isPromise(false).should.to.be.not.ok;
-        })
-        it('should return false if argument is no then property', () => {
-            class testClass {
-            }
-            isPromise(new testClass).should.to.be.not.ok;
-        })
-        it('should return true if argument is a object with then property', () => {
-            class testClass {
-                then() {
-
-                }
-            }
-            isPromise(new testClass).should.to.be.ok;
-        })
-    })
-
     describe('classToFactory', () => {
         class TestC {
         }

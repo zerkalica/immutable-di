@@ -1,13 +1,9 @@
 "use strict";
 
 module.exports = actionToPromise;
-function isPromise(data) {
-    return typeof data === "object" && typeof data.then === "function";
-}
-
 function actionToPromise(actionType, payload) {
     var actionItem = undefined;
-    if (isPromise(payload)) {
+    if (typeof payload === "object" && typeof payload.then === "function") {
         actionItem = payload.then(function (payload) {
             return {
                 actionType: actionType,
@@ -24,13 +20,11 @@ function actionToPromise(actionType, payload) {
             };
         });
     } else {
-        actionItem = new Promise(function (resolve, reject) {
-            resolve({
-                actionType: actionType,
-                payload: payload,
-                isError: false,
-                isPromise: false
-            });
+        actionItem = Promise.resolve({
+            actionType: actionType,
+            payload: payload,
+            isError: false,
+            isPromise: false
         });
     }
     return actionItem;

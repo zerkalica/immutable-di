@@ -1,7 +1,5 @@
 "use strict";
 
-var _prototypeProperties = function (child, staticProps, instanceProps) { if (staticProps) Object.defineProperties(child, staticProps); if (instanceProps) Object.defineProperties(child.prototype, instanceProps); };
-
 var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
 
 var _utils = require("../utils");
@@ -11,42 +9,6 @@ var getDebugPath = _utils.getDebugPath;
 var classToFactory = _utils.classToFactory;
 
 describe("utils", function () {
-    describe("isPromise", function () {
-        it("should return false if argument is not an object", function () {
-            isPromise().should.to.be.not.ok;
-            isPromise({}).should.to.be.not.ok;
-            isPromise("").should.to.be.not.ok;
-            isPromise(0).should.to.be.not.ok;
-            isPromise(false).should.to.be.not.ok;
-        });
-        it("should return false if argument is no then property", function () {
-            var testClass = function testClass() {
-                _classCallCheck(this, testClass);
-            };
-
-            isPromise(new testClass()).should.to.be.not.ok;
-        });
-        it("should return true if argument is a object with then property", function () {
-            var testClass = (function () {
-                function testClass() {
-                    _classCallCheck(this, testClass);
-                }
-
-                _prototypeProperties(testClass, null, {
-                    then: {
-                        value: function then() {},
-                        writable: true,
-                        configurable: true
-                    }
-                });
-
-                return testClass;
-            })();
-
-            isPromise(new testClass()).should.to.be.ok;
-        });
-    });
-
     describe("classToFactory", function () {
         var TestC = function TestC() {
             _classCallCheck(this, TestC);

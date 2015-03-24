@@ -23,7 +23,7 @@ export default class Renderer {
                 props: factory(name + '__Props', Widget.__props),
                 state: factory(name + '__State', Widget.__state, Widget.__transducer)
             }),
-            {props} => this._renderer.getElement(Widget, props)
+            ({props}) => this._renderer.getElement(Widget, props)
         )
     }
 

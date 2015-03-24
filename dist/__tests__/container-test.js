@@ -14,7 +14,10 @@ var NativeAdapter = _interopRequire(require("../state-adapters/native-adapter"))
 
 var GenericAdapter = _interopRequire(require("../definition-adapters/generic-adapter"));
 
-var testFunc = require("../__mocks__/fixture-definition").testFunc;
+var _mocks__FixtureDefinition = require("../__mocks__/fixture-definition");
+
+var testFunc = _mocks__FixtureDefinition.testFunc;
+var testObjectDeps = _mocks__FixtureDefinition.testObjectDeps;
 
 describe("container", function () {
     var state = {
@@ -126,13 +129,17 @@ describe("container", function () {
             return container.get(testFunc).should.eventually.to.equal("testFunc.value.DepClass.value.depFn.value");
         });
 
+        it("should instance complex service with deps as object and return value", function () {
+            return container.get(testObjectDeps).should.eventually.to.equal("testFunc.value.DepClass.value.depFn.value");
+        });
+
         it("should resolve state path as dep", function () {
             var exampleValue = "test-va";
 
             function Dep(pa) {
                 return exampleValue + "." + pa;
             }
-            Dep.__factory = ["Dep", ["p", "a"]];
+            Dep.__factory = ["Dep", "p.a"];
 
             return container.get(Dep).should.eventually.equal(exampleValue + "." + state.p.a);
         });
@@ -168,7 +175,7 @@ describe("container", function () {
             function Dep(pa) {
                 return exampleValue + "." + pa;
             }
-            Dep.__factory = ["Dep", ["p", "a"]];
+            Dep.__factory = ["Dep", "p.a"];
 
             container.get(Dep);
 
@@ -180,7 +187,7 @@ describe("container", function () {
 
         it("should use cache, if called twice or more", function () {
             var Dep = spy();
-            Dep.__factory = ["Dep", ["p", "a"]];
+            Dep.__factory = ["Dep", "p.a"];
 
             return container.get(Dep).then(function (d) {
                 return container.get(Dep);
@@ -191,7 +198,7 @@ describe("container", function () {
 
         it("should compute state-depended value again after clear cache", function () {
             var Dep = spy();
-            Dep.__factory = ["Dep", ["p", "a"]];
+            Dep.__factory = ["Dep", "p.a"];
 
             return container.get(Dep).then(function (d) {
                 container.clear("p");
@@ -212,6 +219,37 @@ describe("container", function () {
                 Dep.should.have.been.calledTwice;
             });
         });
+
+        it("should create invoker instance", function () {
+            var testPayload = { test: 123 };
+            var testAction = "testAction";
+            container.createMethod(testAction, testPayload).handle.should.be.a["function"];
+        });
+
+        it("should transform state", function () {
+            var depFn = spy();
+            var Dep = function (state) {
+                depFn();
+                return state;
+            };
+            Dep.__factory = ["Dep", "state"];
+            var mutations = [{
+                id: "state", data: { a: { b: 2 } }
+            }];
+
+            return container.get(Dep).then(function (data) {
+                data.should.be.deep.equal({ a: { b: 1, b1: 2 } });
+
+                container.transformState(mutations);
+                return container.get(Dep);
+            }).then(function (data) {
+                container.get(Dep);
+                depFn.should.be.calledTwice;
+                return data;
+            }).then(function (data) {
+                data.should.deep.equal({ a: { b: 2 } });
+            });
+        });
     });
 
     describe("exception handling", function () {
@@ -224,7 +262,7 @@ describe("container", function () {
                 throw new Error("test");
                 return exampleValue;
             }
-            Dep.__factory = ["Dep", ["p", "a"]];
+            Dep.__factory = ["Dep", "p.a"];
 
             function TestService(dep) {
                 return new Promise.resolve(dep);
@@ -256,3 +294,5 @@ describe("container", function () {
         });
     });
 });
+//container.createMethod(testAction, testPayload).handle(store)
+//  container.createMethod(testAction, testPayload).handle.should

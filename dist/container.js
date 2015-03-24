@@ -1,8 +1,17 @@
 "use strict";
 
+var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+
 var _prototypeProperties = function (child, staticProps, instanceProps) { if (staticProps) Object.defineProperties(child, staticProps); if (instanceProps) Object.defineProperties(child.prototype, instanceProps); };
 
 var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+
+var Invoker = _interopRequire(require("./invoker"));
+
+var _utils = require("./utils");
+
+var bindAll = _utils.bindAll;
+var convertArgsToOptions = _utils.convertArgsToOptions;
 
 var Container = (function () {
     function Container(_ref) {
@@ -17,11 +26,19 @@ var Container = (function () {
         this._meta = metaInfoCache;
         this._state = state;
         this._locks = new Map();
+        bindAll(this);
     }
 
     Container.__class = ["Container"];
 
     _prototypeProperties(Container, null, {
+        factory: {
+            value: function factory(name, deps, fn) {
+                return this._meta.factory(name, deps, fn);
+            },
+            writable: true,
+            configurable: true
+        },
         clear: {
             value: function clear(scope) {
                 this._getScope(scope).clear();
@@ -41,8 +58,44 @@ var Container = (function () {
             writable: true,
             configurable: true
         },
+        transformState: {
+            value: function transformState(mutations) {
+                var _this = this;
+
+                var updatedScopes = this._state.transformState(mutations);
+                updatedScopes.forEach(function (scope) {
+                    return _this.clear(scope);
+                });
+            },
+            writable: true,
+            configurable: true
+        },
+        createMethod: {
+            value: function createMethod(actionType, payload) {
+                var _this = this;
+
+                var getPayload = payload === void 0 ? function (id) {
+                    return _this._state.get(id);
+                } : function (id) {
+                    return _this._payload;
+                };
+
+                return new Invoker({
+                    metaInfoCache: this._meta,
+                    container: this,
+                    actionType: actionType,
+                    getPayload: getPayload
+                });
+            },
+            writable: true,
+            configurable: true
+        },
         get: {
             value: function get(definition, debugCtx) {
+                if (definition && this instanceof definition) {
+                    return this;
+                }
+
                 var _meta$get = this._meta.get(definition, debugCtx);
 
                 var id = _meta$get.id;
@@ -64,6 +117,7 @@ var Container = (function () {
                 }
                 this._locks.set(id, true);
                 var args = [];
+                var argNames = [];
                 for (var i = 0; i < deps.length; i++) {
                     var dep = deps[i];
                     var value = undefined;
@@ -85,10 +139,13 @@ var Container = (function () {
                     }
 
                     args.push(value);
+                    if (dep.name) {
+                        argNames.push(dep.name);
+                    }
                 }
 
                 result = Promise.all(args).then(function (resolvedArgs) {
-                    return handler.apply(null, resolvedArgs);
+                    return argNames.length ? handler(convertArgsToOptions(resolvedArgs, argNames)) : handler.apply(null, resolvedArgs);
                 });
 
                 this._locks.set(id, false);

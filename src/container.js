@@ -1,13 +1,5 @@
 import Invoker from './invoker'
-import {bindAll} from './utils'
-
-function convertArgsToOptions(args, argsNames) {
-    const obj = {}
-    for(let i = 0; i < args.length; i++) {
-        obj[argsNames[i]] = args[i]
-    }
-    return obj
-}
+import {bindAll, convertArgsToOptions} from './utils'
 
 export default class Container {
     static __class = ['Container']
@@ -55,7 +47,7 @@ export default class Container {
     }
 
     get(definition, debugCtx) {
-        if (this instanceof definition) {
+        if (definition && this instanceof definition) {
             return this
         }
         const {id, deps, debugPath, handler, statePaths} = this._meta.get(definition, debugCtx)
@@ -99,9 +91,10 @@ export default class Container {
             }
         }
 
-        result = Promise.all(args).then(resolvedArgs => (
-            handler.apply(null, argNames ? [convertArgsToOptions(resolvedArgs, argsNames)] : resolvedArgs)
-        ))
+        result = Promise.all(args).then(resolvedArgs => argNames.length
+            ? handler(convertArgsToOptions(resolvedArgs, argNames))
+            : handler.apply(null, resolvedArgs)
+        )
 
         this._locks.set(id, false)
         cache.set(id, result)

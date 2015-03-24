@@ -7,6 +7,7 @@ var _classCallCheck = function (instance, Constructor) { if (!(instance instance
 exports.depFn = depFn;
 exports.waitFn1 = waitFn1;
 exports.waitFn2 = waitFn2;
+exports.testObjectDeps = testObjectDeps;
 exports.testFunc = testFunc;
 function depFn() {
     return new Promise(function (resolve) {
@@ -33,10 +34,39 @@ var DepClass = exports.DepClass = (function () {
     return DepClass;
 })();
 
-DepClass.__class = ["DepClass", ["state", "a", "b1"]];
+DepClass.__class = ["DepClass", "state.a.b1"];
 
 function waitFn1() {}
 function waitFn2() {}
+
+function testObjectDeps(_ref) {
+    var depClass = _ref.depClass;
+    var depFnValue = _ref.depFnValue;
+
+    if (!(depClass instanceof DepClass)) {
+        throw new Error("arg is not an instance of DepClass");
+    }
+    return "testFunc.value." + depClass.test() + "." + depFnValue;
+}
+testObjectDeps.__factory = ["testObjectDeps", { depFnValue: depFn, depClass: DepClass }];
+
+var testObjectDepsMeta = exports.testObjectDepsMeta = {
+    id: "testObjectDeps",
+    name: "testObjectDeps",
+    handler: testObjectDeps,
+    deps: [{
+        name: "depFnValue",
+        definition: depFn,
+        path: [],
+        promiseHandler: null
+    }, {
+        name: "depClass",
+        definition: DepClass,
+        path: [],
+        promiseHandler: null
+    }],
+    waitFor: []
+};
 
 function testFunc(depClass, depFnValue) {
     if (!(depClass instanceof DepClass)) {
@@ -47,30 +77,35 @@ function testFunc(depClass, depFnValue) {
 var ignore = function (p) {
     return p["catch"](function () {});
 };
-testFunc.__factory = ["testFunc", DepClass, [depFn, ignore], ["state", "a", "b"]];
+testFunc.__factory = ["testFunc", DepClass, [depFn, ignore], "state.a.b"];
 testFunc.__waitFor = [waitFn1, waitFn2];
 
 var testFuncMeta = exports.testFuncMeta = {
     id: "testFunc",
     handler: testFunc,
     deps: [{
+        name: void 0,
         definition: DepClass,
         path: [],
         promiseHandler: null
     }, {
+        name: void 0,
         definition: depFn,
         path: [],
         promiseHandler: ignore
     }, {
+        name: void 0,
         definition: null,
         path: ["state", "a", "b"],
         promiseHandler: null
     }],
     waitFor: [{
+        name: void 0,
         definition: waitFn1,
         path: [],
         promiseHandler: null
     }, {
+        name: void 0,
         definition: waitFn2,
         path: [],
         promiseHandler: null

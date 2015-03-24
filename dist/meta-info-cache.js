@@ -15,6 +15,13 @@ var MetaInfoCache = (function () {
     }
 
     _prototypeProperties(MetaInfoCache, null, {
+        factory: {
+            value: function factory(name, deps, fn) {
+                return this._adapter.factory(name, deps, fn);
+            },
+            writable: true,
+            configurable: true
+        },
         get: {
             value: function get(definition, debugCtx) {
                 var _this = this;
