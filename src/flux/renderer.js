@@ -15,12 +15,12 @@ export default class Renderer {
         return this
     }
 
-    Statefull(Widget) {
+    _createDefinition(Widget) {
         const {displayName, props, state} = Widget
         const name = displayName
         const stateDef = factory(name + '.state', state)
 
-        Widget.__state = factory(
+        return factory(
             name + '.element',
             factory(name, {
                 updater: factory(
@@ -35,7 +35,7 @@ export default class Renderer {
     }
 
     render(Widget) {
-        return this._container.get(Widget.__state)
+        return this._container.get(this._createDefinition(Widget))
             .then(props => this._renderer.render(this._renderer.getElement(Widget, props)))
     }
 }
