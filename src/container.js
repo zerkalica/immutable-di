@@ -13,10 +13,6 @@ export default class Container {
         bindAll(this)
     }
 
-    factory(name, deps, fn) {
-        return this._meta.factory(name, deps, fn)
-    }
-
     clear(scope) {
         this._getScope(scope).clear()
     }

@@ -6,10 +6,6 @@ export default class MetaInfoCache {
         this._meta = new Map()
     }
 
-    factory(name, deps, fn) {
-        return this._adapter.factory(name, deps, fn)
-    }
-
     get(definition, debugCtx) {
         debugCtx = debugCtx || []
         let debugPath = getDebugPath(debugCtx)

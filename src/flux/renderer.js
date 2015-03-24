@@ -15,20 +15,27 @@ export default class Renderer {
         return this
     }
 
-    _widgetToDefinition(name, Widget) {
-        const factory = this._container.factory
-        return factory(
-            name + '__Element',
+    Statefull(Widget) {
+        const {displayName, props, state} = Widget
+        const name = displayName
+        const stateDef = factory(name + '.state', state)
+
+        Widget.__state = factory(
+            name + '.element',
             factory(name, {
-                props: factory(name + '__Props', Widget.__props),
-                state: factory(name + '__State', Widget.__state, Widget.__transducer)
-            }),
-            ({props}) => this._renderer.getElement(Widget, props)
+                updater: factory(
+                    name + '.updaterProvider',
+                    {},
+                    () => ((setState) => factory(name + '.updater', stateDef, state => setState(state)))
+                ),
+                props: factory(name + '.props', props),
+                state: stateDef
+            })
         )
     }
 
     render(Widget) {
-        return this._container.get(this._widgetToDefinition(this._renderer.getName(Widget), Widget))
-            .then(el => this._renderer.render(el))
+        return this._container.get(Widget.__state)
+            .then(props => this._renderer.render(this._renderer.getElement(Widget, props)))
     }
 }

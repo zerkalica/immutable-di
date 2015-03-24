@@ -19,10 +19,8 @@ export default class Dispatcher {
     }
 
     mount(name, deps, onUpdate) {
-        const definition = this._container.factory(name, deps, onUpdate)
         this._listeners.push(definition)
-
-        return definition
+        return this
     }
 
     unmount(definition) {
