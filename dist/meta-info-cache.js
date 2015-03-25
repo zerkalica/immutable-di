@@ -16,37 +16,9 @@ var MetaInfoCache = (function () {
     _prototypeProperties(MetaInfoCache, null, {
         get: {
             value: function get(definition, debugCtx) {
-                var _this = this;
-
                 debugCtx = debugCtx || [];
                 var debugPath = getDebugPath(debugCtx);
-                var meta = definition ? definition.__di_meta : void 0;
-
-                if (!meta) {
-                    (function () {
-                        meta = _this._adapter.extractMetaInfo(definition, debugPath);
-                        debugPath = getDebugPath([debugCtx[0], meta.name]);
-                        var scopes = new Set();
-                        var deps = meta.deps;
-                        for (var i = 0; i < deps.length; i++) {
-                            var dep = deps[i];
-                            if (dep.path && dep.path.length) {
-                                scopes.add(dep.path[0]);
-                            } else {
-                                var depMeta = _this.get(dep.definition, [debugPath, i]);
-                                depMeta.scopes.forEach(function (path) {
-                                    return scopes.add(path);
-                                });
-                            }
-                        }
-
-                        meta.scopes = Array.from(scopes.values());
-                        meta.scope = meta.scopes.length ? meta.scopes[0] : "global";
-                        definition.__di_meta = meta;
-                    })();
-                }
-
-                return meta;
+                return this._adapter.extractMetaInfo(definition, debugPath);
             },
             writable: true,
             configurable: true

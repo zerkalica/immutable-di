@@ -12,7 +12,9 @@ DepClass.__class = [
 ]
 
 export function waitFn1() {}
+waitFn1.__factory = ['waitFn1']
 export function waitFn2() {}
+waitFn2.__factory = ['waitFn2']
 
 export function testObjectDeps({depClass, depFnValue}) {
     if (!(depClass instanceof DepClass)) {

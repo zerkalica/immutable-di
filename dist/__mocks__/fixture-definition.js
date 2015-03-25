@@ -37,7 +37,9 @@ var DepClass = exports.DepClass = (function () {
 DepClass.__class = ["DepClass", "state.a.b1"];
 
 function waitFn1() {}
+waitFn1.__factory = ["waitFn1"];
 function waitFn2() {}
+waitFn2.__factory = ["waitFn2"];
 
 function testObjectDeps(_ref) {
     var depClass = _ref.depClass;
