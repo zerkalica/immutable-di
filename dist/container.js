@@ -11,6 +11,7 @@ var Invoker = _interopRequire(require("./invoker"));
 var _utils = require("./utils");
 
 var bindAll = _utils.bindAll;
+var getDebugPath = _utils.getDebugPath;
 var convertArgsToOptions = _utils.convertArgsToOptions;
 
 var Container = (function () {
@@ -96,7 +97,7 @@ var Container = (function () {
                 var handler = _meta$get.handler;
                 var scope = _meta$get.scope;
 
-                var debugPath = getDebugPath([debugCtx.length ? debugCtx[0] : [], id]);
+                var debugPath = getDebugPath([debugCtx && debugCtx.length ? debugCtx[0] : [], id]);
                 var cache = this._getScope(scope);
                 var result = cache.get(id);
                 if (result !== void 0) {

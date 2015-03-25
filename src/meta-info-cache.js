@@ -3,14 +3,12 @@ import {getDebugPath} from './utils'
 export default class MetaInfoCache {
     constructor(adapter) {
         this._adapter = adapter
-        this._meta = new Map()
     }
 
     get(definition, debugCtx) {
         debugCtx = debugCtx || []
         let debugPath = getDebugPath(debugCtx)
-        const id = this._adapter.idFromDefinition(definition, debugPath)
-        let meta = this._meta.get(id)
+        let meta = definition ? definition.__di_meta : void 0
 
         if(!meta) {
             meta = this._adapter.extractMetaInfo(definition, debugPath)
@@ -29,7 +27,7 @@ export default class MetaInfoCache {
 
             meta.scopes = Array.from(scopes.values())
             meta.scope = meta.scopes.length ? meta.scopes[0] : 'global'
-            this._meta.set(id, meta)
+            definition.__di_meta = meta
         }
 
         return meta

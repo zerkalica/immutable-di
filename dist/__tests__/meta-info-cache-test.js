@@ -24,19 +24,15 @@ describe("meta-info-cache", function () {
     });
     it("should include definition keys", function () {
         var definition = meta.get(testFunc);
-        definition.should.to.include.keys(["id", "handler", "name", "waitFor", "deps", "statePaths", "debugPath"]);
+        definition.should.to.include.keys(["id", "handler", "name", "waitFor", "deps", "scopes", "scope"]);
     });
-    it("should have a valid debugPath", function () {
+    it("should have a valid scopes", function () {
         var definition = meta.get(testFunc);
-        definition.debugPath.should.be.equal("testFunc");
-    });
-    it("should have a valid statePaths", function () {
-        var definition = meta.get(testFunc);
-        definition.statePaths.should.be.deep.equal([["state", "a", "b1"], ["state", "a", "b"]]);
+        definition.scopes.should.be.deep.equal(["state"]);
     });
     it("should have a valid definition", function () {
         var definition = meta.get(testFunc);
-        delete definition.statePaths;
+        delete definition.scopes;
         delete definition.debugPath;
         definition.should.be.deep.equal(testFuncMeta);
     });

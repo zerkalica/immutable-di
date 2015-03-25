@@ -11,7 +11,6 @@ var MetaInfoCache = (function () {
         _classCallCheck(this, MetaInfoCache);
 
         this._adapter = adapter;
-        this._meta = new Map();
     }
 
     _prototypeProperties(MetaInfoCache, null, {
@@ -21,8 +20,7 @@ var MetaInfoCache = (function () {
 
                 debugCtx = debugCtx || [];
                 var debugPath = getDebugPath(debugCtx);
-                var id = this._adapter.idFromDefinition(definition, debugPath);
-                var meta = this._meta.get(id);
+                var meta = definition ? definition.__di_meta : void 0;
 
                 if (!meta) {
                     (function () {
@@ -44,7 +42,7 @@ var MetaInfoCache = (function () {
 
                         meta.scopes = Array.from(scopes.values());
                         meta.scope = meta.scopes.length ? meta.scopes[0] : "global";
-                        _this._meta.set(id, meta);
+                        definition.__di_meta = meta;
                     })();
                 }
 
