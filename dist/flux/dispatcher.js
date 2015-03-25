@@ -39,10 +39,8 @@ var Dispatcher = (function () {
         },
         mount: {
             value: function mount(name, deps, onUpdate) {
-                var definition = this._container.factory(name, deps, onUpdate);
                 this._listeners.push(definition);
-
-                return definition;
+                return this;
             },
             writable: true,
             configurable: true

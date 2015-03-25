@@ -142,6 +142,7 @@ describe("definition-adapters/generic-adapter", function () {
             testFunc.__factory = ["testFunc"];
             var meta = {
                 id: "testFunc",
+                scope: "state",
                 handler: testFunc,
                 deps: [],
                 waitFor: [],

@@ -15,22 +15,23 @@ export default class MetaInfoCache {
         if(!meta) {
             meta = this._adapter.extractMetaInfo(definition, debugPath)
             debugPath = getDebugPath([debugCtx[0], meta.name])
-            const statePaths = new Map()
+            const scopes = new Set()
             const deps = meta.deps
             for(let i = 0; i < deps.length; i++) {
                 const dep = deps[i]
                 if (dep.path && dep.path.length) {
-                    statePaths.set(dep.path.join('.'), dep.path)
+                    scopes.add(dep.path[0])
                 } else {
                     const depMeta = this.get(dep.definition, [debugPath, i])
-                    depMeta.statePaths.forEach(path => statePaths.set(path.join('.'), path))
+                    depMeta.scopes.forEach(path => scopes.add(path))
                 }
             }
-            meta.statePaths = Array.from(statePaths.values())
+
+            meta.scopes = Array.from(scopes.values())
+            meta.scope = meta.scopes.length ? meta.scopes[0] : 'global'
             this._meta.set(id, meta)
         }
 
-        meta.debugPath = getDebugPath([debugCtx[0], meta.name])
         return meta
     }
 }

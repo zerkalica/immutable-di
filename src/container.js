@@ -1,5 +1,5 @@
 import Invoker from './invoker'
-import {bindAll, convertArgsToOptions} from './utils'
+import {bindAll, getDebugPath, convertArgsToOptions} from './utils'
 
 export default class Container {
     static __class = ['Container']
@@ -46,9 +46,8 @@ export default class Container {
         if (definition && this instanceof definition) {
             return this
         }
-        const {id, deps, debugPath, handler, statePaths} = this._meta.get(definition, debugCtx)
-        //@todo think about scopes
-        const scope = statePaths.length ? statePaths[0][0] : 'global'
+        const {id, deps, handler, scope} = this._meta.get(definition, debugCtx)
+        const debugPath = getDebugPath([debugCtx && debugCtx.length ? debugCtx[0] : [], id])
         const cache = this._getScope(scope)
         let result = cache.get(id)
         if (result !== void 0) {

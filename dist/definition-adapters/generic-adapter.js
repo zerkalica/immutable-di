@@ -73,6 +73,7 @@ var GenericAdapter = (function () {
                     id: id,
                     handler: isClass ? classToFactory(definition) : definition,
                     name: di[0],
+                    scope: "state",
                     waitFor: waitFor,
                     deps: deps
                 };

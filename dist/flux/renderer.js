@@ -30,18 +30,26 @@ var Renderer = (function () {
             writable: true,
             configurable: true
         },
-        _widgetToDefinition: {
-            value: function _widgetToDefinition(name, Widget) {
-                var _this = this;
+        _createDefinition: {
+            value: function _createDefinition(Widget) {
+                var displayName = Widget.displayName;
+                var props = Widget.props;
+                var state = Widget.state;
 
-                var factory = this._container.factory;
-                return factory(name + "__Element", factory(name, {
-                    props: factory(name + "__Props", Widget.__props),
-                    state: factory(name + "__State", Widget.__state, Widget.__transducer)
-                }), function (_ref) {
-                    var props = _ref.props;
-                    return _this._renderer.getElement(Widget, props);
-                });
+                var name = displayName;
+                var stateDef = factory(name + ".state", state);
+
+                return factory(name + ".element", factory(name, {
+                    updater: factory(name + ".updaterProvider", {}, function () {
+                        return function (setState) {
+                            return factory(name + ".updater", stateDef, function (state) {
+                                return setState(state);
+                            });
+                        };
+                    }),
+                    props: factory(name + ".props", props),
+                    state: stateDef
+                }));
             },
             writable: true,
             configurable: true
@@ -50,8 +58,8 @@ var Renderer = (function () {
             value: function render(Widget) {
                 var _this = this;
 
-                return this._container.get(this._widgetToDefinition(this._renderer.getName(Widget), Widget)).then(function (el) {
-                    return _this._renderer.render(el);
+                return this._container.get(this._createDefinition(Widget)).then(function (props) {
+                    return _this._renderer.render(_this._renderer.getElement(Widget, props));
                 });
             },
             writable: true,

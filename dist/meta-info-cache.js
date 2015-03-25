@@ -15,13 +15,6 @@ var MetaInfoCache = (function () {
     }
 
     _prototypeProperties(MetaInfoCache, null, {
-        factory: {
-            value: function factory(name, deps, fn) {
-                return this._adapter.factory(name, deps, fn);
-            },
-            writable: true,
-            configurable: true
-        },
         get: {
             value: function get(definition, debugCtx) {
                 var _this = this;
@@ -35,25 +28,26 @@ var MetaInfoCache = (function () {
                     (function () {
                         meta = _this._adapter.extractMetaInfo(definition, debugPath);
                         debugPath = getDebugPath([debugCtx[0], meta.name]);
-                        var statePaths = new Map();
+                        var scopes = new Set();
                         var deps = meta.deps;
                         for (var i = 0; i < deps.length; i++) {
                             var dep = deps[i];
                             if (dep.path && dep.path.length) {
-                                statePaths.set(dep.path.join("."), dep.path);
+                                scopes.add(dep.path[0]);
                             } else {
                                 var depMeta = _this.get(dep.definition, [debugPath, i]);
-                                depMeta.statePaths.forEach(function (path) {
-                                    return statePaths.set(path.join("."), path);
+                                depMeta.scopes.forEach(function (path) {
+                                    return scopes.add(path);
                                 });
                             }
                         }
-                        meta.statePaths = Array.from(statePaths.values());
+
+                        meta.scopes = Array.from(scopes.values());
+                        meta.scope = meta.scopes.length ? meta.scopes[0] : "global";
                         _this._meta.set(id, meta);
                     })();
                 }
 
-                meta.debugPath = getDebugPath([debugCtx[0], meta.name]);
                 return meta;
             },
             writable: true,

@@ -53,6 +53,7 @@ testObjectDeps.__factory = ["testObjectDeps", { depFnValue: depFn, depClass: Dep
 var testObjectDepsMeta = exports.testObjectDepsMeta = {
     id: "testObjectDeps",
     name: "testObjectDeps",
+    scope: "state",
     handler: testObjectDeps,
     deps: [{
         name: "depFnValue",
@@ -110,6 +111,7 @@ var testFuncMeta = exports.testFuncMeta = {
         path: [],
         promiseHandler: null
     }],
+    scope: "state",
     name: "testFunc"
 };
 Object.defineProperty(exports, "__esModule", {

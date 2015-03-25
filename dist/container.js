@@ -32,13 +32,6 @@ var Container = (function () {
     Container.__class = ["Container"];
 
     _prototypeProperties(Container, null, {
-        factory: {
-            value: function factory(name, deps, fn) {
-                return this._meta.factory(name, deps, fn);
-            },
-            writable: true,
-            configurable: true
-        },
         clear: {
             value: function clear(scope) {
                 this._getScope(scope).clear();
@@ -100,12 +93,10 @@ var Container = (function () {
 
                 var id = _meta$get.id;
                 var deps = _meta$get.deps;
-                var debugPath = _meta$get.debugPath;
                 var handler = _meta$get.handler;
-                var statePaths = _meta$get.statePaths;
+                var scope = _meta$get.scope;
 
-                //@todo think about scopes
-                var scope = statePaths.length ? statePaths[0][0] : "global";
+                var debugPath = getDebugPath([debugCtx.length ? debugCtx[0] : [], id]);
                 var cache = this._getScope(scope);
                 var result = cache.get(id);
                 if (result !== void 0) {

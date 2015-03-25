@@ -5,7 +5,8 @@
   "scripts": {
     "build": "gulp build",
     "w": "gulp w",
-    "test": "gulp test"
+    "test": "gulp test",
+    "test:src": "gulp test:src"
   },
   "author": "Stefan Zerkalica <zerkalica@gmail.com>",
   "license": "MIT",

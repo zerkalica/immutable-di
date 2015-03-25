@@ -13,19 +13,15 @@ describe('meta-info-cache', () => {
     })
     it('should include definition keys', () => {
         let definition = meta.get(testFunc)
-        definition.should.to.include.keys(['id', 'handler', 'name', 'waitFor', 'deps', 'statePaths', 'debugPath'])
+        definition.should.to.include.keys(['id', 'handler', 'name', 'waitFor', 'deps', 'scopes', 'scope'])
     })
-    it('should have a valid debugPath', () => {
+    it('should have a valid scopes', () => {
         let definition = meta.get(testFunc)
-        definition.debugPath.should.be.equal('testFunc')
-    })
-    it('should have a valid statePaths', () => {
-        let definition = meta.get(testFunc)
-        definition.statePaths.should.be.deep.equal([[ 'state', 'a', 'b1' ], [ 'state', 'a', 'b' ]])
+        definition.scopes.should.be.deep.equal(['state'])
     })
     it('should have a valid definition', () => {
         let definition = meta.get(testFunc);
-        delete definition.statePaths;
+        delete definition.scopes;
         delete definition.debugPath;
         definition.should.be.deep.equal(testFuncMeta)
     })

@@ -25,6 +25,7 @@ testObjectDeps.__factory = ['testObjectDeps', {depFnValue: depFn, depClass: DepC
 export let testObjectDepsMeta = {
     id: 'testObjectDeps',
     name: 'testObjectDeps',
+    scope: 'state',
     handler: testObjectDeps,
     deps: [
         {
@@ -87,5 +88,6 @@ export let testFuncMeta = {
         path: [],
         promiseHandler: null
     }],
+    scope: 'state',
     name: 'testFunc'
 };
