@@ -1,7 +1,6 @@
 //invoker-example.js
-import {Builder, NativeAdapter} from '../src'
+import {ContainerCreator, NativeAdapter, Define} from '../src'
 class Store2 {
-    static __class = ['Store2', ['registry']]
     constructor(registry) {
         this.registry = registry
     }
@@ -10,10 +9,9 @@ class Store2 {
         return Promise.resolve({a2: actionType, p2: this.registry.counter})
     }
 }
+Define.Class(Store2, ['registry'])
 
 class Store1 {
-    static __class = ['Store1', ['registry']]
-    static __waitFor = [Store2]
     constructor(registry) {
         this.registry = registry
     }
@@ -24,9 +22,11 @@ class Store1 {
         return Promise.resolve({a1: actionType, p1: this.registry.counter})
     }
 }
+Define.Class(Store1, ['registry'])
+Define.WaitFor(Store1, [Store2])
 
-const ImmutableDi = Builder()
-const di = ImmutableDi(new NativeAdapter({registry: {counter: 0}}))
+const containerCreator = new ContainerCreator()
+const di = containerCreator.create(new NativeAdapter({registry: {counter: 0}}))
 const method = di.createMethod('testAction', {data: 0})
 
 method.handle(Store1).then(data => console.log(data)) // {a1: 'testAction', p1: 2}

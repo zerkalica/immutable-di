@@ -1,5 +1,5 @@
 //state-example.js
-import {Builder, NativeAdapter} from '../src'
+import {ContainerCreator, NativeAdapter, Define} from '../src'
 
 const config = {
     logger: {
@@ -10,17 +10,9 @@ const config = {
 function ConsoleOut() {
     return (message) => console.log(message)
 }
-ConsoleOut.__factory = ['ConsoleOut']
+Define.Factory(ConsoleOut)
 
 class Logger {
-    // babel + playground feature enabled
-    static __class = [
-        'Logger',
-        ['req', 'query'],
-        ['config', 'logger'],
-        ConsoleOut
-    ]
-
     constructor(query, config, out) {
         this.query = query
         this.level = config.level
@@ -31,11 +23,10 @@ class Logger {
         this.out('[WARN] .' + this.level + '. ' + message + ' (' + this.query + ')')
     }
 }
-//Use Logger.__class =, if properties in classes is not supported by tsranspiler
-//Logger.__class = ['Logger', ['req', 'query'], ['config', 'logger'], ConsoleOut]
+Define.Class(Logger, ['req.query', 'config.logger', ConsoleOut])
 
 // Need for static caching meta-info from di-classes between middleware calls
-const ImmutableDi = Builder()
+const containerCreator = new ContainerCreator()
 
 // emulate server call
 function middleware(req) {
@@ -44,7 +35,7 @@ function middleware(req) {
         config: config
     }
 
-    const di = ImmutableDi(new NativeAdapter(state))
+    const di = containerCreator.create(new NativeAdapter(state))
 
     di.get(Logger)
         .then(logger => logger.warn('test-string'))

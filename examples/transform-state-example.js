@@ -1,18 +1,17 @@
 //transform-state-example.js
-import {Builder, NativeAdapter} from '../src'
+import {ContainerCreator, Dispatcher, NativeAdapter, Define} from '../src'
 
 class Logger {
-    // babel + playground feature enabled
-    static __class = ['Logger']
     log(message) {
         console.log('msg: ' + message)
     }
 }
+Define.Class(Logger)
 
 function SrvFactory2(logger, message) {
     return logger.log(message)
 }
-SrvFactory2.__factory = ['SrvFactory2', Logger, ['TestStore', 'a', 'message']]
+Define.Factory(SrvFactory2, Logger, 'TestStore.a.message')
 
 const states = [
     {},
@@ -28,13 +27,18 @@ const states = [
     }
 ]
 
-const ImmutableDi = Builder([SrvFactory2])
-const di = ImmutableDi(new NativeAdapter({TestStore: states[0]}))
-di.transformState([{id: 'TestStore', data: states[1]}])
-//output: msg: test-message-1
+const containerCreator = new ContainerCreator()
+const di = containerCreator.create(new NativeAdapter({TestStore: states[0]}))
 
-di.get(SrvFactory2)
-//output: nothing
+di.get(Dispatcher)
+    .then(dispatcher => dispatcher.setStores([SrvFactory2])
+    .then(function () {
+        di.transformState([{id: 'TestStore', data: states[1]}])
+        //output: msg: test-message-1
 
-di.transformState([{id: 'TestStore', data: states[2]}])
-//output: msg: test-message-2
+        di.get(SrvFactory2)
+        //output: nothing
+
+        di.transformState([{id: 'TestStore', data: states[2]}])
+        //output: msg: test-message-2
+    })

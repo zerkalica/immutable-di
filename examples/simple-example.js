@@ -1,10 +1,9 @@
 //simple-example.js
-import {Builder, NativeAdapter} from '../src'
+import {ContainerCreator, NativeAdapter, Define} from '../src'
 class Logger {
-    // babel + playground feature enabled
-    static __class = ['Logger']
 }
+Define.Class(Logger)
 
-const ImmutableDi = Builder()
-const di = ImmutableDi(new NativeAdapter({}))
+const containerCreator = new ContainerCreator()
+const di = containerCreator.create(new NativeAdapter({}))
 di.get(Logger).then(logger => console.log(logger instanceof Logger)) // true

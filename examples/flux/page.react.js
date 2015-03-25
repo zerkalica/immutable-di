@@ -1,5 +1,6 @@
 import React from 'react'
 import PageActions from './page-actions'
+import {Define} from '../../src'
 
 class TodoView extends React.Component {
     render() {
@@ -23,29 +24,18 @@ class TodoView extends React.Component {
 }
 
 export default class Page extends React.Component {
-    static props = {
-        actions: PageActions,
-        dispatcher: Dispatcher,
-        config: 'config.Page'
-    }
-    static state = {
-        status: 'PageStore.status',
-        currentTodo: 'PageStore.currentTodo',
-        isEditCurrentTodo: 'PageStore.isEditCurrentTodo'
-    }
-
     constructor({props, state, updater}) {
         super(props)
         this.state = state
-        this._updaterDefinition = updater(state => this.setState(state))
+        this._updater = updater
     }
 
     componentDidMount() {
-        this.props.dispatcher.mount(this._updaterDefinition)
+        this._updater.mount(state => this.setState(state))
     }
 
     componentWillUnmount() {
-        this.props.dispatcher.unmount(this._updaterDefinition)
+        this.updater.unmount()
     }
 
     shouldComponentUpdate(nextProps, nextState) {
@@ -68,4 +58,15 @@ export default class Page extends React.Component {
     )
 }
 
-Annotate.Statefull(Page)
+Define.Statefull(Page, {
+    state: {
+        status: 'PageStore.status',
+        currentTodo: 'PageStore.currentTodo',
+        isEditCurrentTodo: 'PageStore.isEditCurrentTodo'
+    },
+    props: {
+        actions: PageActions,
+        dispatcher: Dispatcher,
+        config: 'config.Page'
+    }
+})

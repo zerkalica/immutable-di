@@ -1,6 +1,7 @@
+import {getDef} from './define'
+
 export default class Invoker {
-    constructor({metaInfoCache, container, actionType, getPayload}) {
-        this._meta = metaInfoCache
+    constructor({container, actionType, getPayload}) {
         this._actionType = actionType
         this._getPayload = getPayload
         this._container = container
@@ -8,8 +9,8 @@ export default class Invoker {
     }
 
     handle(definition, debugCtx) {
-        const {id, waitFor, debugPath} = this._meta.get(definition, debugCtx)
-
+        const {id, waitFor} = getDef(definition)
+        const debugPath = getDebugPath([debugCtx && debugCtx.length ? debugCtx[0] : [], id])
         if(this._cache.has(id)) {
             return this._cache.get(id)
         }

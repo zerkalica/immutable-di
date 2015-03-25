@@ -9,7 +9,10 @@ import WrapActionMethods from './flux/wrap-action-methods'
 import Dispatcher from './flux/dispatcher'
 import Renderer from './flux/renderer'
 
+import Define from './define'
+
 export default {
+    Define,
     ContainerCreator,
     Container,
     NativeState,
