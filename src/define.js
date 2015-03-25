@@ -110,6 +110,7 @@ export function Statefull(Service, {props, state}) {
         const updater = new Updater()
 
         Service.__diGetter = function __diGetter({props, state}) {
+            updater._dispatcher = props.dispatcher
             updater.update({props, state})
             return {
                 props,
