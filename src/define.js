@@ -1,3 +1,6 @@
+import Listeners from './flux/listeners'
+import {classToFactory} from './utils'
+
 function procesDeps(deps) {
     const resultDeps = []
     deps = deps || []
@@ -41,10 +44,6 @@ function getScopes(normalizedDeps, scopeSet) {
     }
 }
 
-export function getDef(Service) {
-    return Service.__di
-}
-
 const ids = new Set()
 function getId(Service) {
     const id = getFunctionName(Service)
@@ -56,78 +55,104 @@ function getId(Service) {
     return id
 }
 
-function Def(Service, {id, isClass, deps}) {
-    if (!getDef(Service)) {
-        const normalizedDeps = procesDeps(deps)
-        const scopeSet = new Set()
-        getScopes(normalizedDeps, scopeSet)
-        const scopes = Array.from(scopeSet.values())
+export function getDef(Service) {
+    return Service.__di
+}
 
-        Service.__di = {
-            isClass,
-            scope: scopes.length ? scopes[0] : 'global',
-            deps: normalizedDeps
-        }
+function Def({id, handler, deps}) {
+    const normalizedDeps = procesDeps(deps)
+    const scopeSet = new Set()
+    getScopes(normalizedDeps, scopeSet)
+    const scopes = Array.from(scopeSet.values())
+
+    return {
+        handler,
+        scope: scopes.length ? scopes[0] : 'global',
+        deps: normalizedDeps
     }
+}
+
+function Class(Service, deps) {
+    return Def({
+        id: getId(Service),
+        handler: classToFactory(Service),
+        deps: deps || {}
+    })
+}
+
+function Factory(Service, deps) {
+    return Def({
+        id: getId(Service),
+        handler: Service,
+        deps: deps || {}
+    })
+}
+
+function WaitFor(Service, deps) {
+    return processDeps(deps)
+}
+
+function passthru(options) {
+    return options
+}
+
+function State(Service, {props, state}) {
+    const id = getId(Service)
+    let propsDef = p => p
+    let stateDef = p => p
+    stateDef.__di = Def({
+        id: id + '.state',
+        deps: state,
+        handler: passthru
+    })
+    propsDef.__di = Def({
+        id: id + '.props',
+        deps: props,
+        handler: passthru
+    })
+
+    let diGetter = ({props, state, listeners}) => ({
+        service: Service,
+        options: {
+            props,
+            state,
+            updater: listeners.createUpdater({id: id + '.updater', state})
+        }
+    })
+
+    return Def({
+        id: id + '.getter',
+        handler: diGetter,
+        deps: {
+            listeners: Listeners,
+            state: stateDef,
+            props: propsDef
+        }
+    })
+}
+
+function cache(cb) {
+    return function(Service, a2, a3) {
+        Service.__di = cb(Service, a2, a3)
+        return Service
+    }
+}
+
+function cachedWaitFor(Service, deps) {
+    Service.__di.waitFor = WaitFor(deps)
     return Service
 }
 
-export function Class(Service, deps) {
-    Def(Service, {id: getId(Service), deps, isClass: true})
+function cachedDef(options) {
+    let fn = p => p
+    fn.__di = Def(options)
+    return fn
 }
 
-export function Factory(Service, deps) {
-    Def(Service, {id: getId(Service), deps, isClass: false})
-}
-
-export function WaitFor(Service, deps) {
-    if (!Service.__waitFor) {
-        Service.__waitFor = processDeps(deps)
-    }
-}
-
-class Updater {
-    update = p => p
-    getter: null
-    constructor(dispatcher) {
-        this._dispatcher = dispatcher
-    }
-
-    mount(cb) {
-        this.update = cb
-        this._dispatcher.mount(this.getter)
-    }
-    unmount() {
-        this._dispatcher.unmount(this.getter)
-    }
-}
-
-export function Statefull(Service, {props, state}) {
-    if (!Service.__diGetter) {
-        const id = getId(Service)
-        const stateDef = Def(p => p, {id + '.state', deps: state})
-        const propsDef = Def(p => p, {id + '.props', deps: props})
-        const updater = new Updater()
-
-        Service.__diGetter = function __diGetter({props, state}) {
-            updater._dispatcher = props.dispatcher
-            updater.update({props, state})
-            return {
-                props,
-                state,
-                updater
-            }
-        }
-
-        Def(Service.__diGetter, {
-            id,
-            deps: {
-                state: stateDef,
-                props: propsDef
-            },
-            isClass: false
-        })
-
-        updater.getter = Service.__diGetter
-    }
+export default {
+    State: cache(State),
+    Class: cache(Class),
+    Factory: cache(Factory),
+    WaitFor: cachedWaitFor,
+    Def: cachedDef,
 }

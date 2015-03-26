@@ -1,11 +1,9 @@
 import Invoker from './invoker'
 import {bindAll, getDebugPath, classToFactory, convertArgsToOptions} from './utils'
-import Define from './define'
+import {Class, getDef} from './define'
 
 export default class Container {
-    static __class = ['Container']
-
-    constructor({state, metaInfoCache, globalCache}) {
+    constructor({state, globalCache}) {
         const cache = this._cache = new Map()
         cache.set('global', globalCache || new Map())
         this._state = state
@@ -45,7 +43,7 @@ export default class Container {
         if (definition && this instanceof definition) {
             return this
         }
-        const {id, isClass, deps, scope} = Define.getDef(definition)
+        const {id, handler, deps, scope} = getDef(definition)
         const debugPath = getDebugPath([debugCtx && debugCtx.length ? debugCtx[0] : [], id])
         const cache = this._getScope(scope)
         let result = cache.get(id)
@@ -84,7 +82,6 @@ export default class Container {
                 argNames.push(dep.name)
             }
         }
-        const handler = isClass ? classToFactory(definition) : definition
 
         result = Promise.all(args).then(resolvedArgs => argNames.length
             ? handler(convertArgsToOptions(resolvedArgs, argNames))
@@ -97,3 +94,4 @@ export default class Container {
         return result
     }
 }
+Class(Container)

@@ -58,7 +58,7 @@ export default class Page extends React.Component {
     )
 }
 
-Define.Statefull(Page, {
+Define.State(Page, {
     state: {
         status: 'PageStore.status',
         currentTodo: 'PageStore.currentTodo',

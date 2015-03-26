@@ -21,24 +21,29 @@ const stores = [PageStore]
 const selector = 'body'
 const target = typeof document !== 'undefined' ? document.querySelector(selector) : null
 const reactRenderer = new ReactRenderer(React, target)
-Renderer.setAdapter(new ReactRenderer(React, target))
 
 const containerCreator = new ContainerCreator()
-const di = containerCreator.create(new NativeState(state)).get
 
-function Route({widget}, renderer) {
-    return WidgetMap[widget].__state
+function onReq({req, res, initialState}) {
+    const di = containerCreator.create(new NativeState(initialState))
+
+    const router = new Router(req)
+    router.onRoute(function onRoute(routeState) {
+        di.transformState([{id: 'router', data: routeState}])
+            .then(() => di.get(Controllers[routeState.pageId]))
+            .then(controller => controller.invoke())
+            .catch(err => console.error('render error:', err.message, err.stack()))
+    })
+
+    return di.get(Dispatcher)
+        .then(dispatcher => dispatcher.setStores(stores).reset())
+        .then(() => router.init())
 }
-Route.__factory = ['Route', 'state.Router', Renderer]
 
-//Fill stores and render page
-di(Dispatcher)
-    .then(dispatcher => dispatcher.setStores(stores).reset())
-    .then(() => di(Renderer))
-    .then(renderer => renderer.setAdapter(reactRenderer))
-    .then(() => Promise.all(di(Router), di(Dispatcher)))
-    .then(([router, dispatcher]) => router.onRoute(routeState => dispatcher.dispatch('route', routeState)
-    .then(() => dispatcher.mount(Route, props => reactRenderer.render(Widget, props)))
-    .then(data => console.log('render complete...', data))
-    .catch(err => console.error('render error:', err.message, err.stack()))
+function promisify(fn) {
+    return options => new Promise(resolve => resolve(fn(options)))
+}
 
+
+promisify(onReq)({req, res, initialState: state})
+    .catch(err => console.error('init error:', err.message, err.stack()))

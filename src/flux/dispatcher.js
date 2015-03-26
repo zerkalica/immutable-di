@@ -1,34 +1,22 @@
 import actionToPromise from './action-to-promise'
 import PromiseSeries from './promise-series'
 import Container from '../container'
+import Listeners from './listeners'
+
 import {bindAll} from '../utils'
+import {Class} from '../define'
 
 export default class Dispatcher {
-    static __class = ['Dispatcher', Container]
-
-    constructor({container}) {
+    constructor(container, listeners) {
         this._container = container
         this._series = new PromiseSeries()
-        this._listeners = []
+        this._listeners = listeners
         bindAll(this)
     }
 
     setStores(stores) {
         this._stores = stores
         return this
-    }
-
-    mount(name, deps, onUpdate) {
-        this._listeners.push(definition)
-        return this
-    }
-
-    unmount(definition) {
-        this._listeners = this._listeners.filter(d => definition === d)
-    }
-
-    _update() {
-        this._listeners.forEach(listener => this._container.get(listener))
     }
 
     dispatch(actionType, payload) {
@@ -39,7 +27,7 @@ export default class Dispatcher {
         return actionToPromise(actionType, payload)
             .then(action => this._getMutationsFromStores(action))
             .then(mutations => this._container.transformState(mutations))
-            .then(() => this._update())
+            .then(() => this._listeners.forEach(listener => this._container.get(listener)))
     }
 
     reset() {
@@ -55,3 +43,5 @@ export default class Dispatcher {
         return Promise.all(mutations)
     }
 }
+
+Class(Dispatcher, [Container, Listeners])
