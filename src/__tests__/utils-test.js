@@ -1,4 +1,4 @@
-import {isPromise, getDebugPath, classToFactory} from '../utils'
+import {isPromise, getDebugPath, classToFactory, getFunctionName} from '../utils'
 import {describe, it, expect} from '../test-helper'
 
 describe('utils', () => {
@@ -47,6 +47,16 @@ describe('utils', () => {
         })
         it('should return valid path', () => {
             getDebugPath(['test', 'q']).should.to.be.equal('test.q')
+        })
+    })
+
+    describe('getFunctionName', () => {
+        it('should return function name as string', () => {
+            function test(/* test */ arg1, arg2 /** test2 **/, ...args) {
+            }
+            const fn = getFunctionName(test)
+
+            fn.should.to.equal('test')
         })
     })
 })

@@ -31,8 +31,8 @@ export default class Dispatcher {
 
     mount(definition, listener) {
         const {id} = getDef(definition)
-        const listenerDef = Def({
-            id: id + '.listener',
+        const listenerDef = Def(p => p, {
+            id: id + '__listener',
             deps: [definition],
             handler: p => listener(p)
         })

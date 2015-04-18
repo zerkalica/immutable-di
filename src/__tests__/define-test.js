@@ -1,16 +1,7 @@
-import {getId, getDef, Def, Class, Factory, WaitFor} from '../define'
+import {getDef, Def, Class, Factory, WaitFor} from '../define'
 import {describe, it, spy} from '../test-helper'
 
 describe('define', () => {
-    it('getId should parse function name', () => {
-        class TestSrv {
-
-        }
-        const a = TestSrv
-
-        getId(a, 1).should.to.be.equal('TestSrv[1]')
-    })
-
     it('getDef should return .__di property', () => {
         class TestSrv {
 
@@ -26,7 +17,7 @@ describe('define', () => {
         }
         const deps = {
         }
-        Def({id: 'test-id', handler: fn, deps: deps}).should.to.be.a('function')
+        Def(p => p, {id: 'test-id', handler: fn, deps: deps}).should.to.be.a('function')
     })
 
     it('Class should define class service', () => {

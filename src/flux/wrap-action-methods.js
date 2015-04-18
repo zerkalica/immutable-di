@@ -7,11 +7,6 @@ function constToMethod(methodName) {
 }
 
 export default function wrapActionMethods(o) {
-    if (o.__wrapped) {
-        return
-    }
-    o.__wrapped = true
-
     const obj = o.prototype
     const keys = Object.keys(obj)
 
@@ -21,7 +16,7 @@ export default function wrapActionMethods(o) {
         obj[methodName] = (key) => (function (a1, a2, a3, a4, a5) {
             const result = fn(a1, a2, a3, a4, a5)
             if(result !== undefined) {
-                this.__dispatcher.dispatch(key, result)
+                this.dispatcher.dispatch(key, result)
             }
         })(methodToConst(methodName))
     }

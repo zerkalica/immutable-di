@@ -1,4 +1,5 @@
-import {classToFactory} from './utils'
+import {classToFactory, getFunctionName} from './utils'
+import WrapActionMethods from './flux/wrap-action-methods'
 
 function pass(p) {
     return p
@@ -47,13 +48,6 @@ function getScopes(normalizedDeps, scopeSet) {
     }
 }
 
-const STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg
-const FN_MAGIC = 'function'
-function getFunctionName(func) {
-    const fnStr = func.toString().replace(STRIP_COMMENTS, '')
-    return fnStr.slice(fnStr.indexOf(FN_MAGIC) + FN_MAGIC.length + 1, fnStr.indexOf('('))
-}
-
 let lastId = 1
 function getId(Service, idPrefix) {
     idPrefix = idPrefix || lastId
@@ -70,7 +64,7 @@ function getDef(Service) {
     return Service.__di
 }
 
-function Def({id, handler, deps}) {
+function extractDef({id, handler, deps}) {
     const normalizedDeps = processDeps(deps)
     const scopeSet = new Set()
     getScopes(normalizedDeps, scopeSet)
@@ -84,44 +78,45 @@ function Def({id, handler, deps}) {
     }
 }
 
-function Class(Service, deps) {
-    return Def({
-        id: getId(Service),
-        handler: classToFactory(Service),
-        deps: deps || {}
-    })
-}
 
-function Factory(Service, deps) {
-    return Def({
-        id: getId(Service),
-        handler: Service,
-        deps: deps || {}
-    })
-}
+const Annotation = {
+    Class(Service, deps) {
+        Service.__di = extractDef({
+            id: getId(Service),
+            handler: classToFactory(Service),
+            deps: deps || {}
+        })
+        return Service
+    },
 
-function WaitFor(deps) {
-    return processDeps(deps)
-}
+    Factory(Service, deps) {
+        Service.__di = extractDef({
+            id: getId(Service),
+            handler: Service,
+            deps: deps || {}
+        })
+        return Service
+    },
 
-function cache(cb) {
-    return function(Service, a2, a3) {
-        Service.__di = cb(Service, a2, a3)
+    WaitFor(Service, deps) {
+        Service.__di.waitFor = processDeps(deps)
+        return Service
+    },
+
+    Def(Service, deps) {
+        Service.__di = extractDef(deps)
+        return Service
+    },
+
+    Action(Service, deps) {
+        WrapActionMethods(Service)
+        Service.__di = extractDef({
+            id: getId(Service),
+            handler: classToFactory(Service),
+            deps: deps || {}
+        })
         return Service
     }
-}
-
-function cachedWaitFor(Service, deps) {
-    Service.__di.waitFor = WaitFor(deps)
-    return Service
-}
-
-function cachedDef(options) {
-    function fn(p) {
-        return p
-    }
-    fn.__di = Def(options)
-    return fn
 }
 
 const Promises = {
@@ -131,11 +126,11 @@ const Promises = {
 }
 
 export default {
-    getId,
-    getDef: getDef,
-    Def: cachedDef,
-    Class: cache(Class),
-    Factory: cache(Factory),
-    WaitFor: cachedWaitFor,
-    Promises: Promises
+    getDef,
+    Promises,
+    Def: Annotation.Def,
+    Class: Annotation.Class,
+    Action: Annotation.Action,
+    Factory: Annotation.Factory,
+    WaitFor: Annotation.WaitFor
 }
