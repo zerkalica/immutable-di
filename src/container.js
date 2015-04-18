@@ -1,5 +1,5 @@
 import Invoker from './invoker'
-import {bindAll, getDebugPath, classToFactory, convertArgsToOptions} from './utils'
+import {getDebugPath, classToFactory, convertArgsToOptions} from './utils'
 import {Class, getDef} from './define'
 
 export default class Container {
@@ -8,7 +8,11 @@ export default class Container {
         cache.set('global', globalCache || new Map())
         this._state = state
         this._locks = new Map()
-        bindAll(this, 'get', 'clear', 'transformState', 'createMethod')
+
+        this.get = this.get.bind(this)
+        this.clear = this.clear.bind(this)
+        this.transformState = this.transformState.bind(this)
+        this.createMethod = this.createMethod.bind(this)
     }
 
     clear(scope) {

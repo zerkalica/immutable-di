@@ -8,14 +8,7 @@ export function classToFactory(Constructor) {
         return Constructor.apply(this, args)
     }
     F.prototype = Constructor.prototype
-    F.prototype.constructor = Constructor
     return (...args) => new F(args)
-}
-
-export function bindAll(object, ...props) {
-    props.forEach(name => {
-        object[name] = object[name].bind(object)
-    })
 }
 
 export function convertArgsToOptions(args, argsNames) {

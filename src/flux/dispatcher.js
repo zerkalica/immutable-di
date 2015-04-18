@@ -2,7 +2,6 @@ import actionToPromise from './action-to-promise'
 import PromiseSeries from './promise-series'
 import Container from '../container'
 
-import {bindAll} from '../utils'
 import {Class, Def, getDef} from '../define'
 
 export default class Dispatcher {
@@ -10,7 +9,13 @@ export default class Dispatcher {
         this._container = container
         this._series = new PromiseSeries()
         this._listeners = []
-        bindAll(this)
+
+        this.setStores = this.setStores.bind(this)
+        this.dispatch = this.dispatch.bind(this)
+        this.dispatchAsync = this.dispatchAsync.bind(this)
+        this.mount = this.mount.bind(this)
+        this.unmount = this.unmount.bind(this)
+        this.reset = this.reset.bind(this)
     }
 
     setStores(stores) {
