@@ -42,11 +42,11 @@ export default class Dispatcher {
     }
 
     unmount(listenerDef) {
-        this._listeners = this._listeners.filter(d => listenerDef === d)
+        this._listeners = this._listeners.filter(d => listenerDef !== d)
     }
 
-    reset() {
-        return this.dispatch('reset')
+    reset(state) {
+        return this.dispatch('reset', state)
     }
 
     _getMutationsFromStores({actionType, payload, isError, isPromise}) {
@@ -60,3 +60,4 @@ export default class Dispatcher {
 }
 
 Class(Dispatcher, [Container])
+
