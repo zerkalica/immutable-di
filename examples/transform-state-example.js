@@ -11,7 +11,7 @@ Define.Class(Logger)
 function SrvFactory2(logger, message) {
     return logger.log(message)
 }
-Define.Factory(SrvFactory2, Logger, 'TestStore.a.message')
+Define.Factory(SrvFactory2, [Logger, 'TestStore.a.message'])
 
 const states = [
     {},
@@ -31,7 +31,7 @@ const containerCreator = new ContainerCreator()
 const di = containerCreator.create(new NativeAdapter({TestStore: states[0]}))
 
 di.get(Dispatcher)
-    .then(dispatcher => dispatcher.setStores([SrvFactory2])
+    .then(dispatcher => dispatcher.setStores([SrvFactory2]))
     .then(function () {
         di.transformState([{id: 'TestStore', data: states[1]}])
         //output: msg: test-message-1

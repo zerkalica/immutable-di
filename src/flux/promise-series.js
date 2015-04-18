@@ -1,8 +1,7 @@
 export default class PromiseSeries {
     constructor() {
-        this.promise = null
-        this._count = 1
-        this._resetPromise()
+        this.promise = Promise.resolve()
+        this._count = 0
     }
 
     add(cb) {
@@ -24,7 +23,7 @@ export default class PromiseSeries {
     _resetPromise() {
         this._count--
         if (this._count === 0) {
-            this.promise = new Promise(resolve => resolve())
+            this.promise = Promise.resolve()
         }
     }
 }

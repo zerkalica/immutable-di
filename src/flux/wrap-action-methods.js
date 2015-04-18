@@ -16,7 +16,7 @@ export default function wrapActionMethods(o) {
         obj[methodName] = (key) => (function (a1, a2, a3, a4, a5) {
             const result = fn(a1, a2, a3, a4, a5)
             if(result !== undefined) {
-                this.dispatcher.dispatch(key, result)
+                this.__dispatcher.dispatch(key, result)
             }
         })(methodToConst(methodName))
     }

@@ -1,7 +1,6 @@
 require('babel-core/register')({
-    experimental: true,
-    externalHelpers: true,
-    playground: true
+    stage: 0,
+    externalHelpers: true
 });
 require('babel-core/external-helpers');
 

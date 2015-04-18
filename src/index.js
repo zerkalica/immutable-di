@@ -1,7 +1,7 @@
 import ContainerCreator from './container-creator'
 import Container from './container'
 
-import NativeState from './state-adapters/native-adapter'
+import NativeAdapter from './state-adapters/native-adapter'
 
 import WrapActionMethods from './flux/wrap-action-methods'
 
@@ -13,6 +13,6 @@ export default {
     Define,
     ContainerCreator,
     Container,
-    NativeState,
+    NativeAdapter,
     Dispatcher
 }

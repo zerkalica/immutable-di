@@ -8,7 +8,7 @@ export default class Container {
         cache.set('global', globalCache || new Map())
         this._state = state
         this._locks = new Map()
-        bindAll(this)
+        bindAll(this, 'get', 'clear', 'transformState', 'createMethod')
     }
 
     clear(scope) {
