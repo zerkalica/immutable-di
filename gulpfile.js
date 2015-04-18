@@ -78,12 +78,14 @@ gulp.task('w:code', function() {
 
 gulp.task('w', gulp.series('w:code'));
 
-gulp.task('build', function () {
+gulp.task('build:dist', function () {
     return gulp.src(config.src.scripts)
         .pipe(babel(config.babel))
         .pipe(gulp.dest(config.dest.scripts));
 });
 
-gulp.task('test', gulp.series('build', 'test:dist'));
+gulp.task('test', gulp.series('test:src'));
+
+gulp.task('build', gulp.series('build:dist', 'test:dist'));
 
 gulp.task('default', gulp.series('build'));

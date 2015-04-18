@@ -10,7 +10,7 @@ export default class Invoker {
     }
 
     handle(definition, debugCtx) {
-        let {id, waitFor} = getDef(definition)
+        let {id, waitFor, statePath} = getDef(definition)
         waitFor = waitFor || []
         const debugPath = getDebugPath([debugCtx && debugCtx.length ? debugCtx[0] : [], id])
         if(this._cache.has(id)) {
@@ -25,8 +25,10 @@ export default class Invoker {
         }
         const result = Promise.all(args)
             .then(() => this._container.get(definition, debugCtx))
-            .then(instance => instance.handle(this._actionType, this._getPayload(id)))
-            .then(data => ({id, data}))
+            .then(instance =>
+                instance.handle(this._actionType, this._getPayload(statePath))
+            )
+            .then(data => ({data, statePath: statePath}))
 
         this._cache.set(id, result)
 

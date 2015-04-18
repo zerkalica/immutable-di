@@ -108,6 +108,16 @@ const Annotation = {
         return Service
     },
 
+    Store(Service, statePath, deps) {
+        Service.__di = extractDef({
+            id: getId(Service),
+            handler: classToFactory(Service),
+            deps: deps || {}
+        })
+        Service.__di.statePath = statePath
+        return Service
+    },
+
     Action(Service, deps) {
         WrapActionMethods(Service)
         Service.__di = extractDef({
@@ -128,6 +138,7 @@ const Promises = {
 export default {
     getDef,
     Promises,
+    Store: Annotation.Store,
     Def: Annotation.Def,
     Class: Annotation.Class,
     Action: Annotation.Action,

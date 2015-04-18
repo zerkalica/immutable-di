@@ -4,10 +4,11 @@
   "description": "Simple, promise-based dependency injection container with some state handling functions (for facebook flux-like state-management)",
   "scripts": {
     "build": "gulp build",
+    "build-examples": "webpack --config ./webpack.config.js",
+    "dev-examples": "webpack --config ./webpack.config.js --watch",
     "w": "gulp w",
     "lint": "eslint src",
-    "test": "gulp test",
-    "test:src": "gulp test:src"
+    "test": "gulp test"
   },
   "author": "Stefan Zerkalica <zerkalica@gmail.com>",
   "license": "MIT",
@@ -18,6 +19,7 @@
   "devDependencies": {
     "babel-core": "^5.1.10",
     "babel-eslint": "^3.0.1",
+    "babel-loader": "^5.0.0",
     "chai": "^2.2.0",
     "chai-as-promised": "^5.0.0",
     "chai-things": "^0.2.0",
@@ -26,12 +28,15 @@
     "gulp-babel": "^5.1.0",
     "gulp-mocha": "^2.0.1",
     "gulp-util": "^3.0.4",
+    "html-webpack-plugin": "^1.1.0",
     "lodash": "^3.7.0",
     "minimist": "^1.1.1",
     "mocha": "^2.2.4",
     "node-notifier": "^4.2.1",
     "proxyquire": "^1.4.0",
+    "react": "^0.13.1",
     "sinon": "^1.14.1",
-    "sinon-chai": "^2.7.0"
+    "sinon-chai": "^2.7.0",
+    "webpack": "^1.8.5"
   }
 }

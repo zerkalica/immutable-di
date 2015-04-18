@@ -4,9 +4,30 @@ import Container from '../container'
 
 import {Class, Def, getDef} from '../define'
 
+class AutoUnmountListener {
+    constructor({listener, dispatcher, definition}) {
+        this._handler = this._handler.bind(this)
+        this._listener = listener
+        this._dispatcher = dispatcher
+        this._definition = definition
+        this._listenerDef = dispatcher.mount(definition, this._handler)
+    }
+
+    _handler(state) {
+        const result = this._listener({
+            getter: this._definition,
+            state: state,
+            dispatcher: this._dispatcher
+        })
+        this._dispatcher.unmount(this._listenerDef)
+
+        return result
+    }
+}
+
 export default class Dispatcher {
     constructor(container) {
-        this._container = container
+        this._container = container || new Container()
         this._series = new PromiseSeries()
         this._listeners = []
 
@@ -50,11 +71,23 @@ export default class Dispatcher {
         this._listeners = this._listeners.filter(d => listenerDef !== d)
     }
 
+    once(definition, listener) {
+        const autoListener = new AutoUnmountListener({
+            listener,
+            definition,
+            dispatcher: this
+        })
+
+        return autoListener
+    }
+
     reset(state) {
         return this.dispatch('reset', state)
     }
 
-    _getMutationsFromStores({actionType, payload, isError, isPromise}) {
+    _getMutationsFromStores(actionObject) {
+        const {actionType, payload, isError, isPromise} = actionObject
+        console.log(actionObject)
         const action = actionType + (isError ? 'Fail' : (isPromise ? 'Success' : ''))
 
         const method = this._container.createMethod(action, payload)

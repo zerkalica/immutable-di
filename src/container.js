@@ -38,7 +38,7 @@ export default class Container {
     createMethod(actionType, payload) {
         const getPayload = payload === undefined
             ? id => this._state.get(id)
-            : () => this._payload
+            : () => payload
 
         return new Invoker({
             container: this,
@@ -81,7 +81,7 @@ export default class Container {
                 try {
                     value = this._state.getIn(dep.path)
                     if (value === undefined) {
-                        throw new Error('Value is undefined')
+                        throw new Error('Value is undefined in ' + dep.path)
                     }
                 } catch (e) {
                     e.message = e.message + ' in ' + debugPath + ' [' + dep.path.join('.') + ']'

@@ -21,10 +21,10 @@ export default class NativeAdapter {
     transformState(mutations) {
         const updatedScopes = []
         for (let i = 0; i < mutations.length; i++) {
-            const {id, data} = mutations[i]
+            const {statePath, data} = mutations[i]
             if (data !== undefined) {
-                updatedScopes.push(id)
-                this._state[id] = data
+                updatedScopes.push(statePath)
+                this._state[statePath] = data
             }
         }
         return updatedScopes

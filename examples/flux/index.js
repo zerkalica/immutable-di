@@ -1,49 +1,96 @@
-import React from 'react'
-import {ContainerCreator, NativeState, ReactRenderer, Dispatcher, Renderer} from '../..'
-import PageStore  from './page-store'
-import Page from './page.react'
+import __polyfill from 'babel-core/polyfill'
 
-const state = {
-    Router: {
-        url: 'page'
-    },
-    Page: {
-        status: 'initial',
-        todos: [],
-        currentTodo: {
-            name: 'todo 1',
-            text: 'todo text'
+import React from 'react'
+import {ContainerCreator, NativeAdapter, Dispatcher, Define} from '../../src'
+import TodoList from './components/todo-list'
+
+const {Factory, Class, WaitFor, Store} = Define
+
+const el = document.getElementById('app')
+
+class Wrapper extends React.Component {
+    static childContextTypes = {
+         dispatcher: React.PropTypes.instanceOf(Dispatcher)
+    }
+
+    constructor(options) {
+        super(options.state)
+        this.state = options.state
+        this._dispatcher = options.dispatcher
+        this._getter = options.getter
+        this._component = options.component
+    }
+
+    getChildContext() {
+        return {
+            dispatcher: this._dispatcher
         }
+    }
+
+    componentDidMount() {
+        this._listener = this._dispatcher.mount(
+            this._getter,
+            (state) => this.setState(state)
+        )
+    }
+
+    componentWillUnmount() {
+        this._dispatcher.unmount(this._listener)
+    }
+
+    render() {
+        return <this._component {...this.state} />
     }
 }
 
-const stores = [PageStore]
-const selector = 'body'
-const target = typeof document !== 'undefined' ? document.querySelector(selector) : null
-const reactRenderer = new ReactRenderer(React, target)
+function getter(appState) {
+    return appState
+}
+Factory(getter, ['todoApp'])
 
-const containerCreator = new ContainerCreator()
+class TodoStore {
+    handle(action, payload) {
+        return this[action] && this[action].call(this, payload)
+    }
 
-function onReq({req, res, initialState}) {
-    const di = containerCreator.create(new NativeState(initialState))
+    load(payload) {
+        //progress
+    }
 
-    const router = new Router(req)
-    router.onRoute(function onRoute(routeState) {
-        di.transformState([{id: 'router', data: routeState}])
-            .then(() => di.get(Controllers[routeState.pageId]))
-            .then(controller => controller.invoke())
-            .catch(err => console.error('render error:', err.message, err.stack()))
-    })
+    loadSuccess(state) {
+        return state
+    }
 
-    return di.get(Dispatcher)
-        .then(dispatcher => dispatcher.setStores(stores).reset())
-        .then(() => router.init())
+    loadFail(err) {
+        return err
+    }
+}
+Store(TodoStore, 'todoApp')
+
+const dispatcher = new Dispatcher(
+    (new ContainerCreator()).create(new NativeAdapter())
+)
+
+dispatcher.setStores([TodoStore])
+
+dispatcher.once(getter, ({getter, state, dispatcher}) => {
+    React.render((
+        <Wrapper
+            dispatcher={dispatcher}
+            state={state}
+            getter={getter}
+            component={TodoList}
+        />
+    ), el)
+})
+
+const initialState = {
+    todoApp: {
+        todos: [
+            {name: 'todo-1', id: 1},
+            {name: 'todo-2', id: 2}
+        ]
+    }
 }
 
-function promisify(fn) {
-    return options => new Promise(resolve => resolve(fn(options)))
-}
-
-
-promisify(onReq)({req, res, initialState: state})
-    .catch(err => console.error('init error:', err.message, err.stack()))
+dispatcher.dispatch('load', Promise.resolve(initialState))
