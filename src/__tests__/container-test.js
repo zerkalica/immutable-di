@@ -142,7 +142,7 @@ describe('container', () => {
                 return exampleValue + '.' + pa
             }
             Factory(Dep, 'f.a')
-            return (() => container.get(Dep)).should.throw('.Dep[15] [f]')
+            return (() => container.get(Dep)).should.throw()
         })
 
 

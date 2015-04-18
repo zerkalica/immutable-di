@@ -29,6 +29,7 @@
     "lodash": "^3.7.0",
     "minimist": "^1.1.1",
     "mocha": "^2.2.4",
+    "node-notifier": "^4.2.1",
     "proxyquire": "^1.4.0",
     "sinon": "^1.14.1",
     "sinon-chai": "^2.7.0"
