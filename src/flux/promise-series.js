@@ -22,7 +22,7 @@ export default class PromiseSeries {
     }
 
     _resetPromise() {
-        this._count--;
+        this._count--
         if (this._count === 0) {
             this.promise = new Promise(resolve => resolve())
         }

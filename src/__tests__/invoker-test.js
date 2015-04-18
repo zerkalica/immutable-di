@@ -1,8 +1,8 @@
 import Invoker from '../invoker'
-import Container from '../container'
-import MetaInfoCache from '../meta-info-cache'
+import ContainerCreator from '../container-creator'
 import NativeAdapter from '../state-adapters/native-adapter'
-import GenericAdapter from '../definition-adapters/generic-adapter'
+import {Class, Factory, WaitFor} from '../define'
+import {describe, it, spy, sinon} from '../test-helper'
 
 describe('invoker', () => {
     let state = {
@@ -10,21 +10,15 @@ describe('invoker', () => {
             a: 'test-state-val'
         }
     };
-    let globalCache;
+    let creator;
     let getInvoker;
 
     beforeEach(() => {
-        globalCache = new Map()
-        const meta = new MetaInfoCache(GenericAdapter)
-        const container = new Container({
-            state: new NativeAdapter(state),
-            metaInfoCache: meta,
-            globalCache: globalCache
-        })
+        creator = new ContainerCreator()
+        const container = creator.create(new NativeAdapter(state))
 
         getInvoker = (actionType, payload) => {
             return new Invoker({
-                metaInfoCache: meta,
                 container: container,
                 actionType: actionType,
                 getPayload: id => payload
@@ -38,11 +32,12 @@ describe('invoker', () => {
         const testPayload = {a: 1, b: 2}
 
         class TestStore {
-            static __class = ['TestStore']
             handle(actionType, payload) {
                 return Promise.resolve(fakeHandle(actionType, payload))
             }
         }
+        Class(TestStore)
+        WaitFor(TestStore)
 
         const invoker = getInvoker(testAction, testPayload)
         return invoker.handle(TestStore).then(d => {
@@ -58,15 +53,18 @@ describe('invoker', () => {
         const data = 'testResult'
 
         class TestStore {
-            static __class = [id]
             handle(actionType, payload) {
                 return Promise.resolve(data)
             }
         }
+        Class(TestStore)
+        WaitFor(TestStore)
 
         const invoker = getInvoker(testAction, testPayload)
         return invoker.handle(TestStore).then(d => {
-            d.should.to.be.deep.equal({id, data})
+            d.should.have.property('data', data)
+            d.should.have.property('id')
+            d.id.should.match(/TestStore.*/)
         })
     })
 
@@ -79,27 +77,27 @@ describe('invoker', () => {
         let invoker
 
         class TestDep1 {
-            static __class = ['TestDep1']
             handle(actionType, payload) {
                 return Promise.resolve(fakeHandle1(actionType, payload))
             }
         }
+        Class(TestDep1)
 
         class TestDep2 {
-            static __class = ['TestDep2']
-            static __waitFor = [TestDep1]
             handle(actionType, payload) {
                 return Promise.resolve(fakeHandle2(actionType, payload))
             }
         }
+        Class(TestDep2)
+        WaitFor(TestDep2, [TestDep1])
 
         class TestStore {
-            static __class = ['TestStore']
-            static __waitFor = [TestDep2, TestDep1]
             handle(actionType, payload) {
                 return Promise.resolve(fakeHandle(actionType, payload))
             }
         }
+        Class(TestStore)
+        WaitFor(TestStore, [TestDep2, TestDep1])
 
         beforeEach(() => {
             fakeHandle = spy()

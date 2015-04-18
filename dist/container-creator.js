@@ -8,8 +8,6 @@ var _classCallCheck = function (instance, Constructor) { if (!(instance instance
 
 var Container = _interopRequire(require("./container"));
 
-var MetaInfoCache = _interopRequire(require("./meta-info-cache"));
-
 var GenericAdapter = _interopRequire(require("./definition-adapters/generic-adapter"));
 
 var ContainerCreator = (function () {
@@ -17,14 +15,12 @@ var ContainerCreator = (function () {
         _classCallCheck(this, ContainerCreator);
 
         this._globalCache = new Map();
-        this._metaInfoCache = new MetaInfoCache(GenericAdapter);
     }
 
     _prototypeProperties(ContainerCreator, null, {
         create: {
             value: function create(state) {
                 return new Container({
-                    metaInfoCache: this._metaInfoCache,
                     state: state,
                     globalCache: this._globalCache
                 });

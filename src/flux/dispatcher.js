@@ -1,16 +1,15 @@
 import actionToPromise from './action-to-promise'
 import PromiseSeries from './promise-series'
 import Container from '../container'
-import Listeners from './listeners'
 
 import {bindAll} from '../utils'
-import {Class} from '../define'
+import {Class, Def, getDef} from '../define'
 
 export default class Dispatcher {
-    constructor(container, listeners) {
+    constructor(container) {
         this._container = container
         this._series = new PromiseSeries()
-        this._listeners = listeners
+        this._listeners = []
         bindAll(this)
     }
 
@@ -30,6 +29,22 @@ export default class Dispatcher {
             .then(() => this._listeners.forEach(listener => this._container.get(listener)))
     }
 
+    mount(definition, listener) {
+        const {id} = getDef(definition)
+        const listenerDef = Def({
+            id: id + '.listener',
+            deps: [definition],
+            handler: p => listener(p)
+        })
+        this._listeners.push(listenerDef)
+
+        return listenerDef
+    }
+
+    unmount(listenerDef) {
+        this._listeners = this._listeners.filter(d => listenerDef === d)
+    }
+
     reset() {
         return this.dispatch('reset')
     }
@@ -44,4 +59,4 @@ export default class Dispatcher {
     }
 }
 
-Class(Dispatcher, [Container, Listeners])
+Class(Dispatcher, [Container])

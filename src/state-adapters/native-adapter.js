@@ -22,7 +22,7 @@ export default class NativeAdapter {
         const updatedScopes = []
         for (let i = 0; i < mutations.length; i++) {
             const {id, data} = mutations[i]
-            if (data !== void 0) {
+            if (data !== undefined) {
                 updatedScopes.push(id)
                 this._state[id] = data
             }

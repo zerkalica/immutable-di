@@ -41,7 +41,7 @@ var NativeAdapter = (function () {
                     var id = _mutations$i.id;
                     var data = _mutations$i.data;
 
-                    if (data !== void 0) {
+                    if (data !== undefined) {
                         updatedScopes.push(id);
                         this._state[id] = data;
                     }

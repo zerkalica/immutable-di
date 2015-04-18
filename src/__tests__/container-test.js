@@ -1,8 +1,7 @@
-import Container from '../container'
-import MetaInfoCache from '../meta-info-cache'
+import ContainerCreator from '../container-creator'
 import NativeAdapter from '../state-adapters/native-adapter'
-import GenericAdapter from '../definition-adapters/generic-adapter'
-import {testFunc, testObjectDeps} from '../__mocks__/fixture-definition'
+import {describe, it, spy, sinon, getClass} from '../test-helper'
+import {Factory, Class, Promises, WaitFor} from '../define'
 
 describe('container', () => {
     let state = {
@@ -11,45 +10,79 @@ describe('container', () => {
             a: 'test-state-val'
         }
     };
-    let globalCache;
-    let container;
+    let creator
+    let container
+
+    function depFn() {
+        return new Promise((resolve) => resolve('depFn.value'))
+    }
+    Factory(depFn)
+
+    function waitFn1() {}
+    Factory(waitFn1)
+
+    function waitFn2() {}
+    Factory(waitFn2)
+
+    class DepClass {
+        test() {
+            return 'DepClass.value'
+        }
+    }
+    Class(DepClass, ['state.a.b'])
+
+    function testFunc(depClass, depFnValue) {
+        if (!(depClass instanceof DepClass)) {
+            throw new Error('arg is not an instance of DepClass')
+        }
+        return 'testFunc.value.' + depClass.test() + '.' + depFnValue
+    }
+    Factory(testFunc, [DepClass, [depFn, Promises.ignore]])
+    WaitFor(testFunc, [waitFn1, waitFn2])
+
+    function testObjectDeps({depClass, depFnValue}) {
+        if (!(depClass instanceof DepClass)) {
+            throw new Error('arg is not an instance of DepClass')
+        }
+        return 'testFunc.value.' + depClass.test() + '.' + depFnValue
+    }
+    Factory(testObjectDeps, {
+        depFnValue: depFn,
+        depClass: DepClass
+    })
 
     beforeEach(() => {
-        globalCache = new Map()
-        container = new Container({
-            state: new NativeAdapter(state),
-            metaInfoCache: new MetaInfoCache(GenericAdapter),
-            globalCache: globalCache
-        })
+        creator = new ContainerCreator()
+        container = creator.create(new NativeAdapter(state))
     })
 
     describe('if wrong arguments passed', () => {
-      it('should throw exception if no argument passed', () => {
-        const msg = 'Getter is not a definition in unk';
-        (() => container.get()).should.throw(msg);
-      })
+        it('should throw exception if no argument passed', () => {
+            const msg = 'Getter is not a definition in unk';
+            (() => container.get()).should.throw(msg);
+        })
 
-      it('should throw exception if null argument passed', () => {
-        const msg = 'Getter is not a definition in unk';
-        (() => container.get(null)).should.throw(msg);
-        (() => container.get('')).should.throw(msg);
-        (() => container.get(0)).should.throw(msg);
-        (() => container.get(false)).should.throw(msg);
-      })
+        it('should throw exception if null argument passed', () => {
+            const msg = 'Getter is not a definition in unk';
+            (() => container.get(null)).should.throw(msg);
+            (() => container.get('')).should.throw(msg);
+            (() => container.get(0)).should.throw(msg);
+            (() => container.get(false)).should.throw(msg);
+        })
 
-      it('should throw exception if not service prototype passed', () => {
-        function TestService() {
-        }
-        (() => container.get(TestService)).should.throw()
-      })
+        it('should throw exception if not service prototype passed', () => {
+            function TestService() {
+            }
+            (() => container.get(TestService)).should.throw()
+        })
 
 
-      it('should throw exception if no service name defined', () => {
-        function TestService() {
-            return 123
-        }
-        (() => container.get(TestService)).should.throw('Property .__factory or .__class not exist in unk')
-      })
+        it('should throw exception if no service name defined', () => {
+            function TestService() {
+                return 123
+            }
+            (() => container.get(TestService)).should.throw('Property .__id not exist in unk')
+        })
     })
 
     describe('if correct service prototype passed', () => {
@@ -57,7 +90,7 @@ describe('container', () => {
             function TestService() {
                 return 1234
             }
-            TestService.__factory = ['TestService']
+            Factory(TestService)
             container.get(TestService).should.instanceOf(Promise)
         })
 
@@ -65,10 +98,9 @@ describe('container', () => {
             function testFactory() {
                 return new Promise(resolve => resolve('testFactory.value'));
             }
-            testFactory.__factory = ['testFactory']
+            Factory(testFactory)
 
             class TestClass {
-                static __class = ['TestClass', testFactory]
                 constructor(testFactoryValue) {
                     this.tfv = testFactoryValue
                 }
@@ -77,6 +109,7 @@ describe('container', () => {
                     return 'TestClass.' + this.tfv
                 }
             }
+            Class(TestClass, [testFactory])
             const v = container.get(TestClass).then(testClass => testClass.get())
 
             return v.should.eventually.to.equal('TestClass.testFactory.value')
@@ -87,7 +120,8 @@ describe('container', () => {
         })
 
         it('should instance complex service with deps as object and return value', () => {
-            return container.get(testObjectDeps).should.eventually.to.equal('testFunc.value.DepClass.value.depFn.value')
+            return container.get(testObjectDeps).should.eventually.to.equal(
+                'testFunc.value.DepClass.value.depFn.value')
         })
 
         it('should resolve state path as dep', () => {
@@ -96,7 +130,7 @@ describe('container', () => {
             function Dep(pa) {
               return exampleValue + '.' + pa
             }
-            Dep.__factory = ['Dep', 'p.a']
+            Factory(Dep, ['p.a'])
 
             return container.get(Dep).should.eventually.equal(exampleValue + '.' + state.p.a)
         })
@@ -107,19 +141,21 @@ describe('container', () => {
             function Dep(pa) {
                 return exampleValue + '.' + pa
             }
-            Dep.__factory = ['Dep', ['f', 'a']];
-            (() => container.get(Dep)).should.throw();
+            Factory(Dep, 'f.a')
+            return (() => container.get(Dep)).should.throw('.Dep[15] [f]')
         })
+
 
         it('should instance simple service and put it in global cache', () => {
             let exampleValue = 'test';
             function TestService2() {
               return new Promise(resolve => resolve(exampleValue));
             }
-            TestService2.__factory = ['TestService2'];
+            Factory(TestService2)
             container.get(TestService2)
+            const globalCache = creator._globalCache
 
-            return globalCache.get('TestService2').should.eventually.equal(exampleValue)
+            return globalCache.get(TestService2.__di.id).should.eventually.equal(exampleValue)
         })
 
         it('should instance simple service and put it in state cache', () => {
@@ -128,19 +164,19 @@ describe('container', () => {
             function Dep(pa) {
               return exampleValue + '.' + pa
             }
-            Dep.__factory = ['Dep', 'p.a']
+            Factory(Dep, ['p.a'])
 
             container.get(Dep);
 
             const localCache = container._cache.get('p');
             localCache.should.to.be.instanceOf(Map)
 
-            return localCache.get('Dep').should.eventually.equal(exampleValue + '.' + state.p.a)
+            return localCache.get(Dep.__di.id).should.eventually.equal(exampleValue + '.' + state.p.a)
         })
 
         it('should use cache, if called twice or more', () => {
             const Dep = spy()
-            Dep.__factory = ['Dep', 'p.a']
+            Factory(Dep, ['p.a'])
 
             return container.get(Dep).then(d => {
                 return container.get(Dep)
@@ -151,7 +187,7 @@ describe('container', () => {
 
         it('should compute state-depended value again after clear cache', () => {
             const Dep = spy()
-            Dep.__factory = ['Dep', 'p.a']
+            Factory(Dep, ['p.a'])
 
             return container.get(Dep).then(d => {
                 container.clear('p')
@@ -163,7 +199,7 @@ describe('container', () => {
 
         it('should compute global-depended value again after clear cache', () => {
             const Dep = spy()
-            Dep.__factory = ['Dep']
+            Factory(Dep)
 
             return container.get(Dep).then(d => {
                 container.clear('global')
@@ -173,13 +209,10 @@ describe('container', () => {
             })
         })
 
-
         it('should create invoker instance', () => {
             const testPayload = {test: 123};
             const testAction = 'testAction';
             container.createMethod(testAction, testPayload).handle.should.be.a.function
-            //container.createMethod(testAction, testPayload).handle(store)
-            //  container.createMethod(testAction, testPayload).handle.should
         })
 
         it('should transform state', () => {
@@ -188,7 +221,7 @@ describe('container', () => {
                 depFn();
                 return state;
             }
-            Dep.__factory = ['Dep', 'state']
+            Factory(Dep, ['state'])
             const mutations = [
                 {
                     id: 'state', data: {a: {b: 2}}
@@ -223,13 +256,16 @@ describe('container', () => {
               throw new Error('test')
               return exampleValue
             }
-            Dep.__factory = ['Dep', 'p.a']
+            Factory(Dep, ['p.a'])
 
             function TestService(dep) {
               return new Promise.resolve(dep);
             }
-            TestService.__factory = ['TestService', [Dep, p => p.catch(err => testFallback)]]
-            expect(container.get(TestService)).eventually.deep.equal(testFallback)
+            Factory(TestService, [
+                [Dep, p => p.catch(err => testFallback)],
+            ])
+
+            container.get(TestService).should.eventually.deep.equal(testFallback)
         })
 
         it('should filter exception, if service throws custom exception', () => {
@@ -237,16 +273,16 @@ describe('container', () => {
             function Dep() {
                 throw new ReferenceError('test')
             }
-            Dep.__factory = ['Dep'];
+            Factory(Dep)
+
             function TestService(dep) {
               return new Promise.resolve(dep);
             }
-            TestService.__factory = [
-                'TestService',
+            Factory(TestService, [
                 [Dep, p => p.catch(ReferenceError, err => testErr)]
-            ]
+            ])
 
-            expect(container.get(TestService)).eventually.deep.equal(testErr);
+            container.get(TestService).should.eventually.deep.equal(testErr);
         })
     })
 })

@@ -16,10 +16,12 @@ export default class Container {
     }
 
     _getScope(scope) {
-        let cache = this._cache.get(scope)
-        if (cache === void 0) {
+        let cache
+        if (!this._cache.has(scope)) {
             cache = new Map()
             this._cache.set(scope, cache)
+        } else {
+            cache = this._cache.get(scope)
         }
         return cache
     }
@@ -30,7 +32,9 @@ export default class Container {
     }
 
     createMethod(actionType, payload) {
-        const getPayload = payload === void 0 ? (id => this._state.get(id)) : (id => this._payload)
+        const getPayload = payload === undefined
+            ? id => this._state.get(id)
+            : () => this._payload
 
         return new Invoker({
             container: this,
@@ -40,19 +44,28 @@ export default class Container {
     }
 
     get(definition, debugCtx) {
-        if (definition && this instanceof definition) {
-            return this
+        if (definition) {
+            if (this instanceof definition) {
+                return this
+            }
+        } else {
+            throw new Error('Getter is not a definition in ' + getDebugPath(debugCtx || []))
         }
-        const {id, handler, deps, scope} = getDef(definition)
+
+        const def = getDef(definition)
+        if (!def) {
+            throw new Error('Property .__id not exist in ' + getDebugPath(debugCtx || []))
+        }
+        const {id, handler, deps, scope} = def
         const debugPath = getDebugPath([debugCtx && debugCtx.length ? debugCtx[0] : [], id])
         const cache = this._getScope(scope)
         let result = cache.get(id)
-        if (result !== void 0) {
+        if (result !== undefined) {
             return result
         }
 
         if (this._locks.get(id)) {
-            throw new Error('Recursive call detected in ' + debugPath);
+            throw new Error('Recursive call detected in ' + debugPath)
         }
         this._locks.set(id, true)
         const args = []
@@ -60,10 +73,10 @@ export default class Container {
         for (let i = 0; i < deps.length; i++) {
             const dep = deps[i]
             let value
-            if (dep.path.length) {
+            if (dep.path) {
                 try {
                     value = this._state.getIn(dep.path)
-                    if (value === void 0) {
+                    if (value === undefined) {
                         throw new Error('Value is undefined')
                     }
                 } catch (e) {

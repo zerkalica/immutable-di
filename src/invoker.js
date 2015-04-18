@@ -1,4 +1,5 @@
 import {getDef} from './define'
+import {getDebugPath} from './utils'
 
 export default class Invoker {
     constructor({container, actionType, getPayload}) {
@@ -9,7 +10,8 @@ export default class Invoker {
     }
 
     handle(definition, debugCtx) {
-        const {id, waitFor} = getDef(definition)
+        let {id, waitFor} = getDef(definition)
+        waitFor = waitFor || []
         const debugPath = getDebugPath([debugCtx && debugCtx.length ? debugCtx[0] : [], id])
         if(this._cache.has(id)) {
             return this._cache.get(id)
@@ -22,7 +24,7 @@ export default class Invoker {
             args.push(dep.promiseHandler ? dep.promiseHandler(value) : value)
         }
         const result = Promise.all(args)
-            .then(depsMutations => this._container.get(definition, debugCtx))
+            .then(() => this._container.get(definition, debugCtx))
             .then(instance => instance.handle(this._actionType, this._getPayload(id)))
             .then(data => ({id, data}))
 

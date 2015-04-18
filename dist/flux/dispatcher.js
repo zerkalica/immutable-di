@@ -12,55 +12,27 @@ var PromiseSeries = _interopRequire(require("./promise-series"));
 
 var Container = _interopRequire(require("../container"));
 
+var Listeners = _interopRequire(require("./listeners"));
+
 var bindAll = require("../utils").bindAll;
 
-var Dispatcher = (function () {
-    function Dispatcher(_ref) {
-        var container = _ref.container;
+var Class = require("../define").Class;
 
+var Dispatcher = (function () {
+    function Dispatcher(container, listeners) {
         _classCallCheck(this, Dispatcher);
 
         this._container = container;
         this._series = new PromiseSeries();
-        this._listeners = [];
+        this._listeners = listeners;
         bindAll(this);
     }
-
-    Dispatcher.__class = ["Dispatcher", Container];
 
     _prototypeProperties(Dispatcher, null, {
         setStores: {
             value: function setStores(stores) {
                 this._stores = stores;
                 return this;
-            },
-            writable: true,
-            configurable: true
-        },
-        mount: {
-            value: function mount(name, deps, onUpdate) {
-                this._listeners.push(definition);
-                return this;
-            },
-            writable: true,
-            configurable: true
-        },
-        unmount: {
-            value: function unmount(definition) {
-                this._listeners = this._listeners.filter(function (d) {
-                    return definition === d;
-                });
-            },
-            writable: true,
-            configurable: true
-        },
-        _update: {
-            value: function _update() {
-                var _this = this;
-
-                this._listeners.forEach(function (listener) {
-                    return _this._container.get(listener);
-                });
             },
             writable: true,
             configurable: true
@@ -85,7 +57,9 @@ var Dispatcher = (function () {
                 }).then(function (mutations) {
                     return _this._container.transformState(mutations);
                 }).then(function () {
-                    return _this._update();
+                    return _this._listeners.forEach(function (listener) {
+                        return _this._container.get(listener);
+                    });
                 });
             },
             writable: true,
@@ -123,3 +97,5 @@ var Dispatcher = (function () {
 })();
 
 module.exports = Dispatcher;
+
+Class(Dispatcher, [Container, Listeners]);

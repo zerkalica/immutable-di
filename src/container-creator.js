@@ -1,5 +1,4 @@
 import Container from './container'
-import GenericAdapter from './definition-adapters/generic-adapter'
 
 export default class ContainerCreator {
     constructor() {

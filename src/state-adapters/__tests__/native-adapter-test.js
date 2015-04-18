@@ -1,4 +1,5 @@
 import NativeAdapter from '../native-adapter'
+import {describe, it, expect} from '../../test-helper'
 
 describe('state-adapters/native-adapter', () => {
     let testState

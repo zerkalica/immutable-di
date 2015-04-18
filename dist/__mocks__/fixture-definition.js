@@ -9,12 +9,19 @@ exports.waitFn1 = waitFn1;
 exports.waitFn2 = waitFn2;
 exports.testObjectDeps = testObjectDeps;
 exports.testFunc = testFunc;
+
+var _define = require("../define");
+
+var Factory = _define.Factory;
+var Class = _define.Class;
+var Promises = _define.Promises;
+var WaitFor = _define.WaitFor;
 function depFn() {
     return new Promise(function (resolve) {
         return resolve("depFn.value");
     });
 }
-depFn.__factory = ["depFn"];
+Factory(depFn);
 
 var DepClass = exports.DepClass = (function () {
     function DepClass() {
@@ -34,12 +41,12 @@ var DepClass = exports.DepClass = (function () {
     return DepClass;
 })();
 
-DepClass.__class = ["DepClass", "state.a.b1"];
+Class(DepClass, ["state.a.b"]);
 
 function waitFn1() {}
-waitFn1.__factory = ["waitFn1"];
+Factory(waitFn1);
 function waitFn2() {}
-waitFn2.__factory = ["waitFn2"];
+Factory(waitFn2);
 
 function testObjectDeps(_ref) {
     var depClass = _ref.depClass;
@@ -50,7 +57,10 @@ function testObjectDeps(_ref) {
     }
     return "testFunc.value." + depClass.test() + "." + depFnValue;
 }
-testObjectDeps.__factory = ["testObjectDeps", { depFnValue: depFn, depClass: DepClass }];
+Factory(testObjectDeps, {
+    depFnValue: depFn,
+    depClass: DepClass
+});
 
 var testObjectDepsMeta = exports.testObjectDepsMeta = {
     id: "testObjectDeps",
@@ -77,38 +87,35 @@ function testFunc(depClass, depFnValue) {
     }
     return "testFunc.value." + depClass.test() + "." + depFnValue;
 }
-var ignore = function (p) {
-    return p["catch"](function () {});
-};
-testFunc.__factory = ["testFunc", DepClass, [depFn, ignore], "state.a.b"];
-testFunc.__waitFor = [waitFn1, waitFn2];
+Factory(testFunc, [[depFn, Promises.ignore], "state.a.b"]);
+WaitFor(testFunc, [waitFn1, waitFn2]);
 
 var testFuncMeta = exports.testFuncMeta = {
     id: "testFunc",
     handler: testFunc,
     deps: [{
-        name: void 0,
+        name: undefined,
         definition: DepClass,
         path: [],
         promiseHandler: null
     }, {
-        name: void 0,
+        name: undefined,
         definition: depFn,
         path: [],
-        promiseHandler: ignore
+        promiseHandler: Promises.ignore
     }, {
-        name: void 0,
+        name: undefined,
         definition: null,
         path: ["state", "a", "b"],
         promiseHandler: null
     }],
     waitFor: [{
-        name: void 0,
+        name: undefined,
         definition: waitFn1,
         path: [],
         promiseHandler: null
     }, {
-        name: void 0,
+        name: undefined,
         definition: waitFn2,
         path: [],
         promiseHandler: null

@@ -4,18 +4,18 @@ import {Define} from '../../src'
 
 class TodoView extends React.Component {
     render() {
-        const {isEdit, todo} = this.props
+        const {isEditCurrentTodo, todo} = this.props
         const actions = this.props.actions
         return (
             <div>
                 <h1>TodoView</h1>
                 {isEditCurrentTodo
                     ? <input
-                        value={currentTodo.title}
+                        value={todo.title}
                         onChange={() => actions.editTodoTitleComplete()}
                     />
                     : <button
-                        onClick={() => actions.editTodoTitleStart()}>{currentTodo.title}</button>
+                        onClick={() => actions.editTodoTitleStart()}>{todo.title}</button>
                 }
 
             </div>
@@ -66,7 +66,7 @@ Define.State(Page, {
     },
     props: {
         actions: PageActions,
-        dispatcher: Dispatcher,
         config: 'config.Page'
     }
 })
+1ub

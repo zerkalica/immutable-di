@@ -1,6 +1,6 @@
 export function getDebugPath(args) {
     const [debugPath, name] = args || []
-    return  (debugPath ? (debugPath + '.') : '') + (name ? name : 'unk')
+    return (debugPath ? (debugPath + '.') : '') + (name ? name : 'unk')
 }
 
 export function classToFactory(Constructor) {
@@ -9,7 +9,7 @@ export function classToFactory(Constructor) {
     }
     F.prototype = Constructor.prototype
 
-    return (...args) => new F(args);
+    return (...args) => new F(args)
 }
 
 export function bindAll(object) {

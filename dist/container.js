@@ -12,25 +12,27 @@ var _utils = require("./utils");
 
 var bindAll = _utils.bindAll;
 var getDebugPath = _utils.getDebugPath;
+var classToFactory = _utils.classToFactory;
 var convertArgsToOptions = _utils.convertArgsToOptions;
+
+var _define = require("./define");
+
+var Class = _define.Class;
+var getDef = _define.getDef;
 
 var Container = (function () {
     function Container(_ref) {
         var state = _ref.state;
-        var metaInfoCache = _ref.metaInfoCache;
         var globalCache = _ref.globalCache;
 
         _classCallCheck(this, Container);
 
         var cache = this._cache = new Map();
         cache.set("global", globalCache || new Map());
-        this._meta = metaInfoCache;
         this._state = state;
         this._locks = new Map();
         bindAll(this);
     }
-
-    Container.__class = ["Container"];
 
     _prototypeProperties(Container, null, {
         clear: {
@@ -42,10 +44,12 @@ var Container = (function () {
         },
         _getScope: {
             value: function _getScope(scope) {
-                var cache = this._cache.get(scope);
-                if (cache === void 0) {
+                var cache = undefined;
+                if (!this._cache.has(scope)) {
                     cache = new Map();
                     this._cache.set(scope, cache);
+                } else {
+                    cache = this._cache.get(scope);
                 }
                 return cache;
             },
@@ -68,14 +72,13 @@ var Container = (function () {
             value: function createMethod(actionType, payload) {
                 var _this = this;
 
-                var getPayload = payload === void 0 ? function (id) {
+                var getPayload = payload === undefined ? function (id) {
                     return _this._state.get(id);
-                } : function (id) {
+                } : function () {
                     return _this._payload;
                 };
 
                 return new Invoker({
-                    metaInfoCache: this._meta,
                     container: this,
                     actionType: actionType,
                     getPayload: getPayload
@@ -90,17 +93,17 @@ var Container = (function () {
                     return this;
                 }
 
-                var _meta$get = this._meta.get(definition, debugCtx);
+                var _getDef = getDef(definition);
 
-                var id = _meta$get.id;
-                var deps = _meta$get.deps;
-                var handler = _meta$get.handler;
-                var scope = _meta$get.scope;
+                var id = _getDef.id;
+                var handler = _getDef.handler;
+                var deps = _getDef.deps;
+                var scope = _getDef.scope;
 
                 var debugPath = getDebugPath([debugCtx && debugCtx.length ? debugCtx[0] : [], id]);
                 var cache = this._getScope(scope);
                 var result = cache.get(id);
-                if (result !== void 0) {
+                if (result !== undefined) {
                     return result;
                 }
 
@@ -116,7 +119,7 @@ var Container = (function () {
                     if (dep.path.length) {
                         try {
                             value = this._state.getIn(dep.path);
-                            if (value === void 0) {
+                            if (value === undefined) {
                                 throw new Error("Value is undefined");
                             }
                         } catch (e) {
@@ -154,3 +157,5 @@ var Container = (function () {
 })();
 
 module.exports = Container;
+
+Class(Container);

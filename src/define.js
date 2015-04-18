@@ -1,21 +1,27 @@
-import Listeners from './flux/listeners'
 import {classToFactory} from './utils'
 
-function procesDeps(deps) {
+function pass(p) {
+    return p
+}
+
+function processDeps(deps) {
     const resultDeps = []
     deps = deps || []
     const isArray = Array.isArray(deps)
     const names = isArray ? [] : Object.keys(deps)
     const len = isArray ? deps.length : names.length
     for(let i = 0; i < len; i++) {
-        const name = names.length ? names[i] : void 0
+        const name = names.length ? names[i] : undefined
         const dep = deps[name || i]
-        const isPromise = Array.isArray(dep) && dep.length === 2 && typeof dep[1] === 'function'
+        const isPromise = Array.isArray(dep)
+            && dep.length === 2
+            && typeof dep[1] === 'function'
         const isPath = typeof dep === 'string'
-        const definition = isPromise ? dep[0] : (isPath ? null : dep)
+        const path = isPath ? null : dep
+        const definition = isPromise ? dep[0] : path
         resultDeps.push({
             name,
-            promiseHandler: isPromise ? (dep[1] || ((p) => p)) : null,
+            promiseHandler: isPromise ? (dep[1] || pass) : null,
             path: isPath ? dep.split('.') : null,
             definition: definition
         })
@@ -24,48 +30,54 @@ function procesDeps(deps) {
     return resultDeps
 }
 
-const STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg
-const FN_MAGIC = 'function'
-function getFunctionName(func) {
-    return func
-        .toString()
-        .replace(STRIP_COMMENTS, '')
-        .slice(fnStr.indexOf(FN_MAGIC) + FN_MAGIC.length + 1, fnStr.indexOf('('))
-}
-
 function getScopes(normalizedDeps, scopeSet) {
     for(let i = 0; i < normalizedDeps.length; i++) {
         const dep = normalizedDeps[i]
         if (dep.path && dep.path.length) {
             scopeSet.add(dep.path[0])
         } else {
-            getScopes(getDef(dep).deps, scopeSet)
+            if (!dep.definition) {
+                throw new Error('no definition in dep: ' + dep)
+            }
+            if (!dep.definition.__di) {
+                throw new Error('no definition in dep.definition: ' + dep.definition)
+            }
+            getScopes(getDef(dep.definition).deps, scopeSet)
         }
     }
 }
 
-const ids = new Set()
-function getId(Service) {
-    const id = getFunctionName(Service)
-    if (ids.has(id)) {
-        throw new Error('Already registered service with id: ' + id)
+const STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg
+const FN_MAGIC = 'function'
+function getFunctionName(func) {
+    const fnStr = func.toString().replace(STRIP_COMMENTS, '')
+    return fnStr.slice(fnStr.indexOf(FN_MAGIC) + FN_MAGIC.length + 1, fnStr.indexOf('('))
+}
+
+let lastId = 1
+function getId(Service, idPrefix) {
+    idPrefix = idPrefix || lastId
+    let id = Service.__id
+    if (!id) {
+        id = getFunctionName(Service) + '[' + idPrefix + ']'
+        lastId++
     }
-    ids.add(id)
 
     return id
 }
 
-export function getDef(Service) {
+function getDef(Service) {
     return Service.__di
 }
 
 function Def({id, handler, deps}) {
-    const normalizedDeps = procesDeps(deps)
+    const normalizedDeps = processDeps(deps)
     const scopeSet = new Set()
     getScopes(normalizedDeps, scopeSet)
     const scopes = Array.from(scopeSet.values())
 
     return {
+        id,
         handler,
         scope: scopes.length ? scopes[0] : 'global',
         deps: normalizedDeps
@@ -88,47 +100,8 @@ function Factory(Service, deps) {
     })
 }
 
-function WaitFor(Service, deps) {
+function WaitFor(deps) {
     return processDeps(deps)
-}
-
-function passthru(options) {
-    return options
-}
-
-function State(Service, {props, state}) {
-    const id = getId(Service)
-    let propsDef = p => p
-    let stateDef = p => p
-    stateDef.__di = Def({
-        id: id + '.state',
-        deps: state,
-        handler: passthru
-    })
-    propsDef.__di = Def({
-        id: id + '.props',
-        deps: props,
-        handler: passthru
-    })
-
-    let diGetter = ({props, state, listeners}) => ({
-        service: Service,
-        options: {
-            props,
-            state,
-            updater: listeners.createUpdater({id: id + '.updater', state})
-        }
-    })
-
-    return Def({
-        id: id + '.getter',
-        handler: diGetter,
-        deps: {
-            listeners: Listeners,
-            state: stateDef,
-            props: propsDef
-        }
-    })
 }
 
 function cache(cb) {
@@ -144,15 +117,25 @@ function cachedWaitFor(Service, deps) {
 }
 
 function cachedDef(options) {
-    let fn = p => p
+    function fn(p) {
+        return p
+    }
     fn.__di = Def(options)
     return fn
 }
 
+const Promises = {
+    ignore(p) {
+        return p.catch(() => {})
+    }
+}
+
 export default {
-    State: cache(State),
+    getId,
+    getDef: getDef,
+    Def: cachedDef,
     Class: cache(Class),
     Factory: cache(Factory),
     WaitFor: cachedWaitFor,
-    Def: cachedDef,
+    Promises: Promises
 }

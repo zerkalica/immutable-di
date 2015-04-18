@@ -1,4 +1,5 @@
 import {isPromise, getDebugPath, classToFactory} from '../utils'
+import {describe, it, expect} from '../test-helper'
 
 describe('utils', () => {
     describe('classToFactory', () => {
@@ -33,7 +34,7 @@ describe('utils', () => {
             expect(factory(1, 2).c).equal(3)
         })
     })
-    
+
     describe('getDebugPath', () => {
         it('should return string', () => {
             getDebugPath().should.to.be.equal('unk')

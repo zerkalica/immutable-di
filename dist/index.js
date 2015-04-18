@@ -16,7 +16,10 @@ var Dispatcher = _interopRequire(require("./flux/dispatcher"));
 
 var Renderer = _interopRequire(require("./flux/renderer"));
 
+var Define = _interopRequire(require("./define"));
+
 module.exports = {
+    Define: Define,
     ContainerCreator: ContainerCreator,
     Container: Container,
     NativeState: NativeState,

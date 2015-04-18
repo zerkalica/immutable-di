@@ -30,36 +30,12 @@ var Renderer = (function () {
             writable: true,
             configurable: true
         },
-        _createDefinition: {
-            value: function _createDefinition(Widget) {
-                var displayName = Widget.displayName;
-                var props = Widget.props;
-                var state = Widget.state;
-
-                var name = displayName;
-                var stateDef = factory(name + ".state", state);
-
-                return factory(name + ".element", factory(name, {
-                    updater: factory(name + ".updaterProvider", {}, function () {
-                        return function (setState) {
-                            return factory(name + ".updater", stateDef, function (state) {
-                                return setState(state);
-                            });
-                        };
-                    }),
-                    props: factory(name + ".props", props),
-                    state: stateDef
-                }));
-            },
-            writable: true,
-            configurable: true
-        },
         render: {
             value: function render(Widget) {
                 var _this = this;
 
-                return this._container.get(this._createDefinition(Widget)).then(function (props) {
-                    return _this._renderer.render(_this._renderer.getElement(Widget, props));
+                return this._container.get(Widget.__diGetter).then(function (options) {
+                    return _this._renderer.render(_this._renderer.getElement(Widget, options));
                 });
             },
             writable: true,

@@ -5,18 +5,6 @@ var notifier = require('node-notifier');
 var path = require('path');
 var minimist = require('minimist');
 
-var sinon = require('sinon');
-var chai = require('chai');
-var chaiAsPromised = require('chai-as-promised');
-var sinonChai = require('sinon-chai');
-
-global.expect = chai.expect;
-global.sinon = sinon;
-global.spy = sinon.spy;
-chai.use(chaiAsPromised);
-chai.use(sinonChai);
-chai.should();
-
 var knownOptions = {
   string: ['env', 'tests'],
   boolean: 'debug',
@@ -44,9 +32,8 @@ function getConfig(args) {
         babel: {
             modules: 'common',
             loose: isDebug ? 'all' : [],
-            experimental: true,
             externalHelpers: false,
-            playground: true
+            stage: 0
         },
         mocha: {
             reporter: 'spec'
@@ -67,7 +54,7 @@ function runTest(src) {
     return gulp.src(src, {read: false})
         .pipe(gmocha(config.mocha))
         .on('error', function (arg) {
-            console.warn(arg.message);
+            console.warn(arg.message, arg.stack);
             notifier.notify({
                 title: 'Test',
                 message: arg.message,
