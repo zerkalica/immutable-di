@@ -29,6 +29,7 @@
     "gulp-mocha": "^2.0.1",
     "gulp-util": "^3.0.4",
     "html-webpack-plugin": "^1.1.0",
+    "isomorphic-fetch": "^2.0.2",
     "lodash": "^3.7.0",
     "minimist": "^1.1.1",
     "mocha": "^2.2.4",

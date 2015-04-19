@@ -3,6 +3,9 @@ import PromiseSeries from './promise-series'
 import Container from '../container'
 
 import {Class, Def, getDef} from '../define'
+import debug from 'debug'
+
+const info = debug('immutable-di:dispatcher')
 
 class AutoUnmountListener {
     constructor({listener, dispatcher, definition}) {
@@ -36,7 +39,6 @@ export default class Dispatcher {
         this.dispatchAsync = this.dispatchAsync.bind(this)
         this.mount = this.mount.bind(this)
         this.unmount = this.unmount.bind(this)
-        this.reset = this.reset.bind(this)
     }
 
     setStores(stores) {
@@ -44,12 +46,22 @@ export default class Dispatcher {
         return this
     }
 
-    dispatch(actionType, payload) {
-        return this._series.add(() => this.dispatchAsync(actionType, payload))
+    dispatch(action, payload) {
+        return this._series.add(() => this.dispatchAsync(action, payload))
     }
 
-    dispatchAsync(actionType, payload) {
-        return actionToPromise(actionType, payload)
+    dispatchAsync(action, payload) {
+        const promiseAction = actionToPromise(action, payload)
+        let promise = this._invokeDispatch(promiseAction[0])
+        for (let i = 1; i < promiseAction.length; i++) {
+            promise = promise.then(() => this._invokeDispatch(promiseAction[i]))
+        }
+
+        return promise
+    }
+
+    _invokeDispatch(actionPromise) {
+        return actionPromise
             .then(action => this._getMutationsFromStores(action))
             .then(mutations => this._container.transformState(mutations))
             .then(() => this._listeners.forEach(listener => this._container.get(listener)))
@@ -81,15 +93,8 @@ export default class Dispatcher {
         return autoListener
     }
 
-    reset(state) {
-        return this.dispatch('reset', state)
-    }
-
     _getMutationsFromStores(actionObject) {
-        const {actionType, payload, isError, isPromise} = actionObject
-        console.log(actionObject)
-        const action = actionType + (isError ? 'Fail' : (isPromise ? 'Success' : ''))
-
+        const {action, payload} = actionObject
         const method = this._container.createMethod(action, payload)
         const mutations = this._stores.map(store => method.handle(store))
 

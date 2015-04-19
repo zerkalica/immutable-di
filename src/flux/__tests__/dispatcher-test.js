@@ -64,16 +64,6 @@ describe('flux/dispatcher', () => {
                 })
         })
 
-        it('should reset stores with new data', () => {
-            const state = {
-                test: 123
-            }
-            return dispatcher.reset(state)
-                .then(() => {
-                    fakeCreateMethod.should.have.been.calledOnce
-                        .and.calledWith('reset', state);
-                })
-        })
     })
 
     describe('mount', () => {

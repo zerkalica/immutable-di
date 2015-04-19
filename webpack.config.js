@@ -1,6 +1,10 @@
 var path = require('path');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 var exampleDir = path.join(__dirname, 'examples', 'flux');
+var webpack = require('webpack')
+
+const DEBUG = 'immutable-di:*'
+
 module.exports = {
     cache: true,
     debug: true,
@@ -16,6 +20,12 @@ module.exports = {
       ]
     },
     plugins: [
+        new webpack.DefinePlugin({
+            'process.env': {
+                IS_BROWSER: true,
+                DEBUG: JSON.stringify(DEBUG)
+            }
+        }),
         new HtmlWebpackPlugin({
             template: path.join(exampleDir, 'index.tpl.html')
         })

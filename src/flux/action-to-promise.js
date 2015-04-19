@@ -1,26 +1,26 @@
-export default function actionToPromise(actionType, payload) {
-    let actionItem
+export default function actionToPromise(action, payload) {
+    let actionPromises = []
     if (typeof payload === 'object' && typeof payload.then === 'function') {
-        actionItem = payload
+        actionPromises.push(Promise.resolve({
+            action: action + 'Progress',
+            payload: {}
+        }))
+        actionPromises.push(payload
             .then(payload => ({
-                actionType: actionType,
-                payload: payload,
-                isError: false,
-                isPromise: true
+                action: action + 'Success',
+                payload: payload
             }))
             .catch(err => ({
-                actionType: actionType,
-                payload: err,
-                isError: true,
-                isPromise: true
+                action: action + 'Fail',
+                payload: err
             }))
+        )
     } else {
-        actionItem = Promise.resolve({
-            actionType: actionType,
-            payload: payload,
-            isError: false,
-            isPromise: false
-        })
+        actionPromises.push(Promise.resolve({
+            action: action,
+            payload: payload
+        }))
     }
-    return actionItem
+
+    return actionPromises
 }

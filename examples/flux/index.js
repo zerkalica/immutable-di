@@ -1,8 +1,11 @@
-import __polyfill from 'babel-core/polyfill'
+import __bootstrap from './bootstrap'
 
 import React from 'react'
 import {ContainerCreator, NativeAdapter, Dispatcher, Define} from '../../src'
 import TodoList from './components/todo-list'
+import debug from 'debug'
+
+const info = debug('immutable-di:flux:index')
 
 const {Factory, Class, WaitFor, Store} = Define
 
@@ -13,12 +16,12 @@ class Wrapper extends React.Component {
          dispatcher: React.PropTypes.instanceOf(Dispatcher)
     }
 
-    constructor(options) {
-        super(options.state)
-        this.state = options.state
-        this._dispatcher = options.dispatcher
-        this._getter = options.getter
-        this._component = options.component
+    constructor({state, dispatcher, getter, component}) {
+        super(state)
+        this.state = state
+        this._dispatcher = dispatcher
+        this._getter = getter
+        this._component = component
     }
 
     getChildContext() {
@@ -53,16 +56,33 @@ class TodoStore {
         return this[action] && this[action].call(this, payload)
     }
 
-    load(payload) {
-        //progress
-    }
-
-    loadSuccess(state) {
+    reset(state) {
+        this.state = state
+        info('reset: %o', state)
         return state
     }
 
+    loadProgress() {
+        info('loadProgress')
+        return {
+            loading: true
+        }
+    }
+
+    loadSuccess(todos) {
+        info('loadSuccess %o', todos)
+        return {
+            loading: false,
+            todos
+        }
+    }
+
     loadFail(err) {
-        return err
+        info('loadFail %o', err)
+        return {
+            loading: false,
+            error: err
+        }
     }
 }
 Store(TodoStore, 'todoApp')
@@ -86,11 +106,16 @@ dispatcher.once(getter, ({getter, state, dispatcher}) => {
 
 const initialState = {
     todoApp: {
-        todos: [
-            {name: 'todo-1', id: 1},
-            {name: 'todo-2', id: 2}
-        ]
+        loading: false,
+        error: null,
+        todos: []
     }
 }
 
-dispatcher.dispatch('load', Promise.resolve(initialState))
+dispatcher.dispatch('reset', initialState)
+dispatcher.dispatch('load', Promise.resolve({
+    todos: [
+        {name: 'todo-1', id: 1},
+        {name: 'todo-2', id: 2}
+    ]
+}))
