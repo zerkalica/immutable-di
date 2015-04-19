@@ -34,6 +34,8 @@ export default class Dispatcher {
         this._container = container || new Container()
         this._series = new PromiseSeries()
         this._listeners = []
+        this._stores = []
+        this._storeIds = []
 
         this.setStores = this.setStores.bind(this)
         this.dispatch = this.dispatch.bind(this)
@@ -42,7 +44,12 @@ export default class Dispatcher {
         this.unmount = this.unmount.bind(this)
     }
 
-    setStores(stores) {
+    setStores(storeMap) {
+        const stores = []
+        const keys = this._storeIds = Object.keys(storeMap)
+        for(let i = 0; i < keys.length; i++) {
+            stores.push(storeMap[keys[i]])
+        }
         this._stores = stores
         return this
     }
@@ -63,9 +70,7 @@ export default class Dispatcher {
 
     _invokeDispatch(actionPromise) {
         return actionPromise
-            .then(({action, payload}) => this._getMutationsFromStores(action, payload))
-            .then(mutations => this._container.transformState(mutations))
-            .then(() => this._listeners.forEach(listener => this._container.get(listener)))
+            .then(({action, payload}) => this._transformState(action, payload))
     }
 
     mount(definition, listener) {
@@ -94,13 +99,38 @@ export default class Dispatcher {
         return autoListener
     }
 
-    _getMutationsFromStores(action, payload) {
-        const method = new Invoker({action, payload, container: this._container})
-        const mutations = this._stores.map(store => method.handle(store))
+    _invokeListeners() {
+        this._listeners.forEach(listener => this._container.get(listener))
+    }
 
-        return Promise.all(mutations)
+    setState(newState) {
+        this._container.transformState(({get, set}) => {
+            const updatedIds = []
+            this._storeIds.forEach(id => {
+                set(id, newState[id])
+                updatedIds.push(id)
+            })
+
+            return updatedIds
+        })
+        this._invokeListeners()
+    }
+
+    _transformState(action, payload) {
+        this._container.transformState(({get, set}) => {
+            const updatedIds = []
+            this._stores.forEach((store, i) => {
+                const id = this._storeIds[i]
+                const isUpdated = store.handle(get(id), action, payload)
+                if (isUpdated) {
+                    updatedIds.push(id)
+                    //set(id, newState)
+                }
+            })
+            return updatedIds
+        })
+        this._invokeListeners()
     }
 }
 
 Class(Dispatcher, [Container])
-

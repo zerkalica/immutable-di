@@ -53,38 +53,41 @@ Factory(getter, ['todoApp'])
 
 class TodoStore {
     handle(state, action, payload) {
-        return this[action] && this[action].call(this, state, payload)
+        if (this[action]) {
+            return this[action].call(this, state, payload)
+        }
     }
 
     loadProgress(state) {
         info('loadProgress')
-        return {
-            loading: true
-        }
+        state.loading = true
+
+        return state
     }
 
     loadSuccess(state, todos) {
         info('loadSuccess %o', todos)
-        return {
-            loading: false,
-            todos
-        }
+        state = todos
+        state.loading = false
+
+        return state
     }
 
     loadFail(state, err) {
         info('loadFail %o', err)
-        return {
-            loading: false,
-            error: err
-        }
+        state.loading = false
+        state.error = err
+
+        return state
     }
 }
-Store(TodoStore, 'todoApp')
 
 const creator = new ContainerCreator(NativeAdapter)
 const dispatcher = new Dispatcher(creator.create())
 
-dispatcher.setStores([TodoStore])
+dispatcher.setStores({
+    todoApp: new TodoStore()
+})
 
 dispatcher.once(getter, ({getter, state, dispatcher}) => {
     React.render((
@@ -97,15 +100,14 @@ dispatcher.once(getter, ({getter, state, dispatcher}) => {
     ), el)
 })
 
-const initialState = {
+dispatcher.setState({
     todoApp: {
         loading: false,
         error: null,
         todos: []
     }
-}
+})
 
-dispatcher.dispatch('chargeStore', storeId => initialState[storeId])
 dispatcher.dispatch('load', Promise.resolve({
     todos: [
         {name: 'todo-1', id: 1},

@@ -28,9 +28,8 @@ export default class Container {
         return cache
     }
 
-    transformState(mutations) {
-        const updatedScopes = this._state.transformState(mutations)
-        updatedScopes.forEach(scope => this.clear(scope))
+    transformState(getState) {
+        this._state.transformState(getState).forEach(id => this.clear(id))
     }
 
     get(definition, debugCtx) {
