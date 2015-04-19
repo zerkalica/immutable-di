@@ -1,4 +1,3 @@
-import Invoker from './invoker'
 import {getDebugPath, classToFactory, convertArgsToOptions} from './utils'
 import {Class, getDef} from './define'
 
@@ -12,7 +11,6 @@ export default class Container {
         this.get = this.get.bind(this)
         this.clear = this.clear.bind(this)
         this.transformState = this.transformState.bind(this)
-        this.createMethod = this.createMethod.bind(this)
     }
 
     clear(scope) {
@@ -33,18 +31,6 @@ export default class Container {
     transformState(mutations) {
         const updatedScopes = this._state.transformState(mutations)
         updatedScopes.forEach(scope => this.clear(scope))
-    }
-
-    createMethod(actionType, payload) {
-        const getPayload = payload === undefined
-            ? id => this._state.get(id)
-            : () => payload
-
-        return new Invoker({
-            container: this,
-            actionType,
-            getPayload
-        })
     }
 
     get(definition, debugCtx) {

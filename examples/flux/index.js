@@ -52,24 +52,18 @@ function getter(appState) {
 Factory(getter, ['todoApp'])
 
 class TodoStore {
-    handle(action, payload) {
-        return this[action] && this[action].call(this, payload)
+    handle(state, action, payload) {
+        return this[action] && this[action].call(this, state, payload)
     }
 
-    reset(state) {
-        this.state = state
-        info('reset: %o', state)
-        return state
-    }
-
-    loadProgress() {
+    loadProgress(state) {
         info('loadProgress')
         return {
             loading: true
         }
     }
 
-    loadSuccess(todos) {
+    loadSuccess(state, todos) {
         info('loadSuccess %o', todos)
         return {
             loading: false,
@@ -77,7 +71,7 @@ class TodoStore {
         }
     }
 
-    loadFail(err) {
+    loadFail(state, err) {
         info('loadFail %o', err)
         return {
             loading: false,
@@ -87,9 +81,8 @@ class TodoStore {
 }
 Store(TodoStore, 'todoApp')
 
-const dispatcher = new Dispatcher(
-    (new ContainerCreator()).create(new NativeAdapter())
-)
+const creator = new ContainerCreator(NativeAdapter)
+const dispatcher = new Dispatcher(creator.create())
 
 dispatcher.setStores([TodoStore])
 
@@ -112,7 +105,7 @@ const initialState = {
     }
 }
 
-dispatcher.dispatch('reset', initialState)
+dispatcher.dispatch('chargeStore', storeId => initialState[storeId])
 dispatcher.dispatch('load', Promise.resolve({
     todos: [
         {name: 'todo-1', id: 1},

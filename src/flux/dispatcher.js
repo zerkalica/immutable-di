@@ -1,6 +1,7 @@
 import actionToPromise from './action-to-promise'
 import PromiseSeries from './promise-series'
 import Container from '../container'
+import Invoker from '../invoker'
 
 import {Class, Def, getDef} from '../define'
 import debug from 'debug'
@@ -62,7 +63,7 @@ export default class Dispatcher {
 
     _invokeDispatch(actionPromise) {
         return actionPromise
-            .then(action => this._getMutationsFromStores(action))
+            .then(({action, payload}) => this._getMutationsFromStores(action, payload))
             .then(mutations => this._container.transformState(mutations))
             .then(() => this._listeners.forEach(listener => this._container.get(listener)))
     }
@@ -93,9 +94,8 @@ export default class Dispatcher {
         return autoListener
     }
 
-    _getMutationsFromStores(actionObject) {
-        const {action, payload} = actionObject
-        const method = this._container.createMethod(action, payload)
+    _getMutationsFromStores(action, payload) {
+        const method = new Invoker({action, payload, container: this._container})
         const mutations = this._stores.map(store => method.handle(store))
 
         return Promise.all(mutations)

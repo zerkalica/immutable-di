@@ -2,9 +2,11 @@ import {getDef} from './define'
 import {getDebugPath} from './utils'
 
 export default class Invoker {
-    constructor({container, actionType, getPayload}) {
-        this._actionType = actionType
-        this._getPayload = getPayload
+    constructor({container, action, payload}) {
+        this._action = action
+        this._getPayload = typeof payload === 'function'
+            ? (statePath) => payload(statePath)
+            : () => payload
         this._container = container
         this._cache = new Map()
     }
@@ -25,12 +27,10 @@ export default class Invoker {
         }
         const result = Promise.all(args)
             .then(() => this._container.get(definition, debugCtx))
-            .then(instance =>
-                instance.handle(this._actionType, this._getPayload(statePath))
-            )
-            .then(data => ({data, statePath: statePath}))
+            .then(instance => instance.handle(this._action, this._getPayload(statePath)))
+            .then(data => ({data, id: statePath}))
 
-        this._cache.set(id, result)
+         this._cache.set(id, result)
 
         return result
     }

@@ -1,13 +1,14 @@
 import Container from './container'
 
 export default class ContainerCreator {
-    constructor() {
+    constructor(StateAdapter) {
+        this._StateAdapter = StateAdapter
         this._globalCache = new Map()
     }
 
     create(state) {
         return new Container({
-            state,
+            state: new this._StateAdapter(state),
             globalCache: this._globalCache
         })
     }
