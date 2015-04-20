@@ -82,7 +82,6 @@ dispatcher.once(stateGetter).then(({getter, deps}) => {
             dispatcher={dispatcher}
             state={state}
             getter={getter}
-
             component={TodoList}
         />
     ), el)

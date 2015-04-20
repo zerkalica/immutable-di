@@ -1,7 +1,6 @@
 import actionToPromise from './action-to-promise'
 import PromiseSeries from './promise-series'
 import Container from '../container'
-import Invoker from '../invoker'
 
 import {Class, Def, getDef} from '../define'
 import debug from 'debug'

@@ -110,7 +110,7 @@ const Annotation = {
     Def(Service, definition) {
         Service.__di = extractDef(definition)
         return Service
-    },
+    }
 }
 
 const Promises = {
@@ -125,5 +125,5 @@ export default {
     Getter: Annotation.Getter,
     Def: Annotation.Def,
     Class: Annotation.Class,
-    Factory: Annotation.Factory,
+    Factory: Annotation.Factory
 }
