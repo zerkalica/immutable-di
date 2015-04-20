@@ -1,9 +1,12 @@
 "use strict";
 
-var _prototypeProperties = function (child, staticProps, instanceProps) { if (staticProps) Object.defineProperties(child, staticProps); if (instanceProps) Object.defineProperties(child.prototype, instanceProps); };
-
 var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
 
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
 function getInPath(obj, bits) {
     for (var i = 0, j = bits.length; i < j; ++i) {
         obj = obj[bits[i]];
@@ -18,42 +21,34 @@ var NativeAdapter = (function () {
         this._state = state || {};
     }
 
-    _prototypeProperties(NativeAdapter, null, {
-        getIn: {
-            value: function getIn(path) {
-                return getInPath(this._state, path);
-            },
-            writable: true,
-            configurable: true
-        },
-        get: {
-            value: function get(id) {
-                return this._state[id];
-            },
-            writable: true,
-            configurable: true
-        },
-        transformState: {
-            value: function transformState(mutations) {
-                var updatedScopes = [];
-                for (var i = 0; i < mutations.length; i++) {
-                    var _mutations$i = mutations[i];
-                    var id = _mutations$i.id;
-                    var data = _mutations$i.data;
-
-                    if (data !== undefined) {
-                        updatedScopes.push(id);
-                        this._state[id] = data;
-                    }
-                }
-                return updatedScopes;
-            },
-            writable: true,
-            configurable: true
+    _createClass(NativeAdapter, [{
+        key: "getIn",
+        value: function getIn(path) {
+            return getInPath(this._state, path);
         }
-    });
+    }, {
+        key: "get",
+        value: function get(id) {
+            return this._state[id];
+        }
+    }, {
+        key: "transformState",
+        value: function transformState(transform) {
+            var _this = this;
+
+            return transform({
+                get: function get(id) {
+                    return _this._state[id];
+                },
+                set: function set(id, newState) {
+                    _this._state[id] = newState;
+                }
+            });
+        }
+    }]);
 
     return NativeAdapter;
 })();
 
-module.exports = NativeAdapter;
+exports["default"] = NativeAdapter;
+module.exports = exports["default"];

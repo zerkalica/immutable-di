@@ -39,5 +39,8 @@
     "sinon": "^1.14.1",
     "sinon-chai": "^2.7.0",
     "webpack": "^1.8.5"
+  },
+  "dependencies": {
+    "debug": "^2.1.3"
   }
 }

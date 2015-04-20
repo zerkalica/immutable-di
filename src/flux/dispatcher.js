@@ -8,30 +8,9 @@ import debug from 'debug'
 
 const info = debug('immutable-di:dispatcher')
 
-class AutoUnmountListener {
-    constructor({listener, dispatcher, definition}) {
-        this._handler = this._handler.bind(this)
-        this._listener = listener
-        this._dispatcher = dispatcher
-        this._definition = definition
-        this._listenerDef = dispatcher.mount(definition, this._handler)
-    }
-
-    _handler(state) {
-        const result = this._listener({
-            getter: this._definition,
-            state: state,
-            dispatcher: this._dispatcher
-        })
-        this._dispatcher.unmount(this._listenerDef)
-
-        return result
-    }
-}
-
 export default class Dispatcher {
-    constructor(container) {
-        this._container = container || new Container()
+    constructor({stores, stateAdapter, container}) {
+        this._container = container || new Container({state: stateAdapter})
         this._series = new PromiseSeries()
         this._listeners = []
         this._stores = []
@@ -42,6 +21,10 @@ export default class Dispatcher {
         this.dispatchAsync = this.dispatchAsync.bind(this)
         this.mount = this.mount.bind(this)
         this.unmount = this.unmount.bind(this)
+
+        if (stores) {
+            this.setStores(stores)
+        }
     }
 
     setStores(storeMap) {
@@ -74,27 +57,39 @@ export default class Dispatcher {
     }
 
     mount(definition, listener) {
+        info('mount definition: %o', definition)
         const {id} = getDef(definition)
         const listenerDef = Def(p => p, {
             id: id + '__listener',
             deps: [definition],
-            handler: p => listener(p)
+            handler: (...args) => listener(...args)
         })
         this._listeners.push(listenerDef)
+
 
         return listenerDef
     }
 
     unmount(listenerDef) {
+        info('mount definition: %o', listenerDef)
         this._listeners = this._listeners.filter(d => listenerDef !== d)
     }
 
-    once(definition, listener) {
-        const autoListener = new AutoUnmountListener({
-            listener,
-            definition,
-            dispatcher: this
-        })
+    once(definition) {
+        const {getter} = getDef(definition)
+        return new Promise((resolve => {
+            info('once mount getter: %o', getter)
+            const listenerDef = this.mount(getter, p => {
+                info('once unmount getter: %o', getter)
+                this.unmount(listenerDef)
+                resolve(p)
+            })
+        }).bind(this))
+    }
+
+    _handler(p) {
+        this._dispatcher.unmount(this._listenerDef)
+
 
         return autoListener
     }
@@ -103,32 +98,32 @@ export default class Dispatcher {
         this._listeners.forEach(listener => this._container.get(listener))
     }
 
-    setState(newState) {
-        this._container.transformState(({get, set}) => {
+    _stateTransformer({get, set}, getState) {
             const updatedIds = []
-            this._storeIds.forEach(id => {
-                set(id, newState[id])
-                updatedIds.push(id)
+            this._storeIds.forEach((id, index) => {
+                const state = getState({id, index, get})
+                if (state !== undefined) {
+                    set(id, state)
+                    updatedIds.push(id)
+                }
             })
 
             return updatedIds
-        })
+    }
+
+    setState(newState) {
+        this._container.transformState(p => this._stateTransformer(
+            p,
+            ({id}) => newState[id]
+        ))
         this._invokeListeners()
     }
 
     _transformState(action, payload) {
-        this._container.transformState(({get, set}) => {
-            const updatedIds = []
-            this._stores.forEach((store, i) => {
-                const id = this._storeIds[i]
-                const isUpdated = store.handle(get(id), action, payload)
-                if (isUpdated) {
-                    updatedIds.push(id)
-                    //set(id, newState)
-                }
-            })
-            return updatedIds
-        })
+        this._container.transformState(p => this._stateTransformer(
+            p,
+            ({index, id, get}) => this._stores[index].handle(get(id), action, payload)
+        ))
         this._invokeListeners()
     }
 }

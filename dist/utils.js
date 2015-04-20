@@ -1,11 +1,15 @@
-"use strict";
+'use strict';
 
-var _slicedToArray = function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { var _arr = []; for (var _iterator = arr[Symbol.iterator](), _step; !(_step = _iterator.next()).done;) { _arr.push(_step.value); if (i && _arr.length === i) break; } return _arr; } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } };
+var _slicedToArray = function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i['return']) _i['return'](); } finally { if (_d) throw _e; } } return _arr; } else { throw new TypeError('Invalid attempt to destructure non-iterable instance'); } };
 
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
 exports.getDebugPath = getDebugPath;
 exports.classToFactory = classToFactory;
-exports.bindAll = bindAll;
 exports.convertArgsToOptions = convertArgsToOptions;
+exports.getFunctionName = getFunctionName;
+
 function getDebugPath(args) {
     var _ref = args || [];
 
@@ -14,7 +18,7 @@ function getDebugPath(args) {
     var debugPath = _ref2[0];
     var name = _ref2[1];
 
-    return (debugPath ? debugPath + "." : "") + (name ? name : "unk");
+    return (debugPath ? debugPath + '.' : '') + (name ? name : 'unk');
 }
 
 function classToFactory(Constructor) {
@@ -22,7 +26,6 @@ function classToFactory(Constructor) {
         return Constructor.apply(this, args);
     }
     F.prototype = Constructor.prototype;
-
     return function () {
         for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
             args[_key] = arguments[_key];
@@ -32,17 +35,6 @@ function classToFactory(Constructor) {
     };
 }
 
-function bindAll(object) {
-    var keys = Object.keys(object);
-    for (var i = 0; i < keys.length; i++) {
-        var _name = keys[i];
-        var prop = object[_name];
-        if (object.hasOwnProperty(_name) && typeof prop === "function") {
-            object[_name] = prop.bind(object);
-        }
-    }
-}
-
 function convertArgsToOptions(args, argsNames) {
     var obj = {};
     for (var i = 0; i < args.length; i++) {
@@ -50,6 +42,11 @@ function convertArgsToOptions(args, argsNames) {
     }
     return obj;
 }
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
+
+var STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
+var FN_MAGIC = 'function';
+
+function getFunctionName(func) {
+    var fnStr = func.toString().replace(STRIP_COMMENTS, '');
+    return fnStr.slice(fnStr.indexOf(FN_MAGIC) + FN_MAGIC.length + 1, fnStr.indexOf('('));
+}

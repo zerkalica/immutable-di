@@ -9,10 +9,13 @@ import Dispatcher from './flux/dispatcher'
 
 import Define from './define'
 
+import ReactConnector from './flux/connectors/react-connector'
+
 export default {
     Define,
     ContainerCreator,
     Container,
     NativeAdapter,
-    Dispatcher
+    Dispatcher,
+    ReactConnector
 }

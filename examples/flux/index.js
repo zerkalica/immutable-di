@@ -1,80 +1,37 @@
 import __bootstrap from './bootstrap'
 
 import React from 'react'
-import {ContainerCreator, NativeAdapter, Dispatcher, Define} from '../../src'
+import {NativeAdapter, Dispatcher, Define, ReactConnector} from '../../src'
 import TodoList from './components/todo-list'
 import debug from 'debug'
 
 const info = debug('immutable-di:flux:index')
+const Wrapper = ReactConnector(React)
 
-const {Factory, Class, WaitFor, Store} = Define
-
-const el = document.getElementById('app')
-
-class Wrapper extends React.Component {
-    static childContextTypes = {
-         dispatcher: React.PropTypes.instanceOf(Dispatcher)
-    }
-
-    constructor({state, dispatcher, getter, component}) {
-        super(state)
-        this.state = state
-        this._dispatcher = dispatcher
-        this._getter = getter
-        this._component = component
-    }
-
-    getChildContext() {
-        return {
-            dispatcher: this._dispatcher
-        }
-    }
-
-    componentDidMount() {
-        this._listener = this._dispatcher.mount(
-            this._getter,
-            (state) => this.setState(state)
-        )
-    }
-
-    componentWillUnmount() {
-        this._dispatcher.unmount(this._listener)
-    }
-
-    render() {
-        return <this._component {...this.state} />
-    }
-}
-
-function getter(appState) {
-    return appState
-}
-Factory(getter, ['todoApp'])
+const {Factory, Class, Getter} = Define
 
 class TodoStore {
     handle(state, action, payload) {
-        if (this[action]) {
-            return this[action].call(this, state, payload)
-        }
+        return this[action] && this[action].call(this, state, payload)
     }
 
-    loadProgress(state) {
-        info('loadProgress')
+    loadTodosProgress(state) {
+        info('loadTodosProgress')
         state.loading = true
 
         return state
     }
 
-    loadSuccess(state, todos) {
-        info('loadSuccess %o', todos)
-        state = todos
+    loadTodosSuccess(state, todos) {
+        info('loadTodosSuccess %o', todos)
+        state.todos = todos
         state.loading = false
 
         return state
     }
 
-    loadFail(state, err) {
-        info('loadFail %o', err)
+    loadTodosFail(state, err) {
+        info('loadTodosFail %o', err)
         state.loading = false
         state.error = err
 
@@ -82,19 +39,50 @@ class TodoStore {
     }
 }
 
-const creator = new ContainerCreator(NativeAdapter)
-const dispatcher = new Dispatcher(creator.create())
+class TodoActions {
+    constructor(dispatcher) {
+        this.dispatch = dispatcher.dispatch.bind(dispatcher)
+    }
 
-dispatcher.setStores({
-    todoApp: new TodoStore()
+    loadTodos({fromId}) {
+        // simulate fetch
+        return this.dispatch('loadTodos', Promise.resolve([
+            {name: 'todo-1', id: 1},
+            {name: 'todo-2', id: 2}
+        ]))
+    }
+}
+Class(TodoActions, [Dispatcher])
+
+function stateGetter(appState) {
+    return appState
+}
+Factory(stateGetter, ['todoApp'])
+Getter(stateGetter, {
+    actions: TodoActions,
+    dispatcher: Dispatcher,
+    state: stateGetter
 })
 
-dispatcher.once(getter, ({getter, state, dispatcher}) => {
+const el = document.getElementById('app')
+
+const dispatcher = new Dispatcher({
+    stores: {
+        todoApp: new TodoStore()
+    },
+    stateAdapter: new NativeAdapter()
+})
+
+dispatcher.once(stateGetter).then(({getter, deps}) => {
+    info('getter %o, getter: %o', deps, getter)
+    const {dispatcher, state, actions} = deps
     React.render((
         <Wrapper
+            context={{actions}}
             dispatcher={dispatcher}
             state={state}
             getter={getter}
+
             component={TodoList}
         />
     ), el)
@@ -107,10 +95,3 @@ dispatcher.setState({
         todos: []
     }
 })
-
-dispatcher.dispatch('load', Promise.resolve({
-    todos: [
-        {name: 'todo-1', id: 1},
-        {name: 'todo-2', id: 2}
-    ]
-}))

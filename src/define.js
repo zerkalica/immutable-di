@@ -78,7 +78,6 @@ function extractDef({id, handler, deps}) {
     }
 }
 
-
 const Annotation = {
     Class(Service, deps) {
         Service.__di = extractDef({
@@ -98,35 +97,20 @@ const Annotation = {
         return Service
     },
 
-    WaitFor(Service, deps) {
-        Service.__di.waitFor = processDeps(deps)
-        return Service
-    },
-
-    Def(Service, deps) {
-        Service.__di = extractDef(deps)
-        return Service
-    },
-
-    Store(Service, statePath, deps) {
-        Service.__di = extractDef({
-            id: getId(Service),
-            handler: classToFactory(Service),
-            deps: deps || {}
-        })
-        Service.__di.statePath = statePath
-        return Service
-    },
-
-    Action(Service, deps) {
-        WrapActionMethods(Service)
-        Service.__di = extractDef({
-            id: getId(Service),
-            handler: classToFactory(Service),
-            deps: deps || {}
+    Getter(Service, deps) {
+        const handler = deps => ({deps, getter: Service})
+        Service.__di.getter = Annotation.Def(handler, {
+            id: getId(Service) + '__getter',
+            handler,
+            deps: deps
         })
         return Service
-    }
+    },
+
+    Def(Service, definition) {
+        Service.__di = extractDef(definition)
+        return Service
+    },
 }
 
 const Promises = {
@@ -138,10 +122,8 @@ const Promises = {
 export default {
     getDef,
     Promises,
-    Store: Annotation.Store,
+    Getter: Annotation.Getter,
     Def: Annotation.Def,
     Class: Annotation.Class,
-    Action: Annotation.Action,
     Factory: Annotation.Factory,
-    WaitFor: Annotation.WaitFor
 }

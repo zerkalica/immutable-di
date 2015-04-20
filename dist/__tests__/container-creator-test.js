@@ -1,61 +1,20 @@
-"use strict";
+'use strict';
 
-var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
 
-var proxyquire = _interopRequire(require("proxyquire"));
+var _ContainerCreator = require('../container-creator');
 
-var NativeAdapter = _interopRequire(require("../state-adapters/native-adapter"));
+var _ContainerCreator2 = _interopRequireWildcard(_ContainerCreator);
 
-function getClass(methods) {
-    var Class = spy();
-    Class.prototype.constructor = Class;
-    (methods || []).forEach(function (method) {
-        Class.prototype[method] = spy();
-    });
+var _Container = require('../container');
 
-    return Class.prototype;
-}
+var _Container2 = _interopRequireWildcard(_Container);
 
-describe("container-creator", function () {
-    var Creator = undefined,
-        FakeContainer = undefined,
-        FakeMetaInfoCache = undefined,
-        FakeGenericAdapter = undefined,
-        testState = undefined;
+var _describe$it$spy$sinon$getClass = require('../test-helper');
 
-    beforeEach(function () {
-        testState = new NativeAdapter({
-            a: {
-                b: 123
-            }
-        });
-
-        FakeContainer = getClass(["get", "clear"]);
-        FakeMetaInfoCache = getClass();
-        FakeGenericAdapter = getClass();
-        Creator = proxyquire("../container-creator", {
-            "./container": FakeContainer.constructor,
-            "./meta-info-cache": FakeMetaInfoCache.constructor,
-            "./definition-adapters/generic-adapter": FakeGenericAdapter.constructor
-        });
-    });
-
-    it("should return factory for building ImmutableDi containers", function () {
-        var creator = new Creator();
-
-        creator.create.should.be.a("function");
-    });
-
-    it("should build ImmutableDi container", function () {
-        var creator = new Creator();
-        var m = sinon.match;
-        creator.create(testState);
-        FakeContainer.constructor.should.calledWith(m.has("state", testState).and(m.has("globalCache", m.instanceOf(Map))).and(m.has("metaInfoCache", m.instanceOf(FakeMetaInfoCache.constructor))));
-    });
-
-    it("should call get method of container", function () {
-        var di = new Creator().create(testState);
-        di.get("test2");
-        FakeContainer.get.should.have.been.calledWith("test2");
+_describe$it$spy$sinon$getClass.describe('container-creator', function () {
+    _describe$it$spy$sinon$getClass.it('should create new container', function () {
+        var creator = new _ContainerCreator2['default']();
+        creator.create().should.instanceOf(_Container2['default']);
     });
 });

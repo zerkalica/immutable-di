@@ -1,24 +1,16 @@
-"use strict";
+'use strict';
 
-var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } };
 
-var _prototypeProperties = function (child, staticProps, instanceProps) { if (staticProps) Object.defineProperties(child, staticProps); if (instanceProps) Object.defineProperties(child.prototype, instanceProps); };
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
 
-var Invoker = _interopRequire(require("./invoker"));
+var _getDebugPath$classToFactory$convertArgsToOptions = require('./utils');
 
-var _utils = require("./utils");
-
-var bindAll = _utils.bindAll;
-var getDebugPath = _utils.getDebugPath;
-var classToFactory = _utils.classToFactory;
-var convertArgsToOptions = _utils.convertArgsToOptions;
-
-var _define = require("./define");
-
-var Class = _define.Class;
-var getDef = _define.getDef;
+var _Class$getDef = require('./define');
 
 var Container = (function () {
     function Container(_ref) {
@@ -28,134 +20,115 @@ var Container = (function () {
         _classCallCheck(this, Container);
 
         var cache = this._cache = new Map();
-        cache.set("global", globalCache || new Map());
+        cache.set('global', globalCache || new Map());
         this._state = state;
         this._locks = new Map();
-        bindAll(this);
+
+        this.get = this.get.bind(this);
+        this.clear = this.clear.bind(this);
+        this.transformState = this.transformState.bind(this);
     }
 
-    _prototypeProperties(Container, null, {
-        clear: {
-            value: function clear(scope) {
-                this._getScope(scope).clear();
-            },
-            writable: true,
-            configurable: true
-        },
-        _getScope: {
-            value: function _getScope(scope) {
-                var cache = undefined;
-                if (!this._cache.has(scope)) {
-                    cache = new Map();
-                    this._cache.set(scope, cache);
-                } else {
-                    cache = this._cache.get(scope);
-                }
-                return cache;
-            },
-            writable: true,
-            configurable: true
-        },
-        transformState: {
-            value: function transformState(mutations) {
-                var _this = this;
+    _createClass(Container, [{
+        key: 'clear',
+        value: function clear(scope) {
+            this._getScope(scope).clear();
+        }
+    }, {
+        key: '_getScope',
+        value: function _getScope(scope) {
+            var cache = undefined;
+            if (!this._cache.has(scope)) {
+                cache = new Map();
+                this._cache.set(scope, cache);
+            } else {
+                cache = this._cache.get(scope);
+            }
+            return cache;
+        }
+    }, {
+        key: 'transformState',
+        value: function transformState(getState) {
+            var _this = this;
 
-                var updatedScopes = this._state.transformState(mutations);
-                updatedScopes.forEach(function (scope) {
-                    return _this.clear(scope);
-                });
-            },
-            writable: true,
-            configurable: true
-        },
-        createMethod: {
-            value: function createMethod(actionType, payload) {
-                var _this = this;
-
-                var getPayload = payload === undefined ? function (id) {
-                    return _this._state.get(id);
-                } : function () {
-                    return _this._payload;
-                };
-
-                return new Invoker({
-                    container: this,
-                    actionType: actionType,
-                    getPayload: getPayload
-                });
-            },
-            writable: true,
-            configurable: true
-        },
-        get: {
-            value: function get(definition, debugCtx) {
-                if (definition && this instanceof definition) {
+            this._state.transformState(getState).forEach(function (id) {
+                return _this.clear(id);
+            });
+        }
+    }, {
+        key: 'get',
+        value: function get(definition, debugCtx) {
+            if (definition) {
+                if (this instanceof definition) {
                     return this;
                 }
+            } else {
+                throw new Error('Getter is not a definition in ' + _getDebugPath$classToFactory$convertArgsToOptions.getDebugPath(debugCtx || []));
+            }
 
-                var _getDef = getDef(definition);
+            var def = _Class$getDef.getDef(definition);
+            if (!def) {
+                throw new Error('Property .__id not exist in ' + _getDebugPath$classToFactory$convertArgsToOptions.getDebugPath(debugCtx || []));
+            }
+            var id = def.id;
+            var handler = def.handler;
+            var deps = def.deps;
+            var scope = def.scope;
 
-                var id = _getDef.id;
-                var handler = _getDef.handler;
-                var deps = _getDef.deps;
-                var scope = _getDef.scope;
-
-                var debugPath = getDebugPath([debugCtx && debugCtx.length ? debugCtx[0] : [], id]);
-                var cache = this._getScope(scope);
-                var result = cache.get(id);
-                if (result !== undefined) {
-                    return result;
-                }
-
-                if (this._locks.get(id)) {
-                    throw new Error("Recursive call detected in " + debugPath);
-                }
-                this._locks.set(id, true);
-                var args = [];
-                var argNames = [];
-                for (var i = 0; i < deps.length; i++) {
-                    var dep = deps[i];
-                    var value = undefined;
-                    if (dep.path.length) {
-                        try {
-                            value = this._state.getIn(dep.path);
-                            if (value === undefined) {
-                                throw new Error("Value is undefined");
-                            }
-                        } catch (e) {
-                            e.message = e.message + " in " + debugPath + " [" + dep.path.join(".") + "]";
-                            throw e;
-                        }
-                    } else {
-                        value = this.get(dep.definition, [debugPath, i]);
-                        if (dep.promiseHandler) {
-                            value = dep.promiseHandler(value);
-                        }
-                    }
-
-                    args.push(value);
-                    if (dep.name) {
-                        argNames.push(dep.name);
-                    }
-                }
-
-                result = Promise.all(args).then(function (resolvedArgs) {
-                    return argNames.length ? handler(convertArgsToOptions(resolvedArgs, argNames)) : handler.apply(null, resolvedArgs);
-                });
-
-                this._locks.set(id, false);
-                cache.set(id, result);
-
+            var debugPath = _getDebugPath$classToFactory$convertArgsToOptions.getDebugPath([debugCtx && debugCtx.length ? debugCtx[0] : [], id]);
+            var cache = this._getScope(scope);
+            var result = cache.get(id);
+            if (result !== undefined) {
                 return result;
-            },
-            writable: true,
-            configurable: true
+            }
+
+            if (this._locks.get(id)) {
+                throw new Error('Recursive call detected in ' + debugPath);
+            }
+            this._locks.set(id, true);
+            var args = [];
+            var argNames = [];
+            for (var i = 0; i < deps.length; i++) {
+                var dep = deps[i];
+                var value = undefined;
+                if (dep.path) {
+                    try {
+                        value = this._state.getIn(dep.path);
+                        if (value === undefined) {
+                            throw new Error('Value is undefined in ' + dep.path);
+                        }
+                    } catch (e) {
+                        e.message = e.message + ' in ' + debugPath + ' [' + dep.path.join('.') + ']';
+                        throw e;
+                    }
+                } else {
+                    value = this.get(dep.definition, [debugPath, i]);
+                    if (dep.promiseHandler) {
+                        value = dep.promiseHandler(value);
+                    }
+                }
+
+                args.push(value);
+                if (dep.name) {
+                    argNames.push(dep.name);
+                }
+            }
+
+            result = Promise.all(args).then(function (resolvedArgs) {
+                return argNames.length ? handler(_getDebugPath$classToFactory$convertArgsToOptions.convertArgsToOptions(resolvedArgs, argNames)) : handler.apply(null, resolvedArgs);
+            });
+
+            this._locks.set(id, false);
+            cache.set(id, result);
+
+            return result;
         }
-    });
+    }]);
 
     return Container;
 })();
 
-module.exports = Container;
+exports['default'] = Container;
 
-Class(Container);
+_Class$getDef.Class(Container);
+module.exports = exports['default'];

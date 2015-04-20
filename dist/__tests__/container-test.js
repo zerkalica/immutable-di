@@ -1,100 +1,148 @@
-"use strict";
+'use strict';
 
-var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
 
-var _prototypeProperties = function (child, staticProps, instanceProps) { if (staticProps) Object.defineProperties(child, staticProps); if (instanceProps) Object.defineProperties(child.prototype, instanceProps); };
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } };
 
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-var Container = _interopRequire(require("../container"));
+var _ContainerCreator = require('../container-creator');
 
-var MetaInfoCache = _interopRequire(require("../meta-info-cache"));
+var _ContainerCreator2 = _interopRequireWildcard(_ContainerCreator);
 
-var NativeAdapter = _interopRequire(require("../state-adapters/native-adapter"));
+var _NativeAdapter = require('../state-adapters/native-adapter');
 
-var GenericAdapter = _interopRequire(require("../definition-adapters/generic-adapter"));
+var _NativeAdapter2 = _interopRequireWildcard(_NativeAdapter);
 
-var _mocks__FixtureDefinition = require("../__mocks__/fixture-definition");
+var _describe$it$spy$sinon$getClass = require('../test-helper');
 
-var testFunc = _mocks__FixtureDefinition.testFunc;
-var testObjectDeps = _mocks__FixtureDefinition.testObjectDeps;
+var _Factory$Class$Promises$WaitFor = require('../define');
 
-describe("container", function () {
+_describe$it$spy$sinon$getClass.describe('container', function () {
     var state = {
         state: { a: { b: 1, b1: 2 } },
         p: {
-            a: "test-state-val"
+            a: 'test-state-val'
         }
     };
-    var globalCache = undefined;
+    var creator = undefined;
     var container = undefined;
 
-    beforeEach(function () {
-        globalCache = new Map();
-        container = new Container({
-            state: new NativeAdapter(state),
-            metaInfoCache: new MetaInfoCache(GenericAdapter),
-            globalCache: globalCache
+    function depFn() {
+        return new Promise(function (resolve) {
+            return resolve('depFn.value');
         });
+    }
+    _Factory$Class$Promises$WaitFor.Factory(depFn);
+
+    function waitFn1() {}
+    _Factory$Class$Promises$WaitFor.Factory(waitFn1);
+
+    function waitFn2() {}
+    _Factory$Class$Promises$WaitFor.Factory(waitFn2);
+
+    var DepClass = (function () {
+        function DepClass() {
+            _classCallCheck(this, DepClass);
+        }
+
+        _createClass(DepClass, [{
+            key: 'test',
+            value: function test() {
+                return 'DepClass.value';
+            }
+        }]);
+
+        return DepClass;
+    })();
+
+    _Factory$Class$Promises$WaitFor.Class(DepClass, ['state.a.b']);
+
+    function testFunc(depClass, depFnValue) {
+        if (!(depClass instanceof DepClass)) {
+            throw new Error('arg is not an instance of DepClass');
+        }
+        return 'testFunc.value.' + depClass.test() + '.' + depFnValue;
+    }
+    _Factory$Class$Promises$WaitFor.Factory(testFunc, [DepClass, [depFn, _Factory$Class$Promises$WaitFor.Promises.ignore]]);
+    _Factory$Class$Promises$WaitFor.WaitFor(testFunc, [waitFn1, waitFn2]);
+
+    function testObjectDeps(_ref) {
+        var depClass = _ref.depClass;
+        var depFnValue = _ref.depFnValue;
+
+        if (!(depClass instanceof DepClass)) {
+            throw new Error('arg is not an instance of DepClass');
+        }
+        return 'testFunc.value.' + depClass.test() + '.' + depFnValue;
+    }
+    _Factory$Class$Promises$WaitFor.Factory(testObjectDeps, {
+        depFnValue: depFn,
+        depClass: DepClass
     });
 
-    describe("if wrong arguments passed", function () {
-        it("should throw exception if no argument passed", function () {
-            var msg = "Getter is not a definition in unk";
+    beforeEach(function () {
+        creator = new _ContainerCreator2['default']();
+        container = creator.create(new _NativeAdapter2['default'](state));
+    });
+
+    _describe$it$spy$sinon$getClass.describe('if wrong arguments passed', function () {
+        _describe$it$spy$sinon$getClass.it('should throw exception if no argument passed', function () {
+            var msg = 'Getter is not a definition in unk';
             (function () {
                 return container.get();
-            }).should["throw"](msg);
+            }).should['throw'](msg);
         });
 
-        it("should throw exception if null argument passed", function () {
-            var msg = "Getter is not a definition in unk";
+        _describe$it$spy$sinon$getClass.it('should throw exception if null argument passed', function () {
+            var msg = 'Getter is not a definition in unk';
             (function () {
                 return container.get(null);
-            }).should["throw"](msg);
+            }).should['throw'](msg);
             (function () {
-                return container.get("");
-            }).should["throw"](msg);
+                return container.get('');
+            }).should['throw'](msg);
             (function () {
                 return container.get(0);
-            }).should["throw"](msg);
+            }).should['throw'](msg);
             (function () {
                 return container.get(false);
-            }).should["throw"](msg);
+            }).should['throw'](msg);
         });
 
-        it("should throw exception if not service prototype passed", function () {
+        _describe$it$spy$sinon$getClass.it('should throw exception if not service prototype passed', function () {
             function TestService() {}
             (function () {
                 return container.get(TestService);
-            }).should["throw"]();
+            }).should['throw']();
         });
 
-        it("should throw exception if no service name defined", function () {
+        _describe$it$spy$sinon$getClass.it('should throw exception if no service name defined', function () {
             function TestService() {
                 return 123;
             }
             (function () {
                 return container.get(TestService);
-            }).should["throw"]("Property .__factory or .__class not exist in unk");
+            }).should['throw']('Property .__id not exist in unk');
         });
     });
 
-    describe("if correct service prototype passed", function () {
-        it("should instance simple service as promise", function () {
+    _describe$it$spy$sinon$getClass.describe('if correct service prototype passed', function () {
+        _describe$it$spy$sinon$getClass.it('should instance simple service as promise', function () {
             function TestService() {
                 return 1234;
             }
-            TestService.__factory = ["TestService"];
+            _Factory$Class$Promises$WaitFor.Factory(TestService);
             container.get(TestService).should.instanceOf(Promise);
         });
 
-        it("should resolve deps for simple class", function () {
+        _describe$it$spy$sinon$getClass.it('should resolve deps for simple class', function () {
             function testFactory() {
                 return new Promise(function (resolve) {
-                    return resolve("testFactory.value");
+                    return resolve('testFactory.value');
                 });
             }
-            testFactory.__factory = ["testFactory"];
+            _Factory$Class$Promises$WaitFor.Factory(testFactory);
 
             var TestClass = (function () {
                 function TestClass(testFactoryValue) {
@@ -103,91 +151,88 @@ describe("container", function () {
                     this.tfv = testFactoryValue;
                 }
 
-                TestClass.__class = ["TestClass", testFactory];
-
-                _prototypeProperties(TestClass, null, {
-                    get: {
-                        value: function get() {
-                            return "TestClass." + this.tfv;
-                        },
-                        writable: true,
-                        configurable: true
+                _createClass(TestClass, [{
+                    key: 'get',
+                    value: function get() {
+                        return 'TestClass.' + this.tfv;
                     }
-                });
+                }]);
 
                 return TestClass;
             })();
 
+            _Factory$Class$Promises$WaitFor.Class(TestClass, [testFactory]);
             var v = container.get(TestClass).then(function (testClass) {
                 return testClass.get();
             });
 
-            return v.should.eventually.to.equal("TestClass.testFactory.value");
+            return v.should.eventually.to.equal('TestClass.testFactory.value');
         });
 
-        it("should instance complex service with deps and return value", function () {
-            return container.get(testFunc).should.eventually.to.equal("testFunc.value.DepClass.value.depFn.value");
+        _describe$it$spy$sinon$getClass.it('should instance complex service with deps and return value', function () {
+            return container.get(testFunc).should.eventually.to.equal('testFunc.value.DepClass.value.depFn.value');
         });
 
-        it("should instance complex service with deps as object and return value", function () {
-            return container.get(testObjectDeps).should.eventually.to.equal("testFunc.value.DepClass.value.depFn.value");
+        _describe$it$spy$sinon$getClass.it('should instance complex service with deps as object and return value', function () {
+            return container.get(testObjectDeps).should.eventually.to.equal('testFunc.value.DepClass.value.depFn.value');
         });
 
-        it("should resolve state path as dep", function () {
-            var exampleValue = "test-va";
+        _describe$it$spy$sinon$getClass.it('should resolve state path as dep', function () {
+            var exampleValue = 'test-va';
 
             function Dep(pa) {
-                return exampleValue + "." + pa;
+                return exampleValue + '.' + pa;
             }
-            Dep.__factory = ["Dep", "p.a"];
+            _Factory$Class$Promises$WaitFor.Factory(Dep, ['p.a']);
 
-            return container.get(Dep).should.eventually.equal(exampleValue + "." + state.p.a);
+            return container.get(Dep).should.eventually.equal(exampleValue + '.' + state.p.a);
         });
 
-        it("should throw error, if path not found in state", function () {
-            var exampleValue = "test-va";
+        _describe$it$spy$sinon$getClass.it('should throw error, if path not found in state', function () {
+            var exampleValue = 'test-va';
 
             function Dep(pa) {
-                return exampleValue + "." + pa;
+                return exampleValue + '.' + pa;
             }
-            Dep.__factory = ["Dep", ["f", "a"]];
-            (function () {
+            _Factory$Class$Promises$WaitFor.Factory(Dep, 'f.a');
+            return (function () {
                 return container.get(Dep);
-            }).should["throw"]();
+            }).should['throw']();
         });
 
-        it("should instance simple service and put it in global cache", function () {
-            var exampleValue = "test";
+        _describe$it$spy$sinon$getClass.it('should instance simple service and put it in global cache', function () {
+            var exampleValue = 'test';
             function TestService2() {
                 return new Promise(function (resolve) {
                     return resolve(exampleValue);
                 });
             }
-            TestService2.__factory = ["TestService2"];
+            _Factory$Class$Promises$WaitFor.Factory(TestService2);
             container.get(TestService2);
+            var globalCache = creator._globalCache;
 
-            return globalCache.get("TestService2").should.eventually.equal(exampleValue);
+            return globalCache.get(TestService2.__di.id).should.eventually.equal(exampleValue);
         });
 
-        it("should instance simple service and put it in state cache", function () {
-            var exampleValue = "test-va";
+        _describe$it$spy$sinon$getClass.it('should instance simple service and put it in state cache', function () {
+            var exampleValue = 'test-va';
 
             function Dep(pa) {
-                return exampleValue + "." + pa;
+                return exampleValue + '.' + pa;
             }
-            Dep.__factory = ["Dep", "p.a"];
+            _Factory$Class$Promises$WaitFor.Factory(Dep, ['p.a']);
 
             container.get(Dep);
 
-            var localCache = container._cache.get("p");
+            var localCache = container._cache.get('p');
             localCache.should.to.be.instanceOf(Map);
 
-            return localCache.get("Dep").should.eventually.equal(exampleValue + "." + state.p.a);
+            return localCache.get(Dep.__di.id).should.eventually.equal(exampleValue + '.' + state.p.a);
         });
 
-        it("should use cache, if called twice or more", function () {
-            var Dep = spy();
-            Dep.__factory = ["Dep", "p.a"];
+        _describe$it$spy$sinon$getClass.it('should use cache, if called twice or more', function () {
+            var Dep = _describe$it$spy$sinon$getClass.spy();
+            _Factory$Class$Promises$WaitFor.Factory(Dep, ['p.a']);
 
             return container.get(Dep).then(function (d) {
                 return container.get(Dep);
@@ -196,45 +241,45 @@ describe("container", function () {
             });
         });
 
-        it("should compute state-depended value again after clear cache", function () {
-            var Dep = spy();
-            Dep.__factory = ["Dep", "p.a"];
+        _describe$it$spy$sinon$getClass.it('should compute state-depended value again after clear cache', function () {
+            var Dep = _describe$it$spy$sinon$getClass.spy();
+            _Factory$Class$Promises$WaitFor.Factory(Dep, ['p.a']);
 
             return container.get(Dep).then(function (d) {
-                container.clear("p");
+                container.clear('p');
                 return container.get(Dep);
             }).then(function (d) {
                 Dep.should.have.been.calledTwice;
             });
         });
 
-        it("should compute global-depended value again after clear cache", function () {
-            var Dep = spy();
-            Dep.__factory = ["Dep"];
+        _describe$it$spy$sinon$getClass.it('should compute global-depended value again after clear cache', function () {
+            var Dep = _describe$it$spy$sinon$getClass.spy();
+            _Factory$Class$Promises$WaitFor.Factory(Dep);
 
             return container.get(Dep).then(function (d) {
-                container.clear("global");
+                container.clear('global');
                 return container.get(Dep);
             }).then(function (d) {
                 Dep.should.have.been.calledTwice;
             });
         });
 
-        it("should create invoker instance", function () {
+        _describe$it$spy$sinon$getClass.it('should create invoker instance', function () {
             var testPayload = { test: 123 };
-            var testAction = "testAction";
-            container.createMethod(testAction, testPayload).handle.should.be.a["function"];
+            var testAction = 'testAction';
+            container.createMethod(testAction, testPayload).handle.should.be.a['function'];
         });
 
-        it("should transform state", function () {
-            var depFn = spy();
-            var Dep = function (state) {
+        _describe$it$spy$sinon$getClass.it('should transform state', function () {
+            var depFn = _describe$it$spy$sinon$getClass.spy();
+            var Dep = function Dep(state) {
                 depFn();
                 return state;
             };
-            Dep.__factory = ["Dep", "state"];
+            _Factory$Class$Promises$WaitFor.Factory(Dep, ['state']);
             var mutations = [{
-                id: "state", data: { a: { b: 2 } }
+                id: 'state', data: { a: { b: 2 } }
             }];
 
             return container.get(Dep).then(function (data) {
@@ -252,47 +297,47 @@ describe("container", function () {
         });
     });
 
-    describe("exception handling", function () {
-        it("should return empty data, if service throws exception", function () {
-            var exampleValue = "test-va";
+    _describe$it$spy$sinon$getClass.describe('exception handling', function () {
+        _describe$it$spy$sinon$getClass.it('should return empty data, if service throws exception', function () {
+            var exampleValue = 'test-va';
             var testFallback = {
-                test: "123"
+                test: '123'
             };
             function Dep(context) {
-                throw new Error("test");
+                throw new Error('test');
                 return exampleValue;
             }
-            Dep.__factory = ["Dep", "p.a"];
+            _Factory$Class$Promises$WaitFor.Factory(Dep, ['p.a']);
 
             function TestService(dep) {
                 return new Promise.resolve(dep);
             }
-            TestService.__factory = ["TestService", [Dep, function (p) {
-                return p["catch"](function (err) {
+            _Factory$Class$Promises$WaitFor.Factory(TestService, [[Dep, function (p) {
+                return p['catch'](function (err) {
                     return testFallback;
                 });
-            }]];
-            expect(container.get(TestService)).eventually.deep.equal(testFallback);
+            }]]);
+
+            container.get(TestService).should.eventually.deep.equal(testFallback);
         });
 
-        it("should filter exception, if service throws custom exception", function () {
+        _describe$it$spy$sinon$getClass.it('should filter exception, if service throws custom exception', function () {
             var testErr = { test: 123 };
             function Dep() {
-                throw new ReferenceError("test");
+                throw new ReferenceError('test');
             }
-            Dep.__factory = ["Dep"];
+            _Factory$Class$Promises$WaitFor.Factory(Dep);
+
             function TestService(dep) {
                 return new Promise.resolve(dep);
             }
-            TestService.__factory = ["TestService", [Dep, function (p) {
-                return p["catch"](ReferenceError, function (err) {
+            _Factory$Class$Promises$WaitFor.Factory(TestService, [[Dep, function (p) {
+                return p['catch'](ReferenceError, function (err) {
                     return testErr;
                 });
-            }]];
+            }]]);
 
-            expect(container.get(TestService)).eventually.deep.equal(testErr);
+            container.get(TestService).should.eventually.deep.equal(testErr);
         });
     });
 });
-//container.createMethod(testAction, testPayload).handle(store)
-//  container.createMethod(testAction, testPayload).handle.should

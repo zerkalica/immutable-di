@@ -1,29 +1,40 @@
-"use strict";
+'use strict';
 
-var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
 
-var ContainerCreator = _interopRequire(require("./container-creator"));
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
 
-var Container = _interopRequire(require("./container"));
+var _ContainerCreator = require('./container-creator');
 
-var NativeState = _interopRequire(require("./state-adapters/native-adapter"));
+var _ContainerCreator2 = _interopRequireWildcard(_ContainerCreator);
 
-var ReactRenderer = _interopRequire(require("./flux/renderers/react-renderer"));
+var _Container = require('./container');
 
-var WrapActionMethods = _interopRequire(require("./flux/wrap-action-methods"));
+var _Container2 = _interopRequireWildcard(_Container);
 
-var Dispatcher = _interopRequire(require("./flux/dispatcher"));
+var _NativeAdapter = require('./state-adapters/native-adapter');
 
-var Renderer = _interopRequire(require("./flux/renderer"));
+var _NativeAdapter2 = _interopRequireWildcard(_NativeAdapter);
 
-var Define = _interopRequire(require("./define"));
+var _WrapActionMethods = require('./flux/wrap-action-methods');
 
-module.exports = {
-    Define: Define,
-    ContainerCreator: ContainerCreator,
-    Container: Container,
-    NativeState: NativeState,
-    ReactRenderer: ReactRenderer,
-    Dispatcher: Dispatcher,
-    Renderer: Renderer
+var _WrapActionMethods2 = _interopRequireWildcard(_WrapActionMethods);
+
+var _Dispatcher = require('./flux/dispatcher');
+
+var _Dispatcher2 = _interopRequireWildcard(_Dispatcher);
+
+var _Define = require('./define');
+
+var _Define2 = _interopRequireWildcard(_Define);
+
+exports['default'] = {
+    Define: _Define2['default'],
+    ContainerCreator: _ContainerCreator2['default'],
+    Container: _Container2['default'],
+    NativeAdapter: _NativeAdapter2['default'],
+    Dispatcher: _Dispatcher2['default']
 };
+module.exports = exports['default'];

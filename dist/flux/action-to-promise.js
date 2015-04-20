@@ -1,31 +1,36 @@
-"use strict";
+'use strict';
 
-module.exports = actionToPromise;
-function actionToPromise(actionType, payload) {
-    var actionItem = undefined;
-    if (typeof payload === "object" && typeof payload.then === "function") {
-        actionItem = payload.then(function (payload) {
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+exports['default'] = actionToPromise;
+
+function actionToPromise(action, payload) {
+    var actionPromises = [];
+    if (typeof payload === 'object' && typeof payload.then === 'function') {
+        actionPromises.push(Promise.resolve({
+            action: action + 'Progress',
+            payload: {}
+        }));
+        actionPromises.push(payload.then(function (payload) {
             return {
-                actionType: actionType,
-                payload: payload,
-                isError: false,
-                isPromise: true
+                action: action + 'Success',
+                payload: payload
             };
-        })["catch"](function (err) {
+        })['catch'](function (err) {
             return {
-                actionType: actionType,
-                payload: err,
-                isError: true,
-                isPromise: true
+                action: action + 'Fail',
+                payload: err
             };
-        });
+        }));
     } else {
-        actionItem = Promise.resolve({
-            actionType: actionType,
-            payload: payload,
-            isError: false,
-            isPromise: false
-        });
+        actionPromises.push(Promise.resolve({
+            action: action,
+            payload: payload
+        }));
     }
-    return actionItem;
+
+    return actionPromises;
 }
+
+module.exports = exports['default'];
