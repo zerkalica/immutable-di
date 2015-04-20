@@ -16,59 +16,43 @@ _describe$it$spy$sinon$getClass.describe('flux/dispatcher', function () {
 
     var Store1 = undefined;
     var Store2 = undefined;
-    var fakeStoreHandle = undefined;
     var fakeTransformState = undefined;
-    var fakeCreateMethod = undefined;
     var fakeGet = undefined;
 
     var testAction = 'test';
     var testPayload = { test: 111 };
 
     beforeEach(function () {
-        fakeStoreHandle = _describe$it$spy$sinon$getClass.spy();
         fakeTransformState = _describe$it$spy$sinon$getClass.spy();
-        fakeCreateMethod = _describe$it$spy$sinon$getClass.spy();
         fakeGet = _describe$it$spy$sinon$getClass.spy();
         container = {
             transformState: fakeTransformState,
             get: function get(def) {
                 fakeGet(def);
                 return def();
-            },
-            createMethod: function createMethod() {
-                for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-                    args[_key] = arguments[_key];
-                }
-
-                fakeCreateMethod.apply(undefined, args);
-                return {
-                    handle: function handle(store) {
-                        fakeStoreHandle(store);
-                        return { id: 'test', data: { test: 1 } };
-                    }
-                };
             }
         };
-        dispatcher = new _Dispatcher2['default'](container);
         Store1 = _describe$it$spy$sinon$getClass.getClass(['handle']);
         _Factory$Class$Promises$WaitFor.Class(Store1);
         Store2 = _describe$it$spy$sinon$getClass.getClass(['handle']);
         _Factory$Class$Promises$WaitFor.Class(Store2);
-        dispatcher.setStores([Store1, Store2]);
+
+        dispatcher = new _Dispatcher2['default']({
+            stores: {
+                Store1: Store1,
+                Store2: Store2
+            },
+            container: container
+        });
     });
 
     _describe$it$spy$sinon$getClass.describe('dispatch', function () {
-        _describe$it$spy$sinon$getClass.it('should create invoker instance if action dispatched', function () {
-            return dispatcher.dispatch(testAction, testPayload).then(function () {
-                fakeCreateMethod.should.have.been.calledOnce.and.calledWith(testAction, testPayload);
-            });
-        });
 
         _describe$it$spy$sinon$getClass.it('should pass stores to handle', function () {
             return dispatcher.dispatch(testAction, testPayload).then(function () {
-                fakeStoreHandle.should.have.been.calledTwice;
-                fakeStoreHandle.firstCall.should.calledWith(Store1);
-                fakeStoreHandle.secondCall.should.calledWith(Store2);
+                fakeTransformState.should.have.been.calledOnce;
+                //fakeStoreHandle.firstCall.should.calledWith(Store1)
+                //fakeStoreHandle.secondCall.should.calledWith(Store2)
             });
         });
     });

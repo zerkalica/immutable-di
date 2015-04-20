@@ -4,6 +4,8 @@ var gmocha = require('gulp-mocha');
 var notifier = require('node-notifier');
 var path = require('path');
 var minimist = require('minimist');
+var del = require('del');
+var gutil = require('gulp-util');
 
 var knownOptions = {
   string: ['env', 'tests'],
@@ -50,6 +52,25 @@ var config = getConfig(process.argv.slice(2));
 require('babel-core/register')(config.babel);
 require('babel-core/polyfill');
 
+function clean(out) {
+    return function doClean(done) {
+        del(out, function(err, deletedFiles) {
+            if (err) {
+                throw new gutil.PluginError('clean', err);
+            }
+            gutil.log('[clean]', deletedFiles.join(', ').toString({
+                colors: true,
+                version: false,
+                hash: false,
+                timings: false,
+                chunks: false,
+                chunkModules: false
+            }));
+            done();
+        });
+    }
+}
+
 function runTest(src) {
     return gulp.src(src, {read: false})
         .pipe(gmocha(config.mocha))
@@ -85,6 +106,8 @@ gulp.task('build:dist', function () {
 
 gulp.task('test', gulp.series('test-src'));
 
-gulp.task('build', gulp.series('build:dist', 'test-dist'));
+gulp.task('clean', clean(config.dest.scripts));
+
+gulp.task('build', gulp.series('clean', 'build:dist', 'test-dist'));
 
 gulp.task('default', gulp.series('build'));

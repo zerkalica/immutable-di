@@ -4,7 +4,7 @@ var _createClass = (function () { function defineProperties(target, props) { for
 
 var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } };
 
-var _getDef$Def$Class$Factory$WaitFor = require('../define');
+var _getDef$Def$Class$Factory = require('../define');
 
 var _describe$it$spy = require('../test-helper');
 
@@ -16,13 +16,13 @@ _describe$it$spy.describe('define', function () {
 
         TestSrv.__di = 'test';
 
-        _getDef$Def$Class$Factory$WaitFor.getDef(TestSrv).should.to.be.equal('test');
+        _getDef$Def$Class$Factory.getDef(TestSrv).should.to.be.equal('test');
     });
 
     _describe$it$spy.it('Def should create empty service', function () {
         function fn() {}
         var deps = {};
-        _getDef$Def$Class$Factory$WaitFor.Def(function (p) {
+        _getDef$Def$Class$Factory.Def(function (p) {
             return p;
         }, { id: 'test-id', handler: fn, deps: deps }).should.to.be.a('function');
     });
@@ -32,13 +32,13 @@ _describe$it$spy.describe('define', function () {
             _classCallCheck(this, T1);
         };
 
-        _getDef$Def$Class$Factory$WaitFor.Class(T1);
+        _getDef$Def$Class$Factory.Class(T1);
         T1.__di.should.to.be.include.keys(['id', 'handler', 'scope', 'deps']);
     });
 
     _describe$it$spy.it('Factory should define class service', function () {
         function F1() {}
-        _getDef$Def$Class$Factory$WaitFor.Factory(F1);
+        _getDef$Def$Class$Factory.Factory(F1);
         F1.__di.should.to.be.include.keys(['id', 'handler', 'scope', 'deps']);
     });
 
@@ -48,7 +48,7 @@ _describe$it$spy.describe('define', function () {
                 return resolve('depFn.value');
             });
         }
-        _getDef$Def$Class$Factory$WaitFor.Factory(depFn);
+        _getDef$Def$Class$Factory.Factory(depFn);
 
         var DepClass = (function () {
             function DepClass() {
@@ -65,7 +65,7 @@ _describe$it$spy.describe('define', function () {
             return DepClass;
         })();
 
-        _getDef$Def$Class$Factory$WaitFor.Class(DepClass, ['state.a.b']);
+        _getDef$Def$Class$Factory.Class(DepClass, ['state.a.b']);
 
         function testObjectDeps(_ref) {
             var depClass = _ref.depClass;
@@ -83,7 +83,7 @@ _describe$it$spy.describe('define', function () {
             });
         }
 
-        _getDef$Def$Class$Factory$WaitFor.Factory(testObjectDeps, {
+        _getDef$Def$Class$Factory.Factory(testObjectDeps, {
             depFnValue: depFn,
             depClass: [DepClass, ph]
         });
@@ -102,62 +102,5 @@ _describe$it$spy.describe('define', function () {
         def.should.have.deep.property('deps.1.promiseHandler', ph);
         def.should.have.deep.property('deps.1.path', null);
         def.should.have.deep.property('deps.1.definition', DepClass);
-    });
-
-    _describe$it$spy.it('should produce valid waitFor', function () {
-        var TestDep1 = (function () {
-            function TestDep1() {
-                _classCallCheck(this, TestDep1);
-            }
-
-            _createClass(TestDep1, [{
-                key: 'handle',
-                value: function handle(actionType, payload) {
-                    return Promise.resolve(1);
-                }
-            }]);
-
-            return TestDep1;
-        })();
-
-        _getDef$Def$Class$Factory$WaitFor.Class(TestDep1);
-
-        var TestDep2 = (function () {
-            function TestDep2() {
-                _classCallCheck(this, TestDep2);
-            }
-
-            _createClass(TestDep2, [{
-                key: 'handle',
-                value: function handle(actionType, payload) {
-                    return Promise.resolve(2);
-                }
-            }]);
-
-            return TestDep2;
-        })();
-
-        _getDef$Def$Class$Factory$WaitFor.Class(TestDep2);
-        _getDef$Def$Class$Factory$WaitFor.WaitFor(TestDep2, [TestDep1]);
-
-        var TestStore = (function () {
-            function TestStore() {
-                _classCallCheck(this, TestStore);
-            }
-
-            _createClass(TestStore, [{
-                key: 'handle',
-                value: function handle(actionType, payload) {
-                    return Promise.resolve(3);
-                }
-            }]);
-
-            return TestStore;
-        })();
-
-        _getDef$Def$Class$Factory$WaitFor.Class(TestStore);
-        _getDef$Def$Class$Factory$WaitFor.WaitFor(TestStore, [TestDep2, TestDep1]);
-        TestStore.__di.should.have.deep.property('waitFor.0.definition', TestDep2);
-        TestStore.__di.should.have.deep.property('waitFor.1.definition', TestDep1);
     });
 });

@@ -16,7 +16,7 @@ var _NativeAdapter2 = _interopRequireWildcard(_NativeAdapter);
 
 var _describe$it$spy$sinon$getClass = require('../test-helper');
 
-var _Factory$Class$Promises$WaitFor = require('../define');
+var _Factory$Class$Promises = require('../define');
 
 _describe$it$spy$sinon$getClass.describe('container', function () {
     var state = {
@@ -33,13 +33,7 @@ _describe$it$spy$sinon$getClass.describe('container', function () {
             return resolve('depFn.value');
         });
     }
-    _Factory$Class$Promises$WaitFor.Factory(depFn);
-
-    function waitFn1() {}
-    _Factory$Class$Promises$WaitFor.Factory(waitFn1);
-
-    function waitFn2() {}
-    _Factory$Class$Promises$WaitFor.Factory(waitFn2);
+    _Factory$Class$Promises.Factory(depFn);
 
     var DepClass = (function () {
         function DepClass() {
@@ -56,7 +50,7 @@ _describe$it$spy$sinon$getClass.describe('container', function () {
         return DepClass;
     })();
 
-    _Factory$Class$Promises$WaitFor.Class(DepClass, ['state.a.b']);
+    _Factory$Class$Promises.Class(DepClass, ['state.a.b']);
 
     function testFunc(depClass, depFnValue) {
         if (!(depClass instanceof DepClass)) {
@@ -64,8 +58,7 @@ _describe$it$spy$sinon$getClass.describe('container', function () {
         }
         return 'testFunc.value.' + depClass.test() + '.' + depFnValue;
     }
-    _Factory$Class$Promises$WaitFor.Factory(testFunc, [DepClass, [depFn, _Factory$Class$Promises$WaitFor.Promises.ignore]]);
-    _Factory$Class$Promises$WaitFor.WaitFor(testFunc, [waitFn1, waitFn2]);
+    _Factory$Class$Promises.Factory(testFunc, [DepClass, [depFn, _Factory$Class$Promises.Promises.ignore]]);
 
     function testObjectDeps(_ref) {
         var depClass = _ref.depClass;
@@ -76,14 +69,14 @@ _describe$it$spy$sinon$getClass.describe('container', function () {
         }
         return 'testFunc.value.' + depClass.test() + '.' + depFnValue;
     }
-    _Factory$Class$Promises$WaitFor.Factory(testObjectDeps, {
+    _Factory$Class$Promises.Factory(testObjectDeps, {
         depFnValue: depFn,
         depClass: DepClass
     });
 
     beforeEach(function () {
-        creator = new _ContainerCreator2['default']();
-        container = creator.create(new _NativeAdapter2['default'](state));
+        creator = new _ContainerCreator2['default'](_NativeAdapter2['default']);
+        container = creator.create(state);
     });
 
     _describe$it$spy$sinon$getClass.describe('if wrong arguments passed', function () {
@@ -132,7 +125,7 @@ _describe$it$spy$sinon$getClass.describe('container', function () {
             function TestService() {
                 return 1234;
             }
-            _Factory$Class$Promises$WaitFor.Factory(TestService);
+            _Factory$Class$Promises.Factory(TestService);
             container.get(TestService).should.instanceOf(Promise);
         });
 
@@ -142,7 +135,7 @@ _describe$it$spy$sinon$getClass.describe('container', function () {
                     return resolve('testFactory.value');
                 });
             }
-            _Factory$Class$Promises$WaitFor.Factory(testFactory);
+            _Factory$Class$Promises.Factory(testFactory);
 
             var TestClass = (function () {
                 function TestClass(testFactoryValue) {
@@ -161,7 +154,7 @@ _describe$it$spy$sinon$getClass.describe('container', function () {
                 return TestClass;
             })();
 
-            _Factory$Class$Promises$WaitFor.Class(TestClass, [testFactory]);
+            _Factory$Class$Promises.Class(TestClass, [testFactory]);
             var v = container.get(TestClass).then(function (testClass) {
                 return testClass.get();
             });
@@ -183,7 +176,7 @@ _describe$it$spy$sinon$getClass.describe('container', function () {
             function Dep(pa) {
                 return exampleValue + '.' + pa;
             }
-            _Factory$Class$Promises$WaitFor.Factory(Dep, ['p.a']);
+            _Factory$Class$Promises.Factory(Dep, ['p.a']);
 
             return container.get(Dep).should.eventually.equal(exampleValue + '.' + state.p.a);
         });
@@ -194,7 +187,7 @@ _describe$it$spy$sinon$getClass.describe('container', function () {
             function Dep(pa) {
                 return exampleValue + '.' + pa;
             }
-            _Factory$Class$Promises$WaitFor.Factory(Dep, 'f.a');
+            _Factory$Class$Promises.Factory(Dep, 'f.a');
             return (function () {
                 return container.get(Dep);
             }).should['throw']();
@@ -207,7 +200,7 @@ _describe$it$spy$sinon$getClass.describe('container', function () {
                     return resolve(exampleValue);
                 });
             }
-            _Factory$Class$Promises$WaitFor.Factory(TestService2);
+            _Factory$Class$Promises.Factory(TestService2);
             container.get(TestService2);
             var globalCache = creator._globalCache;
 
@@ -220,7 +213,7 @@ _describe$it$spy$sinon$getClass.describe('container', function () {
             function Dep(pa) {
                 return exampleValue + '.' + pa;
             }
-            _Factory$Class$Promises$WaitFor.Factory(Dep, ['p.a']);
+            _Factory$Class$Promises.Factory(Dep, ['p.a']);
 
             container.get(Dep);
 
@@ -232,7 +225,7 @@ _describe$it$spy$sinon$getClass.describe('container', function () {
 
         _describe$it$spy$sinon$getClass.it('should use cache, if called twice or more', function () {
             var Dep = _describe$it$spy$sinon$getClass.spy();
-            _Factory$Class$Promises$WaitFor.Factory(Dep, ['p.a']);
+            _Factory$Class$Promises.Factory(Dep, ['p.a']);
 
             return container.get(Dep).then(function (d) {
                 return container.get(Dep);
@@ -243,7 +236,7 @@ _describe$it$spy$sinon$getClass.describe('container', function () {
 
         _describe$it$spy$sinon$getClass.it('should compute state-depended value again after clear cache', function () {
             var Dep = _describe$it$spy$sinon$getClass.spy();
-            _Factory$Class$Promises$WaitFor.Factory(Dep, ['p.a']);
+            _Factory$Class$Promises.Factory(Dep, ['p.a']);
 
             return container.get(Dep).then(function (d) {
                 container.clear('p');
@@ -255,7 +248,7 @@ _describe$it$spy$sinon$getClass.describe('container', function () {
 
         _describe$it$spy$sinon$getClass.it('should compute global-depended value again after clear cache', function () {
             var Dep = _describe$it$spy$sinon$getClass.spy();
-            _Factory$Class$Promises$WaitFor.Factory(Dep);
+            _Factory$Class$Promises.Factory(Dep);
 
             return container.get(Dep).then(function (d) {
                 container.clear('global');
@@ -265,27 +258,25 @@ _describe$it$spy$sinon$getClass.describe('container', function () {
             });
         });
 
-        _describe$it$spy$sinon$getClass.it('should create invoker instance', function () {
-            var testPayload = { test: 123 };
-            var testAction = 'testAction';
-            container.createMethod(testAction, testPayload).handle.should.be.a['function'];
-        });
-
         _describe$it$spy$sinon$getClass.it('should transform state', function () {
             var depFn = _describe$it$spy$sinon$getClass.spy();
             var Dep = function Dep(state) {
                 depFn();
                 return state;
             };
-            _Factory$Class$Promises$WaitFor.Factory(Dep, ['state']);
-            var mutations = [{
-                id: 'state', data: { a: { b: 2 } }
-            }];
+            _Factory$Class$Promises.Factory(Dep, ['state']);
 
             return container.get(Dep).then(function (data) {
                 data.should.be.deep.equal({ a: { b: 1, b1: 2 } });
 
-                container.transformState(mutations);
+                container.transformState(function (_ref2) {
+                    var get = _ref2.get;
+                    var set = _ref2.set;
+
+                    set('state', { a: { b: 2 } });
+
+                    return ['state'];
+                });
                 return container.get(Dep);
             }).then(function (data) {
                 container.get(Dep);
@@ -307,12 +298,12 @@ _describe$it$spy$sinon$getClass.describe('container', function () {
                 throw new Error('test');
                 return exampleValue;
             }
-            _Factory$Class$Promises$WaitFor.Factory(Dep, ['p.a']);
+            _Factory$Class$Promises.Factory(Dep, ['p.a']);
 
             function TestService(dep) {
                 return new Promise.resolve(dep);
             }
-            _Factory$Class$Promises$WaitFor.Factory(TestService, [[Dep, function (p) {
+            _Factory$Class$Promises.Factory(TestService, [[Dep, function (p) {
                 return p['catch'](function (err) {
                     return testFallback;
                 });
@@ -326,12 +317,12 @@ _describe$it$spy$sinon$getClass.describe('container', function () {
             function Dep() {
                 throw new ReferenceError('test');
             }
-            _Factory$Class$Promises$WaitFor.Factory(Dep);
+            _Factory$Class$Promises.Factory(Dep);
 
             function TestService(dep) {
                 return new Promise.resolve(dep);
             }
-            _Factory$Class$Promises$WaitFor.Factory(TestService, [[Dep, function (p) {
+            _Factory$Class$Promises.Factory(TestService, [[Dep, function (p) {
                 return p['catch'](ReferenceError, function (err) {
                     return testErr;
                 });

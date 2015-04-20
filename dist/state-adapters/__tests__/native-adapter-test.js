@@ -35,10 +35,14 @@ _describe$it$expect.describe('state-adapters/native-adapter', function () {
     });
 
     _describe$it$expect.it('should transformState', function () {
-        var mutation = { id: 'a', data: { c: 'test' } };
         var nativeAdapter = new _NativeAdapter2['default'](testState);
         nativeAdapter.getIn(['a', 'b']).should.to.be.deep.equal(testState.a.b);
-        nativeAdapter.transformState([mutation]);
+        nativeAdapter.transformState(function (_ref) {
+            var get = _ref.get;
+            var set = _ref.set;
+
+            set('a', { c: 'test' });
+        });
         nativeAdapter.getIn(['a', 'c']).should.to.equal('test');
     });
 });
