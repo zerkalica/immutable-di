@@ -111,6 +111,6 @@ container.get(Dispatcher).then(dispatcher => {
         }
     })
     const todoActions = new TodoActions(dispatcher)
-    todoActions.addTodo({name : 'todo-new', id: 333})
+    todoActions.addTodo({name: 'todo-new', id: 333})
     todoActions.loadTodos()
 })

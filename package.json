@@ -11,6 +11,7 @@
   },
   "author": "Stefan Zerkalica <zerkalica@gmail.com>",
   "license": "MIT",
+  "main": "immutable-di.js",
   "repository": {
     "type": "git",
     "url": "http://github.com/zerkalica/immutable-di.git"
