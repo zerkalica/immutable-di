@@ -109,24 +109,17 @@ var Dispatcher = (function () {
     }, {
         key: 'mount',
         value: function mount(definition, listener) {
-            info('mount definition: %o', definition);
-
             var _getDef = _Class$Def$getDef.getDef(definition);
 
             var id = _getDef.id;
 
-            var listenerDef = _Class$Def$getDef.Def(function (p) {
-                return p;
-            }, {
+            var handler = function handler(p) {
+                return listener(p);
+            };
+            var listenerDef = _Class$Def$getDef.Def(handler, {
                 id: id + '__listener',
                 deps: [definition],
-                handler: function handler() {
-                    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-                        args[_key] = arguments[_key];
-                    }
-
-                    return listener.apply(undefined, args);
-                }
+                handler: handler
             });
             this._listeners.push(listenerDef);
 
@@ -135,42 +128,30 @@ var Dispatcher = (function () {
     }, {
         key: 'unmount',
         value: function unmount(listenerDef) {
-            info('mount definition: %o', listenerDef);
             this._listeners = this._listeners.filter(function (d) {
                 return listenerDef !== d;
             });
         }
     }, {
         key: 'once',
-        value: function once(definition) {
+        value: function once(definition, resolve) {
             var _this4 = this;
 
             var _getDef2 = _Class$Def$getDef.getDef(definition);
 
             var getter = _getDef2.getter;
 
-            return new Promise((function (resolve) {
-                info('once mount getter: %o', getter);
-                var listenerDef = _this4.mount(getter, function (p) {
-                    info('once unmount getter: %o', getter);
-                    _this4.unmount(listenerDef);
-                    resolve(p);
-                });
+            var listenerDef = this.mount(getter, (function (p) {
+                _this4.unmount(listenerDef);
+                resolve(p);
             }).bind(this));
-        }
-    }, {
-        key: '_handler',
-        value: function _handler(p) {
-            this._dispatcher.unmount(this._listenerDef);
-
-            return autoListener;
         }
     }, {
         key: '_invokeListeners',
         value: function _invokeListeners() {
             var _this5 = this;
 
-            this._listeners.forEach(function (listener) {
+            return this._listeners.map(function (listener) {
                 return _this5._container.get(listener);
             });
         }
@@ -183,8 +164,10 @@ var Dispatcher = (function () {
             var updatedIds = [];
             this._storeIds.forEach(function (id, index) {
                 var state = getState({ id: id, index: index, get: get });
-                if (state !== undefined) {
-                    set(id, state);
+                if (state) {
+                    if (state !== true) {
+                        set(id, state);
+                    }
                     updatedIds.push(id);
                 }
             });
@@ -192,32 +175,21 @@ var Dispatcher = (function () {
             return updatedIds;
         }
     }, {
-        key: 'setState',
-        value: function setState(newState) {
-            var _this6 = this;
-
-            this._container.transformState(function (p) {
-                return _this6._stateTransformer(p, function (_ref4) {
-                    var id = _ref4.id;
-                    return newState[id];
-                });
-            });
-            this._invokeListeners();
-        }
-    }, {
         key: '_transformState',
         value: function _transformState(action, payload) {
-            var _this7 = this;
+            var _this6 = this;
 
+            var handler = function handler(_ref4) {
+                var index = _ref4.index;
+                var id = _ref4.id;
+                var get = _ref4.get;
+                return _this6._stores[index].handle(get(id), action, payload);
+            };
+            info('_transformState %s:%o', action, payload);
             this._container.transformState(function (p) {
-                return _this7._stateTransformer(p, function (_ref5) {
-                    var index = _ref5.index;
-                    var id = _ref5.id;
-                    var get = _ref5.get;
-                    return _this7._stores[index].handle(get(id), action, payload);
-                });
+                return _this6._stateTransformer(p, handler);
             });
-            this._invokeListeners();
+            return Promise.all(this._invokeListeners());
         }
     }]);
 
@@ -226,5 +198,7 @@ var Dispatcher = (function () {
 
 exports['default'] = Dispatcher;
 
-_Class$Def$getDef.Class(Dispatcher, [_Container2['default']]);
+_Class$Def$getDef.Class(Dispatcher, {
+    container: _Container2['default']
+});
 module.exports = exports['default'];

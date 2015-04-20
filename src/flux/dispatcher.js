@@ -56,53 +56,44 @@ export default class Dispatcher {
     }
 
     mount(definition, listener) {
-        info('mount definition: %o', definition)
         const {id} = getDef(definition)
-        const listenerDef = Def(p => p, {
+        const handler = (p) => {
+            return listener(p)
+        }
+        const listenerDef = Def(handler, {
             id: id + '__listener',
             deps: [definition],
-            handler: (...args) => listener(...args)
+            handler
         })
         this._listeners.push(listenerDef)
-
 
         return listenerDef
     }
 
     unmount(listenerDef) {
-        info('mount definition: %o', listenerDef)
         this._listeners = this._listeners.filter(d => listenerDef !== d)
     }
 
-    once(definition) {
+    once(definition, resolve) {
         const {getter} = getDef(definition)
-        return new Promise((resolve => {
-            info('once mount getter: %o', getter)
-            const listenerDef = this.mount(getter, p => {
-                info('once unmount getter: %o', getter)
-                this.unmount(listenerDef)
-                resolve(p)
-            })
+        const listenerDef = this.mount(getter, (p => {
+            this.unmount(listenerDef)
+            resolve(p)
         }).bind(this))
     }
 
-    _handler(p) {
-        this._dispatcher.unmount(this._listenerDef)
-
-
-        return autoListener
-    }
-
     _invokeListeners() {
-        this._listeners.forEach(listener => this._container.get(listener))
+        return this._listeners.map(listener => this._container.get(listener))
     }
 
     _stateTransformer({get, set}, getState) {
             const updatedIds = []
             this._storeIds.forEach((id, index) => {
                 const state = getState({id, index, get})
-                if (state !== undefined) {
-                    set(id, state)
+                if (state) {
+                    if (state !== true) {
+                        set(id, state)
+                    }
                     updatedIds.push(id)
                 }
             })
@@ -110,21 +101,14 @@ export default class Dispatcher {
             return updatedIds
     }
 
-    setState(newState) {
-        this._container.transformState(p => this._stateTransformer(
-            p,
-            ({id}) => newState[id]
-        ))
-        this._invokeListeners()
-    }
-
     _transformState(action, payload) {
-        this._container.transformState(p => this._stateTransformer(
-            p,
-            ({index, id, get}) => this._stores[index].handle(get(id), action, payload)
-        ))
-        this._invokeListeners()
+        const handler = ({index, id, get}) => this._stores[index].handle(get(id), action, payload)
+        info('_transformState %s:%o', action, payload)
+        this._container.transformState(p => this._stateTransformer(p, handler))
+        return Promise.all(this._invokeListeners())
     }
 }
 
-Class(Dispatcher, [Container])
+Class(Dispatcher, {
+    container: Container
+})

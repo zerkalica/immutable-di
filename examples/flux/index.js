@@ -1,7 +1,7 @@
 import __bootstrap from './bootstrap'
 
 import React from 'react'
-import {NativeAdapter, Dispatcher, Define, ReactConnector} from '../../src'
+import {Container, NativeAdapter, Dispatcher, Define, ReactConnector} from '../../src'
 import TodoList from './components/todo-list'
 import debug from 'debug'
 
@@ -13,6 +13,15 @@ const {Factory, Class, Getter} = Define
 class TodoStore {
     handle(state, action, payload) {
         return this[action] && this[action].call(this, state, payload)
+    }
+
+    reset(state, initialState) {
+        return initialState.todoApp
+    }
+
+    addTodo(state, todo) {
+        state.todos.push(todo)
+        return state
     }
 
     loadTodosProgress(state) {
@@ -44,7 +53,11 @@ class TodoActions {
         this.dispatch = dispatcher.dispatch.bind(dispatcher)
     }
 
-    loadTodos({fromId}) {
+    addTodo(todo) {
+        return this.dispatch('addTodo', todo)
+    }
+
+    loadTodos() {
         // simulate fetch
         return this.dispatch('loadTodos', Promise.resolve([
             {name: 'todo-1', id: 1},
@@ -65,32 +78,39 @@ Getter(stateGetter, {
 })
 
 const el = document.getElementById('app')
-
-const dispatcher = new Dispatcher({
-    stores: {
-        todoApp: new TodoStore()
-    },
-    stateAdapter: new NativeAdapter()
+const container = new Container({
+    state: new NativeAdapter()
 })
 
-dispatcher.once(stateGetter).then(({getter, deps}) => {
-    info('getter %o, getter: %o', deps, getter)
-    const {dispatcher, state, actions} = deps
-    React.render((
-        <Wrapper
-            context={{actions}}
-            dispatcher={dispatcher}
-            state={state}
-            getter={getter}
-            component={TodoList}
-        />
-    ), el)
-})
+const stores = {
+    todoApp: new TodoStore()
+}
 
-dispatcher.setState({
-    todoApp: {
-        loading: false,
-        error: null,
-        todos: []
-    }
+container.get(Dispatcher).then(dispatcher => {
+    dispatcher.setStores(stores)
+
+    dispatcher.once(stateGetter, ({getter, deps}) => {
+        const {dispatcher, state, actions} = deps
+
+        React.render((
+            <Wrapper
+                context={{actions}}
+                dispatcher={dispatcher}
+                state={state}
+                getter={getter}
+                component={TodoList}
+            />
+        ), el)
+    })
+
+    dispatcher.dispatch('reset', {
+        todoApp: {
+            loading: false,
+            error: null,
+            todos: []
+        }
+    })
+    const todoActions = new TodoActions(dispatcher)
+    todoActions.addTodo({name : 'todo-new', id: 333})
+    todoActions.loadTodos()
 })
