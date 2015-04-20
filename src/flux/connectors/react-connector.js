@@ -1,35 +1,45 @@
-export default function getReactConnector(React) {
+import Dispatcher from '../dispatcher'
+export default function getReactConnector(React, childContextTypes) {
+    const p = React.PropTypes
     class ComponentWrapper extends React.Component {
         static childContextTypes = {
-             actions: React.PropTypes.object
+            actions: p.object.isRequired
         }
 
-        constructor({state, dispatcher, getter, component, context}) {
-            super(state)
-            this.state = state
-            this._dispatcher = dispatcher
-            this._getter = getter
-            this._component = component
-            this._context = context
+        static propTypes = {
+            dispatcher: p.instanceOf(Dispatcher).isRequired,
+            state: p.object.isRequired,
+            getter: p.func.isRequired,
+            component: p.func.isRequired,
+            actions: p.object.isRequired
+        }
+
+        __listener = null
+
+        constructor(props, context) {
+            super(props, context)
+            this.state = props.state
         }
 
         getChildContext() {
-            return this._context
+            return {
+                actions: this.props.actions
+            }
         }
 
         componentDidMount() {
-            this._listener = this._dispatcher.mount(
-                this._getter,
-                (state) => this.setState(state)
+            this.__listener = this.props.dispatcher.mount(
+                this.props.getter,
+                state => this.setState(state)
             )
         }
 
         componentWillUnmount() {
-            this._dispatcher.unmount(this._listener)
+            this.props.dispatcher.unmount(this.__listener)
         }
 
         render() {
-            return <this._component {...this.state} />
+            return <this.props.component {...this.props.state} />
         }
     }
 

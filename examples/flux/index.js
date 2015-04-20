@@ -6,7 +6,9 @@ import TodoList from './components/todo-list'
 import debug from 'debug'
 
 const info = debug('immutable-di:flux:index')
-const Wrapper = ReactConnector(React)
+const Wrapper = ReactConnector(React, {
+
+})
 
 const {Factory, Class, Getter} = Define
 
@@ -94,7 +96,7 @@ container.get(Dispatcher).then(dispatcher => {
 
         React.render((
             <Wrapper
-                context={{actions}}
+                actions={actions}
                 dispatcher={dispatcher}
                 state={state}
                 getter={getter}
