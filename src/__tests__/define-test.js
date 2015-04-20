@@ -1,4 +1,4 @@
-import {getDef, Def, Class, Factory, WaitFor} from '../define'
+import {getDef, Def, Class, Factory} from '../define'
 import {describe, it, spy} from '../test-helper'
 
 describe('define', () => {
@@ -78,32 +78,5 @@ describe('define', () => {
         def.should.have.deep.property('deps.1.promiseHandler', ph)
         def.should.have.deep.property('deps.1.path', null)
         def.should.have.deep.property('deps.1.definition', DepClass)
-    })
-
-    it('should produce valid waitFor', () => {
-        class TestDep1 {
-            handle(actionType, payload) {
-                return Promise.resolve(1)
-            }
-        }
-        Class(TestDep1)
-
-        class TestDep2 {
-            handle(actionType, payload) {
-                return Promise.resolve(2)
-            }
-        }
-        Class(TestDep2)
-        WaitFor(TestDep2, [TestDep1])
-
-        class TestStore {
-            handle(actionType, payload) {
-                return Promise.resolve(3)
-            }
-        }
-        Class(TestStore)
-        WaitFor(TestStore, [TestDep2, TestDep1])
-        TestStore.__di.should.have.deep.property('waitFor.0.definition', TestDep2)
-        TestStore.__di.should.have.deep.property('waitFor.1.definition', TestDep1)
     })
 })

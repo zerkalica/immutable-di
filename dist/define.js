@@ -110,33 +110,20 @@ var Annotation = {
         return Service;
     },
 
-    WaitFor: function WaitFor(Service, deps) {
-        Service.__di.waitFor = processDeps(deps);
-        return Service;
-    },
-
-    Def: function Def(Service, deps) {
-        Service.__di = extractDef(deps);
-        return Service;
-    },
-
-    Store: function Store(Service, statePath, deps) {
-        Service.__di = extractDef({
-            id: getId(Service),
-            handler: _classToFactory$getFunctionName.classToFactory(Service),
-            deps: deps || {}
+    Getter: function Getter(Service, deps) {
+        var handler = function handler(deps) {
+            return { deps: deps, getter: Service };
+        };
+        Service.__di.getter = Annotation.Def(handler, {
+            id: getId(Service) + '__getter',
+            handler: handler,
+            deps: deps
         });
-        Service.__di.statePath = statePath;
         return Service;
     },
 
-    Action: function Action(Service, deps) {
-        _WrapActionMethods2['default'](Service);
-        Service.__di = extractDef({
-            id: getId(Service),
-            handler: _classToFactory$getFunctionName.classToFactory(Service),
-            deps: deps || {}
-        });
+    Def: function Def(Service, definition) {
+        Service.__di = extractDef(definition);
         return Service;
     }
 };
@@ -150,11 +137,9 @@ var Promises = {
 exports['default'] = {
     getDef: getDef,
     Promises: Promises,
-    Store: Annotation.Store,
+    Getter: Annotation.Getter,
     Def: Annotation.Def,
     Class: Annotation.Class,
-    Action: Annotation.Action,
-    Factory: Annotation.Factory,
-    WaitFor: Annotation.WaitFor
+    Factory: Annotation.Factory
 };
 module.exports = exports['default'];

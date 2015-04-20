@@ -4,11 +4,10 @@
   "description": "Simple, promise-based dependency injection container with some state handling functions (for facebook flux-like state-management)",
   "scripts": {
     "build": "gulp build",
+    "test": "gulp test",
     "build-examples": "webpack --config ./webpack.config.js",
     "dev-examples": "webpack --config ./webpack.config.js --watch",
-    "w": "gulp w",
-    "lint": "eslint src",
-    "test": "gulp test"
+    "dev-test": "gulp dev-test"
   },
   "author": "Stefan Zerkalica <zerkalica@gmail.com>",
   "license": "MIT",

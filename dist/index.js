@@ -30,11 +30,16 @@ var _Define = require('./define');
 
 var _Define2 = _interopRequireWildcard(_Define);
 
+var _ReactConnector = require('./flux/connectors/react-connector');
+
+var _ReactConnector2 = _interopRequireWildcard(_ReactConnector);
+
 exports['default'] = {
     Define: _Define2['default'],
     ContainerCreator: _ContainerCreator2['default'],
     Container: _Container2['default'],
     NativeAdapter: _NativeAdapter2['default'],
-    Dispatcher: _Dispatcher2['default']
+    Dispatcher: _Dispatcher2['default'],
+    ReactConnector: _ReactConnector2['default']
 };
 module.exports = exports['default'];

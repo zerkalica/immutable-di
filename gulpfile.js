@@ -64,19 +64,18 @@ function runTest(src) {
         });
 }
 
-gulp.task('test:src', function(done) {
+gulp.task('test-src', function(done) {
     return runTest(config.src.tests);
 });
 
-gulp.task('test:dist', function(done) {
+gulp.task('test-dist', function(done) {
     return runTest(config.dest.tests);
 });
 
-gulp.task('w:code', function() {
-    gulp.watch([config.src.scripts], gulp.series('test:src'));
+gulp.task('dev-test', function() {
+    gulp.watch([config.src.scripts], gulp.series('test-src'));
 });
 
-gulp.task('w', gulp.series('w:code'));
 
 gulp.task('build:dist', function () {
     return gulp.src(config.src.scripts)
@@ -84,8 +83,8 @@ gulp.task('build:dist', function () {
         .pipe(gulp.dest(config.dest.scripts));
 });
 
-gulp.task('test', gulp.series('test:src'));
+gulp.task('test', gulp.series('test-src'));
 
-gulp.task('build', gulp.series('build:dist', 'test:dist'));
+gulp.task('build', gulp.series('build:dist', 'test-dist'));
 
 gulp.task('default', gulp.series('build'));

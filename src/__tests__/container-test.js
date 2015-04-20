@@ -1,7 +1,7 @@
 import ContainerCreator from '../container-creator'
 import NativeAdapter from '../state-adapters/native-adapter'
 import {describe, it, spy, sinon, getClass} from '../test-helper'
-import {Factory, Class, Promises, WaitFor} from '../define'
+import {Factory, Class, Promises} from '../define'
 
 describe('container', () => {
     let state = {
@@ -18,12 +18,6 @@ describe('container', () => {
     }
     Factory(depFn)
 
-    function waitFn1() {}
-    Factory(waitFn1)
-
-    function waitFn2() {}
-    Factory(waitFn2)
-
     class DepClass {
         test() {
             return 'DepClass.value'
@@ -38,7 +32,6 @@ describe('container', () => {
         return 'testFunc.value.' + depClass.test() + '.' + depFnValue
     }
     Factory(testFunc, [DepClass, [depFn, Promises.ignore]])
-    WaitFor(testFunc, [waitFn1, waitFn2])
 
     function testObjectDeps({depClass, depFnValue}) {
         if (!(depClass instanceof DepClass)) {
@@ -52,8 +45,8 @@ describe('container', () => {
     })
 
     beforeEach(() => {
-        creator = new ContainerCreator()
-        container = creator.create(new NativeAdapter(state))
+        creator = new ContainerCreator(NativeAdapter)
+        container = creator.create(state)
     })
 
     describe('if wrong arguments passed', () => {
@@ -209,12 +202,6 @@ describe('container', () => {
             })
         })
 
-        it('should create invoker instance', () => {
-            const testPayload = {test: 123};
-            const testAction = 'testAction';
-            container.createMethod(testAction, testPayload).handle.should.be.a.function
-        })
-
         it('should transform state', () => {
             const depFn = spy()
             const Dep = (state) => {
@@ -222,17 +209,16 @@ describe('container', () => {
                 return state;
             }
             Factory(Dep, ['state'])
-            const mutations = [
-                {
-                    id: 'state', data: {a: {b: 2}}
-                }
-            ]
 
             return container.get(Dep)
                 .then(function(data) {
                     data.should.be.deep.equal({a: {b: 1, b1: 2}})
 
-                    container.transformState(mutations)
+                    container.transformState(({get, set}) => {
+                        set('state', {a: {b: 2}})
+
+                        return ['state']
+                    })
                     return container.get(Dep)
                 })
                 .then(function (data) {

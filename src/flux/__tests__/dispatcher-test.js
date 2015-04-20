@@ -9,58 +9,44 @@ describe('flux/dispatcher', () => {
 
     let Store1
     let Store2
-    let fakeStoreHandle
     let fakeTransformState
-    let fakeCreateMethod
     let fakeGet
 
     const testAction = 'test'
     const testPayload = {test: 111}
 
     beforeEach(() => {
-        fakeStoreHandle = spy()
         fakeTransformState = spy()
-        fakeCreateMethod = spy()
         fakeGet = spy()
         container = {
             transformState: fakeTransformState,
             get(def) {
                 fakeGet(def)
                 return def()
-            },
-            createMethod(...args) {
-                fakeCreateMethod(...args)
-                return {
-                    handle: (store) => {
-                        fakeStoreHandle(store);
-                        return {id: 'test', data: {test: 1}};
-                    }
-                }
             }
         }
-        dispatcher = new Dispatcher(container)
         Store1 = getClass(['handle'])
         Class(Store1)
         Store2 = getClass(['handle'])
         Class(Store2)
-        dispatcher.setStores([Store1, Store2])
+
+        dispatcher = new Dispatcher({
+            stores: {
+                Store1: Store1,
+                Store2: Store2
+            },
+            container: container
+        })
     })
 
     describe('dispatch', () => {
-        it('should create invoker instance if action dispatched', () => {
-            return dispatcher.dispatch(testAction, testPayload)
-                .then(() => {
-                    fakeCreateMethod.should.have.been.calledOnce
-                        .and.calledWith(testAction, testPayload);
-                })
-        })
 
         it('should pass stores to handle', () => {
             return dispatcher.dispatch(testAction, testPayload)
                 .then(() => {
-                    fakeStoreHandle.should.have.been.calledTwice;
-                    fakeStoreHandle.firstCall.should.calledWith(Store1)
-                    fakeStoreHandle.secondCall.should.calledWith(Store2)
+                    fakeTransformState.should.have.been.calledOnce;
+                    //fakeStoreHandle.firstCall.should.calledWith(Store1)
+                    //fakeStoreHandle.secondCall.should.calledWith(Store2)
                 })
         })
 

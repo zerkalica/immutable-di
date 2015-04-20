@@ -26,10 +26,11 @@ describe('state-adapters/native-adapter', () => {
     })
 
     it('should transformState', () => {
-        const mutation = {id: 'a', data: {c: 'test'}}
         const nativeAdapter = new NativeAdapter(testState)
         nativeAdapter.getIn(['a', 'b']).should.to.be.deep.equal(testState.a.b)
-        nativeAdapter.transformState([mutation])
+        nativeAdapter.transformState(({get, set}) => {
+            set('a', {c: 'test'})
+        })
         nativeAdapter.getIn(['a', 'c']).should.to.equal('test')
     })
 })
