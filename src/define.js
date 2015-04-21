@@ -1,5 +1,4 @@
 import {classToFactory, getFunctionName} from './utils'
-import WrapActionMethods from './flux/wrap-action-methods'
 
 function pass(p) {
     return p
@@ -98,7 +97,8 @@ const Annotation = {
     },
 
     Getter(Service, deps) {
-        const handler = deps => ({deps, getter: Service})
+        deps.getter = Service
+        const handler = deps => deps
         Service.__di.getter = Annotation.Def(handler, {
             id: getId(Service) + '__getter',
             handler,

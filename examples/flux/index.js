@@ -69,16 +69,6 @@ class TodoActions {
 }
 Class(TodoActions, [Dispatcher])
 
-function stateGetter(appState) {
-    return appState
-}
-Factory(stateGetter, ['todoApp'])
-Getter(stateGetter, {
-    actions: TodoActions,
-    dispatcher: Dispatcher,
-    state: stateGetter
-})
-
 const el = document.getElementById('app')
 const container = new Container({
     state: new NativeAdapter()
@@ -88,31 +78,44 @@ const stores = {
     todoApp: new TodoStore()
 }
 
-container.get(Dispatcher).then(dispatcher => {
-    dispatcher.setStores(stores)
+const dispatcher = container.getSync(Dispatcher)
+const todoActions = new TodoActions(dispatcher)
+dispatcher.setStores(stores)
 
-    dispatcher.once(stateGetter, ({getter, deps}) => {
-        const {dispatcher, state, actions} = deps
-
-        React.render((
-            <Wrapper
-                actions={actions}
-                dispatcher={dispatcher}
-                state={state}
-                getter={getter}
-                component={TodoList}
-            />
-        ), el)
+function createGetter(stateDeps) {
+    function stateGetter(appState) {
+        return appState
+    }
+    Factory(stateGetter, stateDeps)
+    Getter(stateGetter, {
+        dispatcher: Dispatcher,
+        container: Container,
+        state: stateGetter,
+        getter: null
     })
 
-    dispatcher.dispatch('reset', {
-        todoApp: {
-            loading: false,
-            error: null,
-            todos: []
-        }
-    })
-    const todoActions = new TodoActions(dispatcher)
-    todoActions.addTodo({name: 'todo-new', id: 333})
-    todoActions.loadTodos()
+    return stateGetter
+}
+
+dispatcher.once(createGetter(['todoApp']), ({getter, dispatcher, state}) => {
+    React.render((
+        <Wrapper
+            actions={todoActions}
+            dispatcher={dispatcher}
+            state={state}
+            getter={getter}
+            component={TodoList}
+        />
+    ), el)
 })
+
+dispatcher.dispatch('reset', {
+    todoApp: {
+        loading: false,
+        error: null,
+        todos: []
+    }
+})
+todoActions.addTodo({name: 'todo-new', id: 333})
+todoActions.loadTodos()
+

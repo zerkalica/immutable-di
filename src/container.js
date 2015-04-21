@@ -6,7 +6,6 @@ export default class Container {
         const cache = this._cache = new Map()
         cache.set('global', globalCache || new Map())
         this._state = state
-        this._locks = new Map()
 
         this.get = this.get.bind(this)
         this.clear = this.clear.bind(this)
@@ -32,7 +31,7 @@ export default class Container {
         this._state.transformState(getState).forEach(id => this.clear(id))
     }
 
-    get(definition, debugCtx) {
+    get(definition, isSync, debugCtx) {
         if (definition) {
             if (this instanceof definition) {
                 return this
@@ -53,10 +52,6 @@ export default class Container {
             return result
         }
 
-        if (this._locks.get(id)) {
-            throw new Error('Recursive call detected in ' + debugPath)
-        }
-        this._locks.set(id, true)
         const args = []
         const argNames = []
         for (let i = 0; i < deps.length; i++) {
@@ -66,14 +61,14 @@ export default class Container {
                 try {
                     value = this._state.getIn(dep.path)
                     if (value === undefined) {
-                        throw new Error('Value is undefined in ' + dep.path)
+                        throw new Error('Value is undefined')
                     }
                 } catch (e) {
                     e.message = e.message + ' in ' + debugPath + ' [' + dep.path.join('.') + ']'
                     throw e
                 }
             } else {
-                value = this.get(dep.definition, [debugPath, i])
+                value = this.get(dep.definition, isSync, [debugPath, i])
                 if (dep.promiseHandler) {
                     value = dep.promiseHandler(value)
                 }
@@ -84,16 +79,19 @@ export default class Container {
                 argNames.push(dep.name)
             }
         }
-
-        result = Promise.all(args).then(resolvedArgs => argNames.length
+        const create = resolvedArgs => argNames.length
             ? handler(convertArgsToOptions(resolvedArgs, argNames))
             : handler.apply(null, resolvedArgs)
-        )
 
-        this._locks.set(id, false)
+        result = isSync ? create(args) : Promise.all(args).then(create)
+
         cache.set(id, result)
 
         return result
+    }
+
+    getSync(definition) {
+        return this.get(definition, true)
     }
 }
 Class(Container)
