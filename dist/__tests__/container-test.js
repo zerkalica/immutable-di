@@ -1,7 +1,5 @@
 'use strict';
 
-var _createClass = require('babel-runtime/helpers/create-class')['default'];
-
 var _classCallCheck = require('babel-runtime/helpers/class-call-check')['default'];
 
 var _Promise = require('babel-runtime/core-js/promise')['default'];
@@ -44,12 +42,9 @@ _describe$it$spy$sinon$getClass.describe('container', function () {
             _classCallCheck(this, DepClass);
         }
 
-        _createClass(DepClass, [{
-            key: 'test',
-            value: function test() {
-                return 'DepClass.value';
-            }
-        }]);
+        DepClass.prototype.test = function test() {
+            return 'DepClass.value';
+        };
 
         return DepClass;
     })();
@@ -148,12 +143,9 @@ _describe$it$spy$sinon$getClass.describe('container', function () {
                     this.tfv = testFactoryValue;
                 }
 
-                _createClass(TestClass, [{
-                    key: 'get',
-                    value: function get() {
-                        return 'TestClass.' + this.tfv;
-                    }
-                }]);
+                TestClass.prototype.get = function get() {
+                    return 'TestClass.' + this.tfv;
+                };
 
                 return TestClass;
             })();

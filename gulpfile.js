@@ -33,7 +33,7 @@ function getConfig(args) {
         },
         babel: {
             modules: 'common',
-            loose: isDebug ? 'all' : [],
+            loose: ['es6.classes', 'es6.modules'],
             optional: ['runtime'],
             stage: 0
         },
@@ -50,7 +50,6 @@ function getConfig(args) {
 var config = getConfig(process.argv.slice(2));
 
 require('babel-core/register')(config.babel);
-require('babel-core/polyfill');
 
 function clean(out) {
     return function doClean(done) {

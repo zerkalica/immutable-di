@@ -2,9 +2,7 @@
 
 var _Object$keys = require("babel-runtime/core-js/object/keys")["default"];
 
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
+exports.__esModule = true;
 exports["default"] = wrapActionMethods;
 function methodToConst(methodName) {
     return methodName;

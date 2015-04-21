@@ -2,9 +2,7 @@
 
 var _slicedToArray = require('babel-runtime/helpers/sliced-to-array')['default'];
 
-Object.defineProperty(exports, '__esModule', {
-    value: true
-});
+exports.__esModule = true;
 exports.getDebugPath = getDebugPath;
 exports.classToFactory = classToFactory;
 exports.convertArgsToOptions = convertArgsToOptions;

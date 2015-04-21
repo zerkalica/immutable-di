@@ -4,9 +4,7 @@ var _Object$keys = require('babel-runtime/core-js/object/keys')['default'];
 
 var _Set = require('babel-runtime/core-js/set')['default'];
 
-Object.defineProperty(exports, '__esModule', {
-    value: true
-});
+exports.__esModule = true;
 
 var _classToFactory$getFunctionName = require('./utils');
 

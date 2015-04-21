@@ -2,9 +2,7 @@
 
 var _Promise = require('babel-runtime/core-js/promise')['default'];
 
-Object.defineProperty(exports, '__esModule', {
-    value: true
-});
+exports.__esModule = true;
 exports['default'] = actionToPromise;
 
 function actionToPromise(action, payload) {

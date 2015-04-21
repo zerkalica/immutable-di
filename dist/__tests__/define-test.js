@@ -2,8 +2,6 @@
 
 var _classCallCheck = require('babel-runtime/helpers/class-call-check')['default'];
 
-var _createClass = require('babel-runtime/helpers/create-class')['default'];
-
 var _Promise = require('babel-runtime/core-js/promise')['default'];
 
 var _getDef$Class$Factory = require('../define');
@@ -49,12 +47,9 @@ _describe$it$spy.describe('define', function () {
                 _classCallCheck(this, DepClass);
             }
 
-            _createClass(DepClass, [{
-                key: 'test',
-                value: function test() {
-                    return 'DepClass.value';
-                }
-            }]);
+            DepClass.prototype.test = function test() {
+                return 'DepClass.value';
+            };
 
             return DepClass;
         })();
