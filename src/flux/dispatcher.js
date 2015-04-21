@@ -8,8 +8,8 @@ import debug from 'debug'
 const info = debug('immutable-di:dispatcher')
 
 export default class Dispatcher {
-    constructor({stores, stateAdapter, container}) {
-        this._container = container || new Container({state: stateAdapter})
+    constructor({stores, state, container}) {
+        this._container = container || new Container({state})
         this._series = new PromiseSeries()
         this._listeners = []
         this._stores = []
@@ -107,6 +107,4 @@ export default class Dispatcher {
     }
 }
 
-Class(Dispatcher, {
-    container: Container
-})
+Class(Dispatcher, {container: Container})

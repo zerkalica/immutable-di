@@ -1,16 +1,11 @@
 import __bootstrap from './bootstrap'
 
 import React from 'react'
-import {Container, NativeAdapter, Dispatcher, Define, ReactConnector} from '../../src'
+import {NativeAdapter, Dispatcher, ReactConnector} from '../../src'
 import TodoList from './components/todo-list'
 import debug from 'debug'
-
 const info = debug('immutable-di:flux:index')
-const Wrapper = ReactConnector(React, {
-
-})
-
-const {Factory, Class} = Define
+const ReactComponent = ReactConnector(React)
 
 class TodoStore {
     handle(state, action, payload) {
@@ -67,39 +62,37 @@ class TodoActions {
         ]))
     }
 }
-Class(TodoActions, [Dispatcher])
 
 const el = document.getElementById('app')
-const container = new Container({
-    state: new NativeAdapter()
+
+const dispatcher = new Dispatcher({
+    stores: {
+        todoApp: new TodoStore()
+    },
+    state: new NativeAdapter({
+        todoApp: {
+            loading: false,
+            error: null,
+            todos: []
+        }
+    })
 })
-
-const stores = {
-    todoApp: new TodoStore()
-}
-
-const dispatcher = container.getSync(Dispatcher)
 const todoActions = new TodoActions(dispatcher)
 
-dispatcher.setStores(stores).once(['todoApp'], ({getter, state, deps}) => {
+dispatcher.once(['todoApp'], ({getter, state}) => {
     React.render((
-        <Wrapper
+        <ReactComponent
             actions={todoActions}
+            component={TodoList}
+
             dispatcher={dispatcher}
             state={state}
             getter={getter}
-            component={TodoList}
         />
     ), el)
 })
 
-dispatcher.dispatch('reset', {
-    todoApp: {
-        loading: false,
-        error: null,
-        todos: []
-    }
-})
+//dispatcher.dispatch('reset', )
 todoActions.addTodo({name: 'todo-new', id: 333})
 todoActions.loadTodos()
 

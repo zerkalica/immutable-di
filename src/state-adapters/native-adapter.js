@@ -18,6 +18,15 @@ export default class NativeAdapter {
         return this._state[id]
     }
 
+    deserialize(data) {
+        this._state = JSON.parse(data)
+        return this
+    }
+
+    serialize() {
+        return JSON.stringify(this._state)
+    }
+
     transformState(transform) {
         return transform({
             get: (id) => this._state[id],

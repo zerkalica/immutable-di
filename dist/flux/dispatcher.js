@@ -33,12 +33,12 @@ var info = _debug2['default']('immutable-di:dispatcher');
 var Dispatcher = (function () {
     function Dispatcher(_ref) {
         var stores = _ref.stores;
-        var stateAdapter = _ref.stateAdapter;
+        var state = _ref.state;
         var container = _ref.container;
 
         _classCallCheck(this, Dispatcher);
 
-        this._container = container || new _Container2['default']({ state: stateAdapter });
+        this._container = container || new _Container2['default']({ state: state });
         this._series = new _PromiseSeries2['default']();
         this._listeners = [];
         this._stores = [];
@@ -201,7 +201,5 @@ var Dispatcher = (function () {
 
 exports['default'] = Dispatcher;
 
-_Class$getDef$Factory$createGetter.Class(Dispatcher, {
-    container: _Container2['default']
-});
+_Class$getDef$Factory$createGetter.Class(Dispatcher, { container: _Container2['default'] });
 module.exports = exports['default'];

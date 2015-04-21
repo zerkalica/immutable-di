@@ -32,6 +32,17 @@ var NativeAdapter = (function () {
             return this._state[id];
         }
     }, {
+        key: "deserialize",
+        value: function deserialize(data) {
+            this._state = JSON.parse(data);
+            return this;
+        }
+    }, {
+        key: "serialize",
+        value: function serialize() {
+            return JSON.stringify(this._state);
+        }
+    }, {
         key: "transformState",
         value: function transformState(transform) {
             var _this = this;
