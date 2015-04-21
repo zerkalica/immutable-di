@@ -89,7 +89,6 @@ function createGetter(stateDeps) {
     Factory(stateGetter, stateDeps)
     Getter(stateGetter, {
         dispatcher: Dispatcher,
-        container: Container,
         state: stateGetter,
         getter: null
     })
