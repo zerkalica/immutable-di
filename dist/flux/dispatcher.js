@@ -1,10 +1,14 @@
 'use strict';
 
-var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
+var _createClass = require('babel-runtime/helpers/create-class')['default'];
 
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } };
+var _classCallCheck = require('babel-runtime/helpers/class-call-check')['default'];
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var _Object$keys = require('babel-runtime/core-js/object/keys')['default'];
+
+var _Promise = require('babel-runtime/core-js/promise')['default'];
+
+var _interopRequireWildcard = require('babel-runtime/helpers/interop-require-wildcard')['default'];
 
 Object.defineProperty(exports, '__esModule', {
     value: true
@@ -59,7 +63,7 @@ var Dispatcher = (function () {
         key: 'setStores',
         value: function setStores(storeMap) {
             var stores = [];
-            var keys = this._storeIds = Object.keys(storeMap);
+            var keys = this._storeIds = _Object$keys(storeMap);
             for (var i = 0; i < keys.length; i++) {
                 stores.push(storeMap[keys[i]]);
             }
@@ -192,7 +196,7 @@ var Dispatcher = (function () {
             this._container.transformState(function (p) {
                 return _this6._stateTransformer(p, handler);
             });
-            return Promise.all(this._invokeListeners());
+            return _Promise.all(this._invokeListeners());
         }
     }]);
 

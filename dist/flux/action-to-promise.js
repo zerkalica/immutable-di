@@ -1,5 +1,7 @@
 'use strict';
 
+var _Promise = require('babel-runtime/core-js/promise')['default'];
+
 Object.defineProperty(exports, '__esModule', {
     value: true
 });
@@ -8,7 +10,7 @@ exports['default'] = actionToPromise;
 function actionToPromise(action, payload) {
     var actionPromises = [];
     if (typeof payload === 'object' && typeof payload.then === 'function') {
-        actionPromises.push(Promise.resolve({
+        actionPromises.push(_Promise.resolve({
             action: action + 'Progress',
             payload: {}
         }));
@@ -24,7 +26,7 @@ function actionToPromise(action, payload) {
             };
         }));
     } else {
-        actionPromises.push(Promise.resolve({
+        actionPromises.push(_Promise.resolve({
             action: action,
             payload: payload
         }));

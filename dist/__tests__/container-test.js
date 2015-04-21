@@ -1,10 +1,14 @@
 'use strict';
 
-var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
+var _createClass = require('babel-runtime/helpers/create-class')['default'];
 
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } };
+var _classCallCheck = require('babel-runtime/helpers/class-call-check')['default'];
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var _Promise = require('babel-runtime/core-js/promise')['default'];
+
+var _Map = require('babel-runtime/core-js/map')['default'];
+
+var _interopRequireWildcard = require('babel-runtime/helpers/interop-require-wildcard')['default'];
 
 var _ContainerCreator = require('../container-creator');
 
@@ -29,7 +33,7 @@ _describe$it$spy$sinon$getClass.describe('container', function () {
     var container = undefined;
 
     function depFn() {
-        return new Promise(function (resolve) {
+        return new _Promise(function (resolve) {
             return resolve('depFn.value');
         });
     }
@@ -126,12 +130,12 @@ _describe$it$spy$sinon$getClass.describe('container', function () {
                 return 1234;
             }
             _Factory$Class$Promises.Factory(TestService);
-            container.get(TestService).should.instanceOf(Promise);
+            container.get(TestService).should.instanceOf(_Promise);
         });
 
         _describe$it$spy$sinon$getClass.it('should resolve deps for simple class', function () {
             function testFactory() {
-                return new Promise(function (resolve) {
+                return new _Promise(function (resolve) {
                     return resolve('testFactory.value');
                 });
             }
@@ -196,7 +200,7 @@ _describe$it$spy$sinon$getClass.describe('container', function () {
         _describe$it$spy$sinon$getClass.it('should instance simple service and put it in global cache', function () {
             var exampleValue = 'test';
             function TestService2() {
-                return new Promise(function (resolve) {
+                return new _Promise(function (resolve) {
                     return resolve(exampleValue);
                 });
             }
@@ -218,7 +222,7 @@ _describe$it$spy$sinon$getClass.describe('container', function () {
             container.get(Dep);
 
             var localCache = container._cache.get('p');
-            localCache.should.to.be.instanceOf(Map);
+            localCache.should.to.be.instanceOf(_Map);
 
             return localCache.get(Dep.__di.id).should.eventually.equal(exampleValue + '.' + state.p.a);
         });
@@ -301,7 +305,7 @@ _describe$it$spy$sinon$getClass.describe('container', function () {
             _Factory$Class$Promises.Factory(Dep, ['p.a']);
 
             function TestService(dep) {
-                return new Promise.resolve(dep);
+                return new _Promise.resolve(dep);
             }
             _Factory$Class$Promises.Factory(TestService, [[Dep, function (p) {
                 return p['catch'](function (err) {
@@ -320,7 +324,7 @@ _describe$it$spy$sinon$getClass.describe('container', function () {
             _Factory$Class$Promises.Factory(Dep);
 
             function TestService(dep) {
-                return new Promise.resolve(dep);
+                return new _Promise.resolve(dep);
             }
             _Factory$Class$Promises.Factory(TestService, [[Dep, function (p) {
                 return p['catch'](ReferenceError, function (err) {

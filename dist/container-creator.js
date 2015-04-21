@@ -1,10 +1,12 @@
 'use strict';
 
-var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
+var _createClass = require('babel-runtime/helpers/create-class')['default'];
 
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } };
+var _classCallCheck = require('babel-runtime/helpers/class-call-check')['default'];
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var _Map = require('babel-runtime/core-js/map')['default'];
+
+var _interopRequireWildcard = require('babel-runtime/helpers/interop-require-wildcard')['default'];
 
 Object.defineProperty(exports, '__esModule', {
     value: true
@@ -19,7 +21,7 @@ var ContainerCreator = (function () {
         _classCallCheck(this, ContainerCreator);
 
         this._StateAdapter = StateAdapter;
-        this._globalCache = new Map();
+        this._globalCache = new _Map();
     }
 
     _createClass(ContainerCreator, [{

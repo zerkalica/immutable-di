@@ -1,5 +1,9 @@
 'use strict';
 
+var _Object$keys = require('babel-runtime/core-js/object/keys')['default'];
+
+var _Set = require('babel-runtime/core-js/set')['default'];
+
 Object.defineProperty(exports, '__esModule', {
     value: true
 });
@@ -14,7 +18,7 @@ function processDeps(deps) {
     var resultDeps = [];
     deps = deps || [];
     var isArray = Array.isArray(deps);
-    var names = isArray ? [] : Object.keys(deps);
+    var names = isArray ? [] : _Object$keys(deps);
     var len = isArray ? deps.length : names.length;
     for (var i = 0; i < len; i++) {
         var _name = names.length ? names[i] : undefined;
@@ -76,7 +80,7 @@ function extractDef(_ref) {
     var isClass = _ref.isClass;
 
     var normalizedDeps = processDeps(deps);
-    var scopeSet = new Set();
+    var scopeSet = new _Set();
     getScopes(normalizedDeps, scopeSet);
     var scopes = [];
     scopeSet.forEach(function (scope) {

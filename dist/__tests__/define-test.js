@@ -1,8 +1,10 @@
 'use strict';
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var _classCallCheck = require('babel-runtime/helpers/class-call-check')['default'];
 
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } };
+var _createClass = require('babel-runtime/helpers/create-class')['default'];
+
+var _Promise = require('babel-runtime/core-js/promise')['default'];
 
 var _getDef$Class$Factory = require('../define');
 
@@ -36,7 +38,7 @@ _describe$it$spy.describe('define', function () {
 
     _describe$it$spy.it('should handle deps with promises', function () {
         function depFn() {
-            return new Promise(function (resolve) {
+            return new _Promise(function (resolve) {
                 return resolve('depFn.value');
             });
         }

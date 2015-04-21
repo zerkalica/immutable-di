@@ -1,12 +1,16 @@
 'use strict';
 
-var _bind = Function.prototype.bind;
+var _createClass = require('babel-runtime/helpers/create-class')['default'];
 
-var _toConsumableArray = function (arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) arr2[i] = arr[i]; return arr2; } else { return Array.from(arr); } };
+var _classCallCheck = require('babel-runtime/helpers/class-call-check')['default'];
 
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } };
+var _toConsumableArray = require('babel-runtime/helpers/to-consumable-array')['default'];
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var _bind = require('babel-runtime/helpers/bind')['default'];
+
+var _Map = require('babel-runtime/core-js/map')['default'];
+
+var _Promise = require('babel-runtime/core-js/promise')['default'];
 
 Object.defineProperty(exports, '__esModule', {
     value: true
@@ -23,8 +27,8 @@ var Container = (function () {
 
         _classCallCheck(this, Container);
 
-        var cache = this._cache = new Map();
-        cache.set('global', globalCache || new Map());
+        var cache = this._cache = new _Map();
+        cache.set('global', globalCache || new _Map());
         this._state = state;
 
         this.get = this.get.bind(this);
@@ -42,7 +46,7 @@ var Container = (function () {
         value: function _getScope(scope) {
             var cache = undefined;
             if (!this._cache.has(scope)) {
-                cache = new Map();
+                cache = new _Map();
                 this._cache.set(scope, cache);
             } else {
                 cache = this._cache.get(scope);
@@ -118,7 +122,7 @@ var Container = (function () {
                 return isClass ? new (_bind.apply(definition, [null].concat(_toConsumableArray(defArgs))))() : definition.apply(undefined, _toConsumableArray(defArgs));
             }
 
-            result = isSync ? createIntance(args) : Promise.all(args).then(createIntance);
+            result = isSync ? createIntance(args) : _Promise.all(args).then(createIntance);
 
             cache.set(id, result);
 

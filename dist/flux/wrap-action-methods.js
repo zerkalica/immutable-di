@@ -1,5 +1,7 @@
 "use strict";
 
+var _Object$keys = require("babel-runtime/core-js/object/keys")["default"];
+
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
@@ -14,7 +16,7 @@ function constToMethod(methodName) {
 
 function wrapActionMethods(o) {
     var obj = o.prototype;
-    var keys = Object.keys(obj);
+    var keys = _Object$keys(obj);
 
     var _loop = function (i, l) {
         var methodName = keys[i];

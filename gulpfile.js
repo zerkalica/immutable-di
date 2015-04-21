@@ -34,7 +34,7 @@ function getConfig(args) {
         babel: {
             modules: 'common',
             loose: isDebug ? 'all' : [],
-            externalHelpers: false,
+            optional: ['runtime'],
             stage: 0
         },
         mocha: {

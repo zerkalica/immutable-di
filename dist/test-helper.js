@@ -1,6 +1,8 @@
 'use strict';
 
-var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
+var _Object$keys = require('babel-runtime/core-js/object/keys')['default'];
+
+var _interopRequireWildcard = require('babel-runtime/helpers/interop-require-wildcard')['default'];
 
 Object.defineProperty(exports, '__esModule', {
     value: true
@@ -30,7 +32,7 @@ function getClass(mock) {
     Class.prototype.constructor = Class;
 
     if (!Array.isArray(mock)) {
-        methods = Object.keys(mock);
+        methods = _Object$keys(mock);
     }
 
     (methods || []).forEach(function (method) {

@@ -6,4 +6,4 @@ npm i --save-dev babel-core eslint babel-eslint \
     webpack babel-loader html-webpack-plugin react isomorphic-fetch \
     "git+https://github.com/gulpjs/gulp.git#4.0" gulp-babel gulp-mocha gulp-util del
 
-npm i --save debug
+npm i --save debug babel-runtime
