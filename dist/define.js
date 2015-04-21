@@ -78,7 +78,10 @@ function extractDef(_ref) {
     var normalizedDeps = processDeps(deps);
     var scopeSet = new Set();
     getScopes(normalizedDeps, scopeSet);
-    var scopes = Array.from(scopeSet.values());
+    var scopes = [];
+    scopeSet.forEach(function (scope) {
+        return scopes.push(scope);
+    });
 
     return {
         id: id,

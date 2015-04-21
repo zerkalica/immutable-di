@@ -68,7 +68,8 @@ function extractDef({id, deps, isClass}) {
     const normalizedDeps = processDeps(deps)
     const scopeSet = new Set()
     getScopes(normalizedDeps, scopeSet)
-    const scopes = Array.from(scopeSet.values())
+    const scopes = []
+    scopeSet.forEach(scope => scopes.push(scope))
 
     return {
         id,

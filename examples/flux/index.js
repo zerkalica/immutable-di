@@ -1,11 +1,12 @@
-import __bootstrap from './bootstrap'
+import './bootstrap'
 
 import React from 'react'
 import {NativeAdapter, Dispatcher, ReactConnector} from '../../src'
+const ReactComponent = ReactConnector(React)
+
 import TodoList from './components/todo-list'
 import debug from 'debug'
 const info = debug('immutable-di:flux:index')
-const ReactComponent = ReactConnector(React)
 
 class TodoStore {
     handle(state, action, payload) {
