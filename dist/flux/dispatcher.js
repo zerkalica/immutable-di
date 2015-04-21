@@ -22,7 +22,7 @@ var _Container = require('../container');
 
 var _Container2 = _interopRequireWildcard(_Container);
 
-var _Class$Def$getDef = require('../define');
+var _Class$getDef$Factory$createGetter = require('../define');
 
 var _debug = require('debug');
 
@@ -109,21 +109,14 @@ var Dispatcher = (function () {
     }, {
         key: 'mount',
         value: function mount(definition, listener) {
-            var _getDef = _Class$Def$getDef.getDef(definition);
+            var _getDef = _Class$getDef$Factory$createGetter.getDef(definition);
 
             var id = _getDef.id;
 
-            var handler = function handler(p) {
-                return listener(p);
-            };
-            var listenerDef = _Class$Def$getDef.Def(handler, {
-                id: id + '__listener',
-                deps: [definition],
-                handler: handler
-            });
-            this._listeners.push(listenerDef);
+            _Class$getDef$Factory$createGetter.Factory(listener, [definition], id + '__listener');
+            this._listeners.push(listener);
 
-            return listenerDef;
+            return listener;
         }
     }, {
         key: 'unmount',
@@ -137,14 +130,24 @@ var Dispatcher = (function () {
         value: function once(definition, resolve) {
             var _this4 = this;
 
-            var _getDef2 = _Class$Def$getDef.getDef(definition);
+            if (Array.isArray(definition) || typeof definition === 'object') {
+                definition = _Class$getDef$Factory$createGetter.createGetter(definition);
+            }
+
+            var _getDef2 = _Class$getDef$Factory$createGetter.getDef(definition);
 
             var getter = _getDef2.getter;
 
-            var listenerDef = this.mount(getter, (function (p) {
+            var listenerDef = this.mount(getter, function () {
+                for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+                    args[_key] = arguments[_key];
+                }
+
                 _this4.unmount(listenerDef);
-                resolve(p);
-            }).bind(this));
+                resolve.apply(undefined, args);
+            });
+
+            return this;
         }
     }, {
         key: '_invokeListeners',
@@ -198,7 +201,7 @@ var Dispatcher = (function () {
 
 exports['default'] = Dispatcher;
 
-_Class$Def$getDef.Class(Dispatcher, {
+_Class$getDef$Factory$createGetter.Class(Dispatcher, {
     container: _Container2['default']
 });
 module.exports = exports['default'];

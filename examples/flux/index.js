@@ -10,7 +10,7 @@ const Wrapper = ReactConnector(React, {
 
 })
 
-const {Factory, Class, Getter} = Define
+const {Factory, Class} = Define
 
 class TodoStore {
     handle(state, action, payload) {
@@ -80,23 +80,8 @@ const stores = {
 
 const dispatcher = container.getSync(Dispatcher)
 const todoActions = new TodoActions(dispatcher)
-dispatcher.setStores(stores)
 
-function createGetter(stateDeps) {
-    function stateGetter(appState) {
-        return appState
-    }
-    Factory(stateGetter, stateDeps)
-    Getter(stateGetter, {
-        dispatcher: Dispatcher,
-        state: stateGetter,
-        getter: null
-    })
-
-    return stateGetter
-}
-
-dispatcher.once(createGetter(['todoApp']), ({getter, dispatcher, state}) => {
+dispatcher.setStores(stores).once(['todoApp'], ({getter, state, deps}) => {
     React.render((
         <Wrapper
             actions={todoActions}

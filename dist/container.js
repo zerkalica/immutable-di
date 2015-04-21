@@ -1,5 +1,9 @@
 'use strict';
 
+var _bind = Function.prototype.bind;
+
+var _toConsumableArray = function (arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) arr2[i] = arr[i]; return arr2; } else { return Array.from(arr); } };
+
 var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } };
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -8,7 +12,7 @@ Object.defineProperty(exports, '__esModule', {
     value: true
 });
 
-var _getDebugPath$classToFactory$convertArgsToOptions = require('./utils');
+var _getDebugPath$convertArgsToOptions = require('./utils');
 
 var _Class$getDef = require('./define');
 
@@ -22,7 +26,6 @@ var Container = (function () {
         var cache = this._cache = new Map();
         cache.set('global', globalCache || new Map());
         this._state = state;
-        this._locks = new Map();
 
         this.get = this.get.bind(this);
         this.clear = this.clear.bind(this);
@@ -57,35 +60,32 @@ var Container = (function () {
         }
     }, {
         key: 'get',
-        value: function get(definition, debugCtx) {
+        value: function get(definition, isSync, debugCtx) {
             if (definition) {
                 if (this instanceof definition) {
                     return this;
                 }
             } else {
-                throw new Error('Getter is not a definition in ' + _getDebugPath$classToFactory$convertArgsToOptions.getDebugPath(debugCtx || []));
+                throw new Error('Getter is not a definition in ' + _getDebugPath$convertArgsToOptions.getDebugPath(debugCtx || []));
             }
 
             var def = _Class$getDef.getDef(definition);
             if (!def) {
-                throw new Error('Property .__id not exist in ' + _getDebugPath$classToFactory$convertArgsToOptions.getDebugPath(debugCtx || []));
+                throw new Error('Property .__id not exist in ' + _getDebugPath$convertArgsToOptions.getDebugPath(debugCtx || []));
             }
             var id = def.id;
             var handler = def.handler;
             var deps = def.deps;
             var scope = def.scope;
+            var isClass = def.isClass;
 
-            var debugPath = _getDebugPath$classToFactory$convertArgsToOptions.getDebugPath([debugCtx && debugCtx.length ? debugCtx[0] : [], id]);
+            var debugPath = _getDebugPath$convertArgsToOptions.getDebugPath([debugCtx && debugCtx.length ? debugCtx[0] : [], id]);
             var cache = this._getScope(scope);
             var result = cache.get(id);
             if (result !== undefined) {
                 return result;
             }
 
-            if (this._locks.get(id)) {
-                throw new Error('Recursive call detected in ' + debugPath);
-            }
-            this._locks.set(id, true);
             var args = [];
             var argNames = [];
             for (var i = 0; i < deps.length; i++) {
@@ -95,14 +95,14 @@ var Container = (function () {
                     try {
                         value = this._state.getIn(dep.path);
                         if (value === undefined) {
-                            throw new Error('Value is undefined in ' + dep.path);
+                            throw new Error('Value is undefined');
                         }
                     } catch (e) {
                         e.message = e.message + ' in ' + debugPath + ' [' + dep.path.join('.') + ']';
                         throw e;
                     }
                 } else {
-                    value = this.get(dep.definition, [debugPath, i]);
+                    value = dep.isProto ? dep.definition : this.get(dep.definition, isSync, [debugPath, i]);
                     if (dep.promiseHandler) {
                         value = dep.promiseHandler(value);
                     }
@@ -113,15 +113,21 @@ var Container = (function () {
                     argNames.push(dep.name);
                 }
             }
+            function createIntance(resolvedArgs) {
+                var defArgs = argNames.length ? [_getDebugPath$convertArgsToOptions.convertArgsToOptions(resolvedArgs, argNames)] : resolvedArgs;
+                return isClass ? new (_bind.apply(definition, [null].concat(_toConsumableArray(defArgs))))() : definition.apply(undefined, _toConsumableArray(defArgs));
+            }
 
-            result = Promise.all(args).then(function (resolvedArgs) {
-                return argNames.length ? handler(_getDebugPath$classToFactory$convertArgsToOptions.convertArgsToOptions(resolvedArgs, argNames)) : handler.apply(null, resolvedArgs);
-            });
+            result = isSync ? createIntance(args) : Promise.all(args).then(createIntance);
 
-            this._locks.set(id, false);
             cache.set(id, result);
 
             return result;
+        }
+    }, {
+        key: 'getSync',
+        value: function getSync(definition) {
+            return this.get(definition, true);
         }
     }]);
 

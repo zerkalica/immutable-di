@@ -2,7 +2,7 @@ import actionToPromise from './action-to-promise'
 import PromiseSeries from './promise-series'
 import Container from '../container'
 
-import {Class, Def, getDef} from '../define'
+import {Class, getDef, Factory, createGetter} from '../define'
 import debug from 'debug'
 
 const info = debug('immutable-di:dispatcher')
@@ -57,17 +57,10 @@ export default class Dispatcher {
 
     mount(definition, listener) {
         const {id} = getDef(definition)
-        const handler = (p) => {
-            return listener(p)
-        }
-        const listenerDef = Def(handler, {
-            id: id + '__listener',
-            deps: [definition],
-            handler
-        })
-        this._listeners.push(listenerDef)
+        Factory(listener, [definition], id + '__listener')
+        this._listeners.push(listener)
 
-        return listenerDef
+        return listener
     }
 
     unmount(listenerDef) {
@@ -75,11 +68,16 @@ export default class Dispatcher {
     }
 
     once(definition, resolve) {
+        if (Array.isArray(definition) || typeof definition === 'object') {
+            definition = createGetter(definition)
+        }
         const {getter} = getDef(definition)
-        const listenerDef = this.mount(getter, (p => {
+        const listenerDef = this.mount(getter, (...args) => {
             this.unmount(listenerDef)
-            resolve(p)
-        }).bind(this))
+            resolve(...args)
+        })
+
+        return this
     }
 
     _invokeListeners() {

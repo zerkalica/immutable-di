@@ -1,4 +1,4 @@
-import {getDebugPath, classToFactory, convertArgsToOptions} from './utils'
+import {getDebugPath, convertArgsToOptions} from './utils'
 import {Class, getDef} from './define'
 
 export default class Container {
@@ -44,7 +44,7 @@ export default class Container {
         if (!def) {
             throw new Error('Property .__id not exist in ' + getDebugPath(debugCtx || []))
         }
-        const {id, handler, deps, scope} = def
+        const {id, handler, deps, scope, isClass} = def
         const debugPath = getDebugPath([debugCtx && debugCtx.length ? debugCtx[0] : [], id])
         const cache = this._getScope(scope)
         let result = cache.get(id)
@@ -68,7 +68,7 @@ export default class Container {
                     throw e
                 }
             } else {
-                value = this.get(dep.definition, isSync, [debugPath, i])
+                value = dep.isProto ? dep.definition : this.get(dep.definition, isSync, [debugPath, i])
                 if (dep.promiseHandler) {
                     value = dep.promiseHandler(value)
                 }
@@ -79,11 +79,14 @@ export default class Container {
                 argNames.push(dep.name)
             }
         }
-        const create = resolvedArgs => argNames.length
-            ? handler(convertArgsToOptions(resolvedArgs, argNames))
-            : handler.apply(null, resolvedArgs)
+        function createIntance(resolvedArgs) {
+            const defArgs = argNames.length
+                ? [convertArgsToOptions(resolvedArgs, argNames)]
+                : resolvedArgs
+            return isClass ? new definition(...defArgs) : definition(...defArgs)
+        }
 
-        result = isSync ? create(args) : Promise.all(args).then(create)
+        result = isSync ? createIntance(args) : Promise.all(args).then(createIntance)
 
         cache.set(id, result)
 

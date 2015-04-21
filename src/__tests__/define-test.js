@@ -1,4 +1,4 @@
-import {getDef, Def, Class, Factory} from '../define'
+import {getDef, Class, Factory} from '../define'
 import {describe, it, spy} from '../test-helper'
 
 describe('define', () => {
@@ -11,28 +11,19 @@ describe('define', () => {
         getDef(TestSrv).should.to.be.equal('test')
     })
 
-    it('Def should create empty service', () => {
-        function fn() {
-
-        }
-        const deps = {
-        }
-        Def(p => p, {id: 'test-id', handler: fn, deps: deps}).should.to.be.a('function')
-    })
-
     it('Class should define class service', () => {
         class T1 {
 
         }
         Class(T1)
-        T1.__di.should.to.be.include.keys(['id', 'handler', 'scope', 'deps'])
+        T1.__di.should.to.be.include.keys(['id', 'isClass', 'scope', 'deps'])
     })
 
     it('Factory should define class service', () => {
         function F1() {
         }
         Factory(F1)
-        F1.__di.should.to.be.include.keys(['id', 'handler', 'scope', 'deps'])
+        F1.__di.should.to.be.include.keys(['id', 'isClass', 'scope', 'deps'])
     })
 
     it('should handle deps with promises', () => {
