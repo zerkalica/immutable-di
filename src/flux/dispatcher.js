@@ -3,9 +3,9 @@ import PromiseSeries from './promise-series'
 import Container from '../container'
 
 import {Class, getDef, Factory, createGetter} from '../define'
-import debug from 'debug'
+import __debug from 'debug'
 
-const info = debug('immutable-di:dispatcher')
+const debug = __debug('immutable-di:dispatcher')
 
 export default class Dispatcher {
     constructor({stores, state, container}) {
@@ -17,9 +17,9 @@ export default class Dispatcher {
 
         this.setStores = this.setStores.bind(this)
         this.dispatch = this.dispatch.bind(this)
-        this.dispatchAsync = this.dispatchAsync.bind(this)
         this.mount = this.mount.bind(this)
         this.unmount = this.unmount.bind(this)
+        this.dispatchAsync = this.dispatchAsync.bind(this)
 
         if (stores) {
             this.setStores(stores)
@@ -37,28 +37,24 @@ export default class Dispatcher {
     }
 
     dispatch(action, payload) {
-        return this._series.add(() => this.dispatchAsync(action, payload))
+        actionToPromise(action, payload)
+            .forEach(p => this._series.add(() => p.then(this.dispatchAsync)))
+
+        return this._series.promise
     }
 
-    dispatchAsync(action, payload) {
-        const promiseAction = actionToPromise(action, payload)
-        let promise = this._invokeDispatch(promiseAction[0])
-        for (let i = 1; i < promiseAction.length; i++) {
-            promise = promise.then(() => this._invokeDispatch(promiseAction[i]))
-        }
-
-        return promise
-    }
-
-    _invokeDispatch(actionPromise) {
-        return actionPromise
-            .then(({action, payload}) => this._transformState(action, payload))
+    dispatchAsync({action, payload}) {
+        const handler = ({index, id, get}) => this._stores[index].handle(get(id), action, payload)
+        debug('dispatchAsync %s:%o', action, payload)
+        const updatedScopes = this._container.transformState(p => this._stateTransformer(p, handler))
+        return (updatedScopes || []).length
+            ? Promise.all(this._listeners.map(this._container.getSync))
+            : false
     }
 
     mount(definition, listener) {
         const {id} = getDef(definition)
-        Factory(listener, [definition], id + '__listener')
-        this._listeners.push(listener)
+        this._listeners.push(Factory(listener, [definition], id + '__listener'))
 
         return listener
     }
@@ -74,14 +70,10 @@ export default class Dispatcher {
         const {getter} = getDef(definition)
         const listenerDef = this.mount(getter, (...args) => {
             this.unmount(listenerDef)
-            resolve(...args)
+            return resolve(...args)
         })
 
         return this
-    }
-
-    _invokeListeners() {
-        return this._listeners.map(listener => this._container.get(listener))
     }
 
     _stateTransformer({get, set}, getState) {
@@ -98,13 +90,5 @@ export default class Dispatcher {
 
             return updatedIds
     }
-
-    _transformState(action, payload) {
-        const handler = ({index, id, get}) => this._stores[index].handle(get(id), action, payload)
-        info('_transformState %s:%o', action, payload)
-        this._container.transformState(p => this._stateTransformer(p, handler))
-        return Promise.all(this._invokeListeners())
-    }
 }
-
 Class(Dispatcher, {container: Container})

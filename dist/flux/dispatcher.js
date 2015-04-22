@@ -28,7 +28,7 @@ var _debug = require('debug');
 
 var _debug2 = _interopRequireWildcard(_debug);
 
-var info = _debug2['default']('immutable-di:dispatcher');
+var debug = _debug2['default']('immutable-di:dispatcher');
 
 var Dispatcher = (function () {
     function Dispatcher(_ref) {
@@ -46,9 +46,9 @@ var Dispatcher = (function () {
 
         this.setStores = this.setStores.bind(this);
         this.dispatch = this.dispatch.bind(this);
-        this.dispatchAsync = this.dispatchAsync.bind(this);
         this.mount = this.mount.bind(this);
         this.unmount = this.unmount.bind(this);
+        this.dispatchAsync = this.dispatchAsync.bind(this);
 
         if (stores) {
             this.setStores(stores);
@@ -68,38 +68,32 @@ var Dispatcher = (function () {
     Dispatcher.prototype.dispatch = function dispatch(action, payload) {
         var _this = this;
 
-        return this._series.add(function () {
-            return _this.dispatchAsync(action, payload);
+        _actionToPromise2['default'](action, payload).forEach(function (p) {
+            return _this._series.add(function () {
+                return p.then(_this.dispatchAsync);
+            });
         });
+
+        return this._series.promise;
     };
 
-    Dispatcher.prototype.dispatchAsync = function dispatchAsync(action, payload) {
+    Dispatcher.prototype.dispatchAsync = function dispatchAsync(_ref2) {
         var _this2 = this;
 
-        var promiseAction = _actionToPromise2['default'](action, payload);
-        var promise = this._invokeDispatch(promiseAction[0]);
+        var action = _ref2.action;
+        var payload = _ref2.payload;
 
-        var _loop = function (i) {
-            promise = promise.then(function () {
-                return _this2._invokeDispatch(promiseAction[i]);
-            });
+        var handler = function handler(_ref3) {
+            var index = _ref3.index;
+            var id = _ref3.id;
+            var get = _ref3.get;
+            return _this2._stores[index].handle(get(id), action, payload);
         };
-
-        for (var i = 1; i < promiseAction.length; i++) {
-            _loop(i);
-        }
-
-        return promise;
-    };
-
-    Dispatcher.prototype._invokeDispatch = function _invokeDispatch(actionPromise) {
-        var _this3 = this;
-
-        return actionPromise.then(function (_ref2) {
-            var action = _ref2.action;
-            var payload = _ref2.payload;
-            return _this3._transformState(action, payload);
+        debug('dispatchAsync %s:%o', action, payload);
+        var updatedScopes = this._container.transformState(function (p) {
+            return _this2._stateTransformer(p, handler);
         });
+        return updatedScopes.length ? _Promise.all(this._listeners.map(this._container.getSync)) : false;
     };
 
     Dispatcher.prototype.mount = function mount(definition, listener) {
@@ -107,8 +101,7 @@ var Dispatcher = (function () {
 
         var id = _getDef.id;
 
-        _Class$getDef$Factory$createGetter.Factory(listener, [definition], id + '__listener');
-        this._listeners.push(listener);
+        this._listeners.push(_Class$getDef$Factory$createGetter.Factory(listener, [definition], id + '__listener'));
 
         return listener;
     };
@@ -120,7 +113,7 @@ var Dispatcher = (function () {
     };
 
     Dispatcher.prototype.once = function once(definition, resolve) {
-        var _this4 = this;
+        var _this3 = this;
 
         if (Array.isArray(definition) || typeof definition === 'object') {
             definition = _Class$getDef$Factory$createGetter.createGetter(definition);
@@ -135,24 +128,16 @@ var Dispatcher = (function () {
                 args[_key] = arguments[_key];
             }
 
-            _this4.unmount(listenerDef);
-            resolve.apply(undefined, args);
+            _this3.unmount(listenerDef);
+            return resolve.apply(undefined, args);
         });
 
         return this;
     };
 
-    Dispatcher.prototype._invokeListeners = function _invokeListeners() {
-        var _this5 = this;
-
-        return this._listeners.map(function (listener) {
-            return _this5._container.get(listener);
-        });
-    };
-
-    Dispatcher.prototype._stateTransformer = function _stateTransformer(_ref3, getState) {
-        var get = _ref3.get;
-        var set = _ref3.set;
+    Dispatcher.prototype._stateTransformer = function _stateTransformer(_ref4, getState) {
+        var get = _ref4.get;
+        var set = _ref4.set;
 
         var updatedIds = [];
         this._storeIds.forEach(function (id, index) {
@@ -166,22 +151,6 @@ var Dispatcher = (function () {
         });
 
         return updatedIds;
-    };
-
-    Dispatcher.prototype._transformState = function _transformState(action, payload) {
-        var _this6 = this;
-
-        var handler = function handler(_ref4) {
-            var index = _ref4.index;
-            var id = _ref4.id;
-            var get = _ref4.get;
-            return _this6._stores[index].handle(get(id), action, payload);
-        };
-        info('_transformState %s:%o', action, payload);
-        this._container.transformState(function (p) {
-            return _this6._stateTransformer(p, handler);
-        });
-        return _Promise.all(this._invokeListeners());
     };
 
     return Dispatcher;

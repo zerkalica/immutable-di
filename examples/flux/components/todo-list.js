@@ -8,7 +8,6 @@ export default class TodoList extends React.Component {
     }
 
     render() {
-        info('context: %o', this.context)
         info('state: %o, len: %s, loading: %s', this.props, this.props.todos.length, this.props.loading)
         return (
             <div>

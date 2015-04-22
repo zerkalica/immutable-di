@@ -28,6 +28,7 @@ var Container = (function () {
         this._state = state;
 
         this.get = this.get.bind(this);
+        this.getSync = this.getSync.bind(this);
         this.clear = this.clear.bind(this);
         this.transformState = this.transformState.bind(this);
     }
@@ -48,11 +49,9 @@ var Container = (function () {
     };
 
     Container.prototype.transformState = function transformState(getState) {
-        var _this = this;
-
-        this._state.transformState(getState).forEach(function (id) {
-            return _this.clear(id);
-        });
+        var updatedScopes = this._state.transformState(getState);
+        updatedScopes.forEach(this.clear);
+        return updatedScopes;
     };
 
     Container.prototype.get = function get(definition, isSync, debugCtx) {
@@ -76,9 +75,8 @@ var Container = (function () {
 
         var debugPath = _getDebugPath$convertArgsToOptions.getDebugPath([debugCtx && debugCtx.length ? debugCtx[0] : [], id]);
         var cache = this._getScope(scope);
-        var result = cache.get(id);
-        if (result !== undefined) {
-            return result;
+        if (cache.has(id)) {
+            return cache.get(id);
         }
 
         var args = [];
@@ -113,7 +111,7 @@ var Container = (function () {
             return isClass ? new (_bind.apply(definition, [null].concat(_toConsumableArray(defArgs))))() : definition.apply(undefined, _toConsumableArray(defArgs));
         }
 
-        result = isSync ? createIntance(args) : _Promise.all(args).then(createIntance);
+        var result = isSync ? createIntance(args) : _Promise.all(args).then(createIntance);
 
         cache.set(id, result);
 

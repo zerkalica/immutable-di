@@ -13,10 +13,6 @@ class TodoStore {
         return this[action] && this[action].call(this, state, payload)
     }
 
-    reset(state, initialState) {
-        return initialState.todoApp
-    }
-
     addTodo(state, todo) {
         state.todos.push(todo)
         return state
@@ -29,16 +25,12 @@ class TodoStore {
         return state
     }
 
-    loadTodosSuccess(state, todos) {
-        info('loadTodosSuccess %o', todos)
-        state.todos = todos
-        state.loading = false
-
-        return state
+    loadTodosSuccess(state, newState) {
+        newState.loading = false
+        return newState
     }
 
-    loadTodosFail(state, err) {
-        info('loadTodosFail %o', err)
+    _loadTodosFail(state, err) {
         state.loading = false
         state.error = err
 
@@ -60,7 +52,10 @@ class TodoActions {
         return this.dispatch('loadTodos', Promise.resolve([
             {name: 'todo-1', id: 1},
             {name: 'todo-2', id: 2}
-        ]))
+        ]).then(todos => ({
+            todos,
+            loading: false
+        })))
     }
 }
 
@@ -94,6 +89,5 @@ dispatcher.once(['todoApp'], ({getter, state}) => {
 })
 
 //dispatcher.dispatch('reset', )
-todoActions.addTodo({name: 'todo-new', id: 333})
+//todoActions.addTodo({name: 'todo-new', id: 333})
 todoActions.loadTodos()
-

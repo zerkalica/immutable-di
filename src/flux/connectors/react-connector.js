@@ -14,11 +14,10 @@ export default function getReactConnector(React, childContextTypes) {
             actions: p.object.isRequired
         }
 
-        __listener = null
-
         constructor(props, context) {
             super(props, context)
             this.state = props.state
+            this.__listener = null
         }
 
         getChildContext() {
@@ -39,7 +38,7 @@ export default function getReactConnector(React, childContextTypes) {
         }
 
         render() {
-            return <this.props.component {...this.props.state} />
+            return <this.props.component {...this.state} />
         }
     }
 

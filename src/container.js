@@ -8,6 +8,7 @@ export default class Container {
         this._state = state
 
         this.get = this.get.bind(this)
+        this.getSync = this.getSync.bind(this)
         this.clear = this.clear.bind(this)
         this.transformState = this.transformState.bind(this)
     }
@@ -28,7 +29,9 @@ export default class Container {
     }
 
     transformState(getState) {
-        this._state.transformState(getState).forEach(id => this.clear(id))
+        const updatedScopes = this._state.transformState(getState)
+        updatedScopes.forEach(this.clear)
+        return updatedScopes
     }
 
     get(definition, isSync, debugCtx) {
@@ -47,9 +50,8 @@ export default class Container {
         const {id, handler, deps, scope, isClass} = def
         const debugPath = getDebugPath([debugCtx && debugCtx.length ? debugCtx[0] : [], id])
         const cache = this._getScope(scope)
-        let result = cache.get(id)
-        if (result !== undefined) {
-            return result
+        if (cache.has(id)) {
+            return cache.get(id)
         }
 
         const args = []
@@ -86,7 +88,9 @@ export default class Container {
             return isClass ? new definition(...defArgs) : definition(...defArgs)
         }
 
-        result = isSync ? createIntance(args) : Promise.all(args).then(createIntance)
+        const result = isSync
+            ? createIntance(args)
+            : Promise.all(args).then(createIntance)
 
         cache.set(id, result)
 

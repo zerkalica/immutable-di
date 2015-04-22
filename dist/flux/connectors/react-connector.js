@@ -23,8 +23,8 @@ function getReactConnector(React, childContextTypes) {
             _classCallCheck(this, ComponentWrapper);
 
             _React$Component.call(this, props, context);
-            this.__listener = null;
             this.state = props.state;
+            this.__listener = null;
         }
 
         _inherits(ComponentWrapper, _React$Component);
@@ -48,14 +48,10 @@ function getReactConnector(React, childContextTypes) {
         };
 
         ComponentWrapper.prototype.render = function render() {
-            return React.createElement(this.props.component, this.props.state);
+            return React.createElement(this.props.component, this.state);
         };
 
-        _createClass(ComponentWrapper, [{
-            key: '__listener',
-            value: undefined,
-            enumerable: true
-        }], [{
+        _createClass(ComponentWrapper, null, [{
             key: 'childContextTypes',
             value: {
                 actions: p.object.isRequired
