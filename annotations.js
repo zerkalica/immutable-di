@@ -1,1 +1,1 @@
-module.exports = require('./dist/define');
+module.exports = require('./dist/define')

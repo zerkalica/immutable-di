@@ -1,3 +1,5 @@
+/*eslint-env node */
+/* eslint-disable no-var, no-process-env */
 var gulp = require('gulp');
 var babel = require('gulp-babel');
 var gmocha = require('gulp-mocha');
@@ -19,9 +21,6 @@ var knownOptions = {
 
 function getConfig(args) {
     var options = minimist(args, knownOptions);
-    var env = options.env;
-    var isDebug = env === 'dev' ? true : options.debug;
-
     return {
         src: {
             scripts: 'src/**/*.js',
@@ -42,10 +41,10 @@ function getConfig(args) {
         },
         notify: {
             iconPath: path.join(path.dirname(require.resolve('mocha')), 'images'),
-            time: 500,
+            time: 500
         }
     }
-};
+}
 
 var config = getConfig(process.argv.slice(2));
 
@@ -84,11 +83,11 @@ function runTest(src) {
         });
 }
 
-gulp.task('test-src', function(done) {
+gulp.task('test-src', function() {
     return runTest(config.src.tests);
 });
 
-gulp.task('test-dist', function(done) {
+gulp.task('test-dist', function() {
     return runTest(config.dest.tests);
 });
 
