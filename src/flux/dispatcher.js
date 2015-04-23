@@ -47,7 +47,7 @@ export default class Dispatcher {
         const handler = ({index, id, get}) => this._stores[index].handle(get(id), action, payload)
         debug('dispatchAsync %s:%o', action, payload)
         const updatedScopes = this._container.transformState(p => this._stateTransformer(p, handler))
-        return (updatedScopes || []).length
+        return updatedScopes.length
             ? Promise.all(this._listeners.map(this._container.getSync))
             : false
     }
@@ -77,18 +77,14 @@ export default class Dispatcher {
     }
 
     _stateTransformer({get, set}, getState) {
-            const updatedIds = []
-            this._storeIds.forEach((id, index) => {
-                const state = getState({id, index, get})
-                if (state) {
-                    if (state !== true) {
-                        set(id, state)
-                    }
-                    updatedIds.push(id)
-                }
-            })
-
-            return updatedIds
+        return this._storeIds.filter((id, index) => {
+            const state = getState({id, index, get})
+            const isHandled = state !== undefined
+            if (isHandled) {
+                set(id, state)
+            }
+            return isHandled
+        })
     }
 }
 Class(Dispatcher, {container: Container})
