@@ -1,4 +1,4 @@
-import {classToFactory, getFunctionName} from './utils'
+import {getFunctionName} from './utils'
 
 function pass(p) {
     return p
@@ -53,7 +53,7 @@ function getId(Service, idPrefix) {
     idPrefix = idPrefix || lastId
     let id = Service.__id
     if (!id) {
-        id = getFunctionName(Service) + '[' + idPrefix + ']'
+        id = getFunctionName(Service) + '#' + idPrefix
         lastId++
     }
 
