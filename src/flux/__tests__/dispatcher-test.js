@@ -16,7 +16,8 @@ describe('flux/dispatcher', () => {
     const testPayload = {test: 111}
 
     beforeEach(() => {
-        fakeTransformState = spy()
+        fakeTransformState = sinon.stub()
+        fakeTransformState.returns([])
         fakeGet = spy()
         container = {
             transformState: fakeTransformState,
