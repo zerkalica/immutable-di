@@ -38,12 +38,12 @@ export default class Dispatcher {
 
     dispatch(action, payload) {
         actionToPromise(action, payload)
-            .forEach(p => this._series.add(() => p.then(this.dispatchAsync)))
+            .forEach(p => this._series.add(() => p.then(o => this.dispatchAsync(o.action, o.payload))))
 
         return this._series.promise
     }
 
-    dispatchAsync({action, payload}) {
+    dispatchAsync(action, payload) {
         const handler = ({index, id, get}) => this._stores[index].handle(get(id), action, payload)
         debug('dispatchAsync %s:%o', action, payload)
         const updatedScopes = this._container.transformState(p => this._stateTransformer(p, handler))
