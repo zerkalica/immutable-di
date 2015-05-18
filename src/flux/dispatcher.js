@@ -20,36 +20,63 @@ export default class Dispatcher {
         this.mount = this.mount.bind(this)
         this.unmount = this.unmount.bind(this)
         this.dispatchAsync = this.dispatchAsync.bind(this)
+        this.get = this.get.bind(this)
 
         if (stores) {
             this.setStores(stores)
         }
     }
 
+    get(definition, props) {
+        const {getter} = getDef(definition)
+        props = props || {}
+
+        return getter
+            ? Object.assign(this._container.getSync(getter), props)
+            : props
+    }
+
     setStores(storeMap) {
         const stores = []
         const keys = this._storeIds = Object.keys(storeMap)
         for(let i = 0; i < keys.length; i++) {
-            stores.push(storeMap[keys[i]])
+            stores.push([storeMap[keys[i]]])
         }
         this._stores = stores
         return this
     }
 
-    dispatch(action, payload) {
-        actionToPromise(action, payload)
+    dispatch(action, payload, progressPayload) {
+        actionToPromise(action, payload, progressPayload)
             .forEach(p => this._series.add(() => p.then(o => this.dispatchAsync(o.action, o.payload))))
 
         return this._series.promise
     }
 
     dispatchAsync(action, payload) {
-        const handler = ({index, id, get}) => this._stores[index].handle(get(id), action, payload)
-        debug('dispatchAsync %s:%o', action, payload)
-        const updatedScopes = this._container.transformState(p => this._stateTransformer(p, handler))
-        return updatedScopes.length
-            ? Promise.all(this._listeners.map(this._container.getSync))
-            : false
+        const updatedIds = this.container.transformState(state =>
+            this._storeIds.filter((path, index) => {
+                const newState = this._stores[index].handle(state.get(path), action, payload)
+                if (newState !== undefined) {
+                    state.set(path, newState)
+                }
+                return newState !== undefined
+            })
+        )
+        if (updatedIds) {
+            this._listeners.forEach(this._container.getSync)
+        }
+    }
+
+    update(path, transform) {
+        function setState(state) {
+            state.set(path, transform(state.get(path)))
+            return [path]
+        }
+        this.container.transformState(setState)
+        this._listeners.forEach(this._container.getSync)
+
+        return this
     }
 
     mount(definition, listener) {
@@ -63,28 +90,13 @@ export default class Dispatcher {
         this._listeners = this._listeners.filter(d => listenerDef !== d)
     }
 
-    once(definition, resolve) {
-        if (Array.isArray(definition) || typeof definition === 'object') {
-            definition = createGetter(definition)
-        }
-        const {getter} = getDef(definition)
-        const listenerDef = this.mount(getter, (...args) => {
+    once(definition, listener) {
+        const listenerDef = this.mount(definition, (...args) => {
             this.unmount(listenerDef)
-            return resolve(...args)
+            return listener(...args)
         })
 
         return this
-    }
-
-    _stateTransformer({get, set}, getState) {
-        return this._storeIds.filter((id, index) => {
-            const state = getState({id, index, get})
-            const isHandled = state !== undefined
-            if (isHandled) {
-                set(id, state)
-            }
-            return isHandled
-        })
     }
 }
 Class(Dispatcher, {container: Container})

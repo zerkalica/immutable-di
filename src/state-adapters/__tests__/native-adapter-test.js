@@ -29,7 +29,7 @@ describe('state-adapters/native-adapter', () => {
         const nativeAdapter = new NativeAdapter(testState)
         nativeAdapter.getIn(['a', 'b']).should.to.be.deep.equal(testState.a.b)
         nativeAdapter.transformState(({get, set}) => {
-            set('a', {c: 'test'})
+            set(['a'], {c: 'test'})
         })
         nativeAdapter.getIn(['a', 'c']).should.to.equal('test')
     })

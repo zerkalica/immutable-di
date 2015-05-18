@@ -1,9 +1,9 @@
-export default function actionToPromise(action, payload) {
+export default function actionToPromise(action, payload, progressPayload) {
     let actionPromises = []
     if (typeof payload === 'object' && typeof payload.then === 'function') {
         actionPromises.push(Promise.resolve({
             action: action + 'Progress',
-            payload: {}
+            payload: progressPayload || {}
         }))
         actionPromises.push(payload
             .then(payload => ({

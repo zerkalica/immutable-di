@@ -10,11 +10,6 @@ export default class Container {
         this.get = this.get.bind(this)
         this.getSync = this.getSync.bind(this)
         this.clear = this.clear.bind(this)
-        this.transformState = this.transformState.bind(this)
-    }
-
-    clear(scope) {
-        this._getScope(scope).clear()
     }
 
     _getScope(scope) {
@@ -28,10 +23,27 @@ export default class Container {
         return cache
     }
 
-    transformState(getState) {
-        const updatedScopes = this._state.transformState(getState)
-        updatedScopes.forEach(this.clear)
-        return updatedScopes
+    update(transform) {
+        const updatedIds = this._state.transformState(transform)
+        updatedIds.forEach(path => this._getScope(path[0]).clear())
+        return updatedIds
+    }
+
+    _getDepValue(dep, isSync, debugPath) {
+        let value
+        if (dep.path) {
+            value = this._state.getIn(dep.path)
+        } else {
+            value = dep.isProto
+                ? dep.definition
+                : this.get(dep.definition, isSync, [debugPath, i])
+
+            if (dep.promiseHandler) {
+                value = dep.promiseHandler(value)
+            }
+        }
+
+        return {value, name: dep.name}
     }
 
     get(definition, isSync, debugCtx) {
@@ -57,35 +69,20 @@ export default class Container {
         const args = []
         const argNames = []
         for (let i = 0; i < deps.length; i++) {
-            const dep = deps[i]
-            let value
-            if (dep.path) {
-                try {
-                    value = this._state.getIn(dep.path)
-                    if (value === undefined) {
-                        throw new Error('Value is undefined')
-                    }
-                } catch (e) {
-                    e.message = e.message + ' in ' + debugPath + ' [' + dep.path.join('.') + ']'
-                    throw e
-                }
-            } else {
-                value = dep.isProto ? dep.definition : this.get(dep.definition, isSync, [debugPath, i])
-                if (dep.promiseHandler) {
-                    value = dep.promiseHandler(value)
-                }
-            }
-
-            args.push(value)
-            if (dep.name) {
-                argNames.push(dep.name)
+            const {value, name} = this._getDepValue(deps[i], isSync, debugPath)
+            if (name) {
+                argNames.push(name)
             }
         }
+
         function createIntance(resolvedArgs) {
             const defArgs = argNames.length
                 ? [convertArgsToOptions(resolvedArgs, argNames)]
                 : resolvedArgs
-            return isClass ? new definition(...defArgs) : definition(...defArgs)
+
+            return isClass
+                ? new definition(...defArgs)
+                : definition(...defArgs)
         }
 
         const result = isSync

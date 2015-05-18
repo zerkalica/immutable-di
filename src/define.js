@@ -98,23 +98,11 @@ const Annotation = {
         return Service
     },
 
-    Getter(Service, deps, id) {
-        Service.__di.getter = Annotation.Factory(p => p, deps, (id || getId(Service)) + '__getter')
+    Getter(Service, deps, func, id) {
+        id = (id || getId(Service)) + '__getter'
+        Service.__di.getter = Annotation.Factory(func || p => p, deps, id)
         return Service
     }
-}
-
-function createGetter(stateDeps, deps, id) {
-    id = id || 'state'
-    const stateGetter = Annotation.Factory(p => p, stateDeps, id + '__main')
-    const depsDefinition = Annotation.Factory(p => p, deps || {}, id + '__deps')
-    Annotation.Getter(stateGetter, {
-        state: stateGetter,
-        getter: [stateGetter],
-        deps: depsDefinition
-    }, id)
-
-    return stateGetter
 }
 
 const Promises = {
@@ -126,7 +114,6 @@ const Promises = {
 export default {
     getDef,
     Promises,
-    createGetter,
     Getter: Annotation.Getter,
     Class: Annotation.Class,
     Factory: Annotation.Factory

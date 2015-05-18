@@ -1,38 +1,38 @@
 function getInPath(obj, bits) {
-    for(let i = 0, j = bits.length; i < j; ++i) {
-        obj = obj[bits[i]]
+    if (bits) {
+        for(let i = 0, j = bits.length; i < j; ++i) {
+            obj = obj[bits[i]]
+        }
     }
+
     return obj
 }
 
 export default class NativeAdapter {
     constructor(state) {
         this._state = state || {}
+        this.getIn = this.getIn.bind(this)
+        this._setIn = this._setIn.bind(this)
     }
 
     getIn(path) {
         return getInPath(this._state, path)
     }
 
-    get(id) {
-        return this._state[id]
-    }
-
-    deserialize(data) {
-        this._state = JSON.parse(data)
+    _setIn(path, newState) {
+        if (!path || !path.length) {
+            this._state = newState
+        } else {
+            const statePart = this.getIn(path.slice(0, -1))
+            statePart[path[path.length - 1]] = newState
+        }
         return this
-    }
-
-    serialize() {
-        return JSON.stringify(this._state)
     }
 
     transformState(transform) {
         return transform({
-            get: (id) => this._state[id],
-            set: (id, newState) => {
-                this._state[id] = newState
-            }
+            get: this.getIn,
+            set: this._setIn
         })
     }
 }

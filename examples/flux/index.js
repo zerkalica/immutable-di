@@ -4,60 +4,12 @@ import React from 'react'
 import {NativeAdapter, Dispatcher, ReactConnector} from '../../src'
 const ReactComponent = ReactConnector(React)
 
+import TodoStore from './todo-store'
+import TodoActions from './todo-actions'
 import TodoList from './components/todo-list'
-import debug from 'debug'
-const info = debug('immutable-di:flux:index')
+import __debug from 'debug'
+const debug = __debug('immutable-di:flux:index')
 
-class TodoStore {
-    handle(state, action, payload) {
-        return this[action] && this[action].call(this, state, payload)
-    }
-
-    addTodo(state, todo) {
-        state.todos.push(todo)
-        return state
-    }
-
-    loadTodosProgress(state) {
-        info('loadTodosProgress')
-        state.loading = true
-
-        return state
-    }
-
-    loadTodosSuccess(state, newState) {
-        newState.loading = false
-        return newState
-    }
-
-    _loadTodosFail(state, err) {
-        state.loading = false
-        state.error = err
-
-        return state
-    }
-}
-
-class TodoActions {
-    constructor(dispatcher) {
-        this.dispatch = dispatcher.dispatch.bind(dispatcher)
-    }
-
-    addTodo(todo) {
-        return this.dispatch('addTodo', todo)
-    }
-
-    loadTodos() {
-        // simulate fetch
-        return this.dispatch('loadTodos', Promise.resolve([
-            {name: 'todo-1', id: 1},
-            {name: 'todo-2', id: 2}
-        ]).then(todos => ({
-            todos,
-            loading: false
-        })))
-    }
-}
 
 const el = document.getElementById('app')
 
@@ -66,27 +18,21 @@ const dispatcher = new Dispatcher({
         todoApp: new TodoStore()
     },
     state: new NativeAdapter({
-        todoApp: {
-            loading: false,
-            error: null,
-            todos: []
-        }
+        todoApp: TodoStore.initialState
     })
 })
 const todoActions = new TodoActions(dispatcher)
 
-dispatcher.once(['todoApp'], ({getter, state}) => {
+dispatcher.once(TodoList.getter, state =>
     React.render((
         <ReactComponent
             actions={todoActions}
             component={TodoList}
-
             dispatcher={dispatcher}
             state={state}
-            getter={getter}
         />
     ), el)
-})
+)
 
 //dispatcher.dispatch('reset', )
 //todoActions.addTodo({name: 'todo-new', id: 333})
