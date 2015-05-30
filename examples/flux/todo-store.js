@@ -33,7 +33,6 @@ export default class TodoStore {
     }
 
     loadTodosProgress(state) {
-        debug('loadTodosProgress')
         state.loading = true
 
         return state

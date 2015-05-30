@@ -1,7 +1,7 @@
 import './bootstrap'
 
 import React from 'react'
-import {NativeAdapter, Dispatcher, ReactConnector} from '../../src'
+import {NativeAdapter, Dispatcher, Container, ReactConnector} from '../../src'
 const ReactComponent = ReactConnector(React)
 
 import TodoStore from './todo-store'
@@ -13,17 +13,21 @@ const debug = __debug('immutable-di:flux:index')
 
 const el = document.getElementById('app')
 
+const container = new Container(new NativeAdapter({
+    todoApp: {
+        todos: []
+    }
+}))
+
 const dispatcher = new Dispatcher({
     stores: {
         todoApp: new TodoStore()
     },
-    state: new NativeAdapter({
-        todoApp: TodoStore.initialState
-    })
+    container: container
 })
 const todoActions = new TodoActions(dispatcher)
 
-dispatcher.once(TodoList.getter, state =>
+dispatcher.once(TodoList, state =>
     React.render((
         <ReactComponent
             actions={todoActions}

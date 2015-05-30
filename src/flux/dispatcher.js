@@ -2,14 +2,14 @@ import actionToPromise from './action-to-promise'
 import PromiseSeries from './promise-series'
 import Container from '../container'
 
-import {Class, getDef, Factory, createGetter} from '../define'
+import {Class, Factory} from '../define'
+import getDef from '../define/get'
 import __debug from 'debug'
-
 const debug = __debug('immutable-di:dispatcher')
 
 export default class Dispatcher {
-    constructor({stores, state, container}) {
-        this._container = container || new Container({state})
+    constructor({stores, container}) {
+        this._container = container
         this._series = new PromiseSeries()
         this._listeners = []
         this._stores = []
@@ -27,21 +27,13 @@ export default class Dispatcher {
         }
     }
 
-    get(definition, props) {
-        const {getter} = getDef(definition)
-        props = props || {}
-
-        return getter
-            ? Object.assign(this._container.getSync(getter), props)
-            : props
-    }
-
     setStores(storeMap) {
         const stores = []
-        const keys = this._storeIds = Object.keys(storeMap)
+        const keys = Object.keys(storeMap)
         for(let i = 0; i < keys.length; i++) {
-            stores.push([storeMap[keys[i]]])
+            stores.push(storeMap[keys[i]])
         }
+        this._storeIds = keys.map(k => [k])
         this._stores = stores
         return this
     }
@@ -54,7 +46,7 @@ export default class Dispatcher {
     }
 
     dispatchAsync(action, payload) {
-        const updatedIds = this.container.transformState(state =>
+        const updatedIds = this._container.transformState(state =>
             this._storeIds.filter((path, index) => {
                 const newState = this._stores[index].handle(state.get(path), action, payload)
                 if (newState !== undefined) {
@@ -66,6 +58,15 @@ export default class Dispatcher {
         if (updatedIds) {
             this._listeners.forEach(this._container.getSync)
         }
+    }
+
+    get(definition, props) {
+        const {getter} = getDef(definition)
+        props = props || {}
+
+        return getter
+            ? Object.assign(this._container.getSync(getter), props)
+            : props
     }
 
     update(path, transform) {
@@ -80,8 +81,8 @@ export default class Dispatcher {
     }
 
     mount(definition, listener) {
-        const {id} = getDef(definition)
-        this._listeners.push(Factory(listener, [definition], id + '__listener'))
+        const {id, getter} = getDef(definition)
+        this._listeners.push(Factory(listener, [getter], id + '__listener'))
 
         return listener
     }
@@ -99,4 +100,6 @@ export default class Dispatcher {
         return this
     }
 }
-Class(Dispatcher, {container: Container})
+Class(Dispatcher, {
+    container: Container
+})

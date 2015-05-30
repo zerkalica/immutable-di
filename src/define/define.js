@@ -1,4 +1,5 @@
-import {getFunctionName} from './utils'
+import getFunctionName from '../utils/get-function-name'
+import getDef from './get'
 
 function pass(p) {
     return p
@@ -60,10 +61,6 @@ function getId(Service, idPrefix) {
     return id
 }
 
-function getDef(Service) {
-    return Service.__di
-}
-
 function extractDef({id, deps, isClass}) {
     const normalizedDeps = processDeps(deps)
     const scopeSet = new Set()
@@ -79,42 +76,29 @@ function extractDef({id, deps, isClass}) {
     }
 }
 
-const Annotation = {
-    Class(Service, deps, id) {
-        Service.__di = extractDef({
-            id: id || getId(Service),
-            isClass: true,
-            deps: deps || {}
-        })
-        return Service
-    },
-
-    Factory(Service, deps, id) {
-        Service.__di = extractDef({
-            id: id || getId(Service),
-            isClass: false,
-            deps: deps || {}
-        })
-        return Service
-    },
-
-    Getter(Service, deps, func, id) {
-        id = (id || getId(Service)) + '__getter'
-        Service.__di.getter = Annotation.Factory(func || p => p, deps, id)
-        return Service
-    }
+export function Class(Service, deps, id) {
+    Service.__di = extractDef({
+        id: id || getId(Service),
+        isClass: true,
+        deps: deps || {}
+    })
+    return Service
 }
 
-const Promises = {
-    ignore(p) {
-        return p.catch(() => {})
-    }
+export function Factory(Service, deps, id) {
+    Service.__di = extractDef({
+        id: id || getId(Service),
+        isClass: false,
+        deps: deps || {}
+    })
+    return Service
 }
 
-export default {
-    getDef,
-    Promises,
-    Getter: Annotation.Getter,
-    Class: Annotation.Class,
-    Factory: Annotation.Factory
+export function Getter(Service, deps, func, id) {
+    id = (id || getId(Service)) + '__getter'
+    func = func || (p => p)
+    Service.__di = Service.__di || {}
+    Service.__di.getter = Factory(func, deps, id)
+    return Service
 }
+

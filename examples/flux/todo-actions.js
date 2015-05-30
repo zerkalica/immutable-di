@@ -28,12 +28,12 @@ export default class TodoActions {
 
     addTodo(todo) {
         return todo;
-        return this.dispatch('addTodo', todo)
+        return this.dispatcher.dispatch('addTodo', todo)
     }
 
     loadTodos() {
         // simulate fetch
-        return this.dispatch('loadTodos', Promise.resolve([
+        return this.dispatcher.dispatch('loadTodos', Promise.resolve([
             {name: 'todo-1', id: 1},
             {name: 'todo-2', id: 2}
         ]).then(todos => ({

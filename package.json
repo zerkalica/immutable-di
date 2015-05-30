@@ -6,7 +6,7 @@
     "build": "gulp build",
     "test": "gulp test",
     "build-examples": "webpack --config ./webpack.config.js",
-    "dev-examples": "webpack --config ./webpack.config.js --watch",
+    "dev-examples": "webpack-dev-server --config ./webpack.config.js --hot --inline",
     "dev-test": "gulp dev-test"
   },
   "author": "Stefan Zerkalica <zerkalica@gmail.com>",
@@ -39,10 +39,12 @@
     "react": "^0.13.1",
     "sinon": "^1.14.1",
     "sinon-chai": "^2.7.0",
-    "webpack": "^1.8.5"
+    "webpack": "^1.8.5",
+    "webpack-dev-server": "^1.9.0"
   },
   "dependencies": {
     "babel-runtime": "^5.1.11",
-    "debug": "^2.1.3"
+    "debug": "^2.1.3",
+    "deepmerge": "^0.2.10"
   }
 }

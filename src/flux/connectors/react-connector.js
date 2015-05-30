@@ -5,7 +5,8 @@ export default function getReactConnector(React, childContextTypes) {
     const p = React.PropTypes
     class ComponentWrapper extends React.Component {
         static childContextTypes = {
-            actions: p.object.isRequired
+            actions: p.object.isRequired,
+            get: p.func.isRequired
         }
 
         static propTypes = {
@@ -30,7 +31,7 @@ export default function getReactConnector(React, childContextTypes) {
 
         componentDidMount() {
             this.__listener = this.props.dispatcher.mount(
-                this.props.component.getter,
+                this.props.component,
                 state => this.setState(state)
             )
         }

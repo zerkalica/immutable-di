@@ -1,7 +1,12 @@
 function getInPath(obj, bits) {
     if (bits) {
-        for(let i = 0, j = bits.length; i < j; ++i) {
-            obj = obj[bits[i]]
+        try {
+            for(let i = 0, j = bits.length; i < j; ++i) {
+                obj = obj[bits[i]]
+            }
+        } catch (e) {
+            e.message = e.message + ': ' + bits
+            throw e
         }
     }
 

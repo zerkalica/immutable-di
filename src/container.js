@@ -1,15 +1,20 @@
-import {getDebugPath, convertArgsToOptions} from './utils'
-import {Class, getDef} from './define'
+import getDebugPath from './utils/get-debug-path'
+import convertArgsToOptions from './utils/convert-args-to-options'
+import {Class} from './define'
+import getDef from './define/get'
 
 export default class Container {
-    constructor({state, globalCache}) {
-        const cache = this._cache = new Map()
-        cache.set('global', globalCache || new Map())
+    constructor(state, cache) {
+        this._cache = cache || new Map()
         this._state = state
 
         this.get = this.get.bind(this)
         this.getSync = this.getSync.bind(this)
         this.clear = this.clear.bind(this)
+    }
+
+    clear(scope) {
+        this._getScope(scope).clear()
     }
 
     _getScope(scope) {
@@ -23,20 +28,20 @@ export default class Container {
         return cache
     }
 
-    update(transform) {
+    transformState(transform) {
         const updatedIds = this._state.transformState(transform)
-        updatedIds.forEach(path => this._getScope(path[0]).clear())
+        updatedIds.forEach(path => this.clear(path[0]))
         return updatedIds
     }
 
-    _getDepValue(dep, isSync, debugPath) {
+    _getDepValue(dep, isSync, ctx) {
         let value
         if (dep.path) {
             value = this._state.getIn(dep.path)
         } else {
             value = dep.isProto
                 ? dep.definition
-                : this.get(dep.definition, isSync, [debugPath, i])
+                : this.get(dep.definition, isSync, ctx)
 
             if (dep.promiseHandler) {
                 value = dep.promiseHandler(value)
@@ -69,10 +74,11 @@ export default class Container {
         const args = []
         const argNames = []
         for (let i = 0; i < deps.length; i++) {
-            const {value, name} = this._getDepValue(deps[i], isSync, debugPath)
+            const {value, name} = this._getDepValue(deps[i], isSync, [debugPath, i])
             if (name) {
                 argNames.push(name)
             }
+            args.push(value)
         }
 
         function createIntance(resolvedArgs) {

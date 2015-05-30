@@ -1,5 +1,5 @@
 import React, {PropTypes as p, Component} from 'react'
-import Annotation from '../../../src'
+import {Class, Getter, Factory} from '../../../src/define'
 
 import TodoActions from '../todo-actions'
 import merge from 'deepmerge'
@@ -10,7 +10,7 @@ const debug = __debug('immutable-di:flux:TodoList')
 class TodoItem extends Component {
     static propTypes = {
         editMode: p.bool,
-        todo: p.shapeOf({
+        todo: p.shape({
             id: p.number.isRequired,
             title: p.string.isRequired,
             description: p.string
@@ -35,27 +35,28 @@ class TodoItem extends Component {
         return (
             <div className='todo_item'>
                 {editMode ? (
-                    <span className='todo_item-title'>
-                        {title}
-                    </span>
-                    <button
-                        className="todo_item-edit_button"
-                        onClick={() => actions.editTodo(id)}
-                    >
-                        Edit
-                    </button>
+                    <div className ='todo_item-body'>
+                        <h3 className='todo_item-title'>
+                            {title}
+                        </h3>
+                        <button className='todo_item-edit_button' onClick={() => actions.editTodo(id)}>
+                            Edit
+                        </button>
+                    </div>
                  ) : (
-                    <input type='text' className='todo_item-title__edit' value={title}
-                        onChange={e => this.setState({title: e.target.value})}
-                    />
-                    <button
-                        className="todo_item-save_button"
-                        onClick={() => actions.saveTodo(merge(todo, {
-                            title: this.state.title
-                        }))}
-                    >
-                        Save
-                    </button>
+                    <div className ='todo_item-body-edit'>
+                        <input type='text' className='todo_item-title__edit' value={title}
+                            onChange={e => this.setState({title: e.target.value})}
+                        />
+                        <button
+                            className="todo_item-save_button"
+                            onClick={() => actions.saveTodo(merge(todo, {
+                                title: this.state.title
+                            }))}
+                        >
+                            Save
+                        </button>
+                    </div>
                 )}
 
                 <div className='todo_item-description'>
@@ -94,26 +95,21 @@ class StateComponent extends Component {
 
     static contextTypes = {
         get: p.func.isRequired,
-        actions: p.instanceOf(TodoActions).isRequired
+        actions: p.object.isRequired
     }
 }
 
-function getMappedTodos(state) {
-    return todos.map((todo) => Object.assign(todo, {extId: todo.id + '!!!'}))
+function getMappedTodos({todos}) {
+    return todos.map(todo => Object.assign(todo, {extId: todo.id + '!!!'}))
 }
-Annotation.Factory(getMappedTodos, {
+Factory(getMappedTodos, {
     todos: 'todoApp.todos'  
 })
 
-@Annotation.Getter({
-    todos: 'todoApp.todos',
-    query: 'todoApp.query',
-    calculated: getMappedTodos
-})
 export default class TodoList extends StateComponent {
     static propTypes = {
         todos: p.arrayOf(TodoItem.propTypes.todo).isRequired,
-        query: p.shapeOf({
+        query: p.shape({
             sortField: p.oneOf(['title', 'description']),
             sortDirection: p.oneOf(['asc', 'desc']),
         }).isRequired
@@ -144,3 +140,9 @@ export default class TodoList extends StateComponent {
         )
     }
 }
+Class(TodoList)
+Getter(TodoList, {
+    todos: 'todoApp.todos',
+    query: 'todoApp.query',
+    calculated: getMappedTodos
+})
