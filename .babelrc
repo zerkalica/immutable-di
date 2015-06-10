@@ -1,0 +1,10 @@
+{
+    "stage": 0,
+    "optional": [
+        "runtime",
+        "es7.decorators",
+        "minification.deadCodeElimination",
+        "utility.inlineEnvironmentVariables"
+    ],
+    "plugins": ["closure-elimination"]
+}
