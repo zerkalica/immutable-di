@@ -9,8 +9,9 @@ export default class Container {
         this._state = state
 
         this.get = this.get.bind(this)
-        this.getSync = this.getSync.bind(this)
+        this.getAsync = this.getAsync.bind(this)
         this.clear = this.clear.bind(this)
+        this.transformState = this.transformState.bind(this)
     }
 
     clear(scope) {
@@ -41,7 +42,7 @@ export default class Container {
         } else {
             value = dep.isProto
                 ? dep.definition
-                : this.get(dep.definition, isSync, ctx)
+                : this.getAsync(dep.definition, isSync, ctx)
 
             if (dep.promiseHandler) {
                 value = dep.promiseHandler(value)
@@ -51,7 +52,7 @@ export default class Container {
         return {value, name: dep.name}
     }
 
-    get(definition, isSync, debugCtx) {
+    getAsync(definition, isSync, debugCtx) {
         if (definition) {
             if (this instanceof definition) {
                 return this
@@ -100,8 +101,8 @@ export default class Container {
         return result
     }
 
-    getSync(definition) {
-        return this.get(definition, true)
+    get(definition) {
+        return this.getAsync(definition, true)
     }
 }
 Class(Container)

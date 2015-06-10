@@ -2,7 +2,6 @@ import React, {PropTypes as p, Component} from 'react'
 import {Class, Getter, Factory} from '../../../src/define'
 
 import TodoActions from '../todo-actions'
-import merge from 'deepmerge'
 
 import __debug from 'debug'
 const debug = __debug('immutable-di:flux:TodoList')
@@ -103,7 +102,7 @@ function getMappedTodos({todos}) {
     return todos.map(todo => Object.assign(todo, {extId: todo.id + '!!!'}))
 }
 Factory(getMappedTodos, {
-    todos: 'todoApp.todos'  
+    todos: 'todoApp.todos'
 })
 
 export default class TodoList extends StateComponent {
@@ -111,8 +110,8 @@ export default class TodoList extends StateComponent {
         todos: p.arrayOf(TodoItem.propTypes.todo).isRequired,
         query: p.shape({
             sortField: p.oneOf(['title', 'description']),
-            sortDirection: p.oneOf(['asc', 'desc']),
-        }).isRequired
+            sortDirection: p.oneOf(['asc', 'desc'])
+        })
     }
 
     render() {
@@ -126,7 +125,11 @@ export default class TodoList extends StateComponent {
 
                 <button
                     className='todos-add_button'
-                    onClick={() => actions.addTodo({title: 'example todo'})}
+                    onClick={() => actions.addTodo({
+                        title: 'example todo',
+                        id: todos.length + 1,
+                        description: 'qwewe'
+                    })}
                 >
                     Add todo
                 </button>

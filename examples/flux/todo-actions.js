@@ -5,40 +5,42 @@ export default class TodoActions {
 
     deleteTodo(id) {
         const dataPromise = Promise.resolve({status: 'ok', id})
-        const cursor = dispatcher.cursor('todoApp')
-        this.dispatcher.update('meta', state =>
+        this.dispatcher.update(['todoApp', 'meta'], state =>
             Object.assign(state, {error: false, loading: true})
         )
 
         return dataPromise
             .then(data =>
-                this.dispatcher.update(null, state =>
+                this.dispatcher.update(['todoApp'], state =>
                     Object.assign(state, {
                         meta: {loading: false, error: false},
-                        todos: data
+                        todos: state.todos.filter(({id}) => id !== data.id)
                     })
                 )
             )
             .catch(err =>
-                this.dispatcher.update('meta', state =>
+                this.dispatcher.update(['todoApp', 'meta'], state =>
                     Object.assign(state, {error: err, loading: false})
                 )
             )
     }
 
     addTodo(todo) {
-        return todo;
-        return this.dispatcher.dispatch('addTodo', todo)
+        return this.dispatcher.update(['todoApp', 'todos'], todos =>
+            [].concat(todos).concat([todo])
+        )
     }
 
     loadTodos() {
-        // simulate fetch
-        return this.dispatcher.dispatch('loadTodos', Promise.resolve([
-            {name: 'todo-1', id: 1},
-            {name: 'todo-2', id: 2}
-        ]).then(todos => ({
-            todos,
-            loading: false
-        })))
+        const dataPromise = Promise.resolve([
+            {title: 'todo-1', id: 1, description: '123'},
+            {title: 'todo-2', id: 2, description: '231'}
+        ])
+
+        return dataPromise.then(data =>
+            this.dispatcher.update(['todoApp', 'todos'], state =>
+                Object.assign(state, data)
+            )
+        )
     }
 }

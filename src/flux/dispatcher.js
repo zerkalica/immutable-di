@@ -56,26 +56,27 @@ export default class Dispatcher {
             })
         )
         if (updatedIds) {
-            this._listeners.forEach(this._container.getSync)
+            this._listeners.forEach(this._container.get)
         }
     }
 
     get(definition, props) {
-        const {getter} = getDef(definition)
+        const {getter} = getDef(definition) || {}
         props = props || {}
 
         return getter
-            ? Object.assign(this._container.getSync(getter), props)
+            ? Object.assign(this._container.get(getter), props)
             : props
     }
 
-    update(path, transform) {
+    update(path: Array<string>, transform: (v: Array<string>) => object) {
+        path = Array.isArray(path) ? path : path.split('.')
         function setState(state) {
             state.set(path, transform(state.get(path)))
             return [path]
         }
-        this.container.transformState(setState)
-        this._listeners.forEach(this._container.getSync)
+        this._container.transformState(setState)
+        this._listeners.forEach(this._container.get)
 
         return this
     }

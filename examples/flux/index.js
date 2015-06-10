@@ -11,23 +11,29 @@ import __debug from 'debug'
 const debug = __debug('immutable-di:flux:index')
 
 
-const el = document.getElementById('app')
+const el = document.querySelector('body')
 
 const container = new Container(new NativeAdapter({
     todoApp: {
-        todos: []
+        meta: {
+            loading: false,
+            error: false
+        },
+        todos: [],
+        query: {
+            sortField: null,
+            sortDirection: null
+        }
     }
 }))
 
 const dispatcher = new Dispatcher({
-    stores: {
-        todoApp: new TodoStore()
-    },
     container: container
 })
 const todoActions = new TodoActions(dispatcher)
 
-dispatcher.once(TodoList, state =>
+dispatcher.once(TodoList, state => {
+    console.log(state)
     React.render((
         <ReactComponent
             actions={todoActions}
@@ -36,7 +42,7 @@ dispatcher.once(TodoList, state =>
             state={state}
         />
     ), el)
-)
+})
 
 //dispatcher.dispatch('reset', )
 //todoActions.addTodo({name: 'todo-new', id: 333})

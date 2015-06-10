@@ -1,9 +1,10 @@
 #!/bin/sh
 
-npm i --save-dev babel-core eslint babel-eslint \
-    chai chai-as-promised mocha sinon sinon-chai proxyquire \
-    minimist lodash node-notifier \
-    webpack babel-loader html-webpack-plugin react isomorphic-fetch \
-    "git+https://github.com/gulpjs/gulp.git#4.0" gulp-babel gulp-mocha gulp-util del
+npm i --save core-js debug babel-runtime
 
-npm i --save debug babel-runtime
+npm i --save-dev babel-core babel babel-plugin-closure-elimination \
+    eslint babel-eslint \
+    autobind-decorator \
+    deepmerge \
+    chai chai-as-promised mocha sinon sinon-chai proxyquire \
+    webpack webpack-dev-server babel-loader html-webpack-plugin react

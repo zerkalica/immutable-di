@@ -21,7 +21,7 @@ module.exports = {
         {
             test: /\.jsx?$/,
             exclude: /node_modules/,
-            loader: 'babel-loader?stage=0'
+            loader: 'babel-loader'
         }
       ]
     },
@@ -32,8 +32,6 @@ module.exports = {
                 DEBUG: JSON.stringify(DEBUG)
             }
         }),
-        new HtmlWebpackPlugin({
-            template: path.join(exampleDir, 'index.tpl.html')
-        })
+        new HtmlWebpackPlugin()
     ]
 }

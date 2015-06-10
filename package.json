@@ -3,11 +3,10 @@
   "version": "1.1.9",
   "description": "Simple, promise-based dependency injection container with some state handling functions (for facebook flux-like state-management)",
   "scripts": {
-    "build": "gulp build",
-    "test": "gulp test",
-    "build-examples": "webpack --config ./webpack.config.js",
-    "dev-examples": "webpack-dev-server --config ./webpack.config.js --hot --inline",
-    "dev-test": "gulp dev-test"
+    "build": "babel src --out-dir=dist",
+    "test": "mocha --compilers js:babel/register --recursive **/__tests/*",
+    "dev": "mocha --compilers js:babel/register --recursive --watch **/__tests/*",
+    "dev.examples": "webpack-dev-server --config webpack.config.js --hot --inline"
   },
   "author": "Stefan Zerkalica <zerkalica@gmail.com>",
   "license": "MIT",
@@ -16,35 +15,30 @@
     "type": "git",
     "url": "http://github.com/zerkalica/immutable-di.git"
   },
+  "dependencies": {
+    "babel-runtime": "^5.4.7",
+    "core-js": "^0.9.13",
+    "debug": "^2.2.0"
+  },
   "devDependencies": {
-    "babel-core": "^5.1.10",
-    "babel-eslint": "^3.0.1",
-    "babel-loader": "^5.0.0",
-    "chai": "^2.2.0",
+    "autobind-decorator": "^1.2.0",
+    "babel": "^5.4.7",
+    "babel-core": "^5.4.7",
+    "babel-eslint": "^3.1.9",
+    "babel-loader": "^5.1.3",
+    "babel-plugin-closure-elimination": "0.0.1",
+    "chai": "^2.3.0",
     "chai-as-promised": "^5.0.0",
-    "chai-things": "^0.2.0",
-    "del": "^1.1.1",
-    "eslint": "^0.19.0",
-    "gulp": "git://github.com/gulpjs/gulp.git#4.0",
-    "gulp-babel": "^5.1.0",
-    "gulp-mocha": "^2.0.1",
-    "gulp-util": "^3.0.4",
-    "html-webpack-plugin": "^1.1.0",
-    "isomorphic-fetch": "^2.0.2",
-    "lodash": "^3.7.0",
-    "minimist": "^1.1.1",
-    "mocha": "^2.2.4",
-    "node-notifier": "^4.2.1",
-    "proxyquire": "^1.4.0",
-    "react": "^0.13.1",
+    "deepmerge": "^0.2.10",
+    "eslint": "^0.22.1",
+    "html-webpack-plugin": "^1.4.0",
+    "mocha": "^2.2.5",
+    "node-libs-browser": "^0.5.2",
+    "proxyquire": "^1.5.0",
+    "react": "^0.13.3",
     "sinon": "^1.14.1",
     "sinon-chai": "^2.7.0",
-    "webpack": "^1.8.5",
+    "webpack": "^1.9.10",
     "webpack-dev-server": "^1.9.0"
-  },
-  "dependencies": {
-    "babel-runtime": "^5.1.11",
-    "debug": "^2.1.3",
-    "deepmerge": "^0.2.10"
   }
 }
