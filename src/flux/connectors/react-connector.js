@@ -16,15 +16,20 @@ class ComponentWrapper extends React.Component {
 
     constructor(props, context) {
         super(props, context)
+        this.props.get = props.dispatcher.get
         this.state = props.state
         this.__listener = null
     }
 
     getChildContext() {
-        return {
-            actions: this.props.actions,
-            get: this.props.dispatcher.get
+        const keys = Object.keys(this.constructor.childContextTypes)
+        const result = {}
+        for (let i = 0; i < keys.length; i++) {
+            const name = keys[i]
+            result[name] = this.props[name]
         }
+
+        return result
     }
 
     componentDidMount() {

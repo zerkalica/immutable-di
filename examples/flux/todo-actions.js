@@ -1,3 +1,7 @@
+import {Class} from '../../src/define'
+import Dispatcher from '../../src/flux/dispatcher'
+
+@Class([Dispatcher])
 export default class TodoActions {
     constructor(dispatcher) {
         this.dispatcher = dispatcher

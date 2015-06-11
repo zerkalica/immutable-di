@@ -76,29 +76,37 @@ function extractDef({id, deps, isClass}) {
     }
 }
 
-export function Class(Service, deps, id) {
-    Service.__di = extractDef({
-        id: id || getId(Service),
-        isClass: true,
-        deps: deps || {}
-    })
-    return Service
+export function Class(deps, id) {
+    return function __Class(Service) {
+        Service.__di = extractDef({
+            id: id || getId(Service),
+            isClass: true,
+            deps: deps || {}
+        })
+
+        return Service
+    }
 }
 
-export function Factory(Service, deps, id) {
-    Service.__di = extractDef({
-        id: id || getId(Service),
-        isClass: false,
-        deps: deps || {}
-    })
-    return Service
+export function Factory(deps, id) {
+    return function __Factory(Service) {
+        Service.__di = extractDef({
+            id: id || getId(Service),
+            isClass: false,
+            deps: deps || {}
+        })
+        return Service
+    }
 }
 
-export function Getter(Service, deps, func, id) {
-    id = (id || getId(Service)) + '__getter'
-    func = func || (p => p)
-    Service.__di = Service.__di || {}
-    Service.__di.getter = Factory(func, deps, id)
-    return Service
+export function Getter(deps, func, id) {
+    return function __Getter(Service) {
+        if (!Service.__di) {
+            Class()(Service)
+        }
+        id = (id || getId(Service)) + '__getter'
+        func = func || (p => p)
+        Service.__di.getter = Factory(deps, id)(func)
+        return Service
+    }
 }
-

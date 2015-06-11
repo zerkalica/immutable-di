@@ -3,6 +3,7 @@ import convertArgsToOptions from './utils/convert-args-to-options'
 import {Class} from './define'
 import getDef from './define/get'
 
+@Class()
 export default class Container {
     constructor(state, cache) {
         this._cache = cache || new Map()
@@ -105,4 +106,3 @@ export default class Container {
         return this.getAsync(definition, true)
     }
 }
-Class(Container)
