@@ -1,3 +1,5 @@
+import type {AbstractStateAdapter, PathType} from './state-adapters/abstract-adapter'
+
 import getDebugPath from './utils/get-debug-path'
 import convertArgsToOptions from './utils/convert-args-to-options'
 import {Class} from './define'
@@ -5,18 +7,17 @@ import getDef from './define/get'
 
 @Class()
 export default class Container {
-    constructor(state, cache) {
+    _state: AbstractStateAdapter
+    _cache: Map<Map<any>>
+
+    constructor(state: AbstractStateAdapter, cache: Map<Map<any>>) {
         this._cache = cache || new Map()
         this._state = state
 
         this.get = this.get.bind(this)
         this.getAsync = this.getAsync.bind(this)
-        this.clear = this.clear.bind(this)
+        this._clear = this._clear.bind(this)
         this.transformState = this.transformState.bind(this)
-    }
-
-    clear(scope) {
-        this._getScope(scope).clear()
     }
 
     _getScope(scope) {
@@ -30,16 +31,20 @@ export default class Container {
         return cache
     }
 
-    transformState(transform) {
-        const updatedIds = this._state.transformState(transform)
-        updatedIds.forEach(path => this.clear(path[0]))
-        return updatedIds
+    transformState(transform: (v: Transformer) => any) {
+        const transformer = new Transformer(this._state)
+        transform(transformer)
+        transformer.getAffectedPaths().forEach(this._clear)
+    }
+
+    _clear(path: PathType) {
+        this._getScope(path[0]).clear()
     }
 
     _getDepValue(dep, isSync, ctx) {
         let value
         if (dep.path) {
-            value = this._state.getIn(dep.path)
+            value = this._state.get(dep.path)
         } else {
             value = dep.isProto
                 ? dep.definition

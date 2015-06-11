@@ -53,3 +53,4 @@ export default function getReactConnector(React, childContextTypes) {
     
     return ComponentWrapper
 }
+

@@ -13,7 +13,7 @@ const debug = __debug('immutable-di:flux:index')
 
 const el = document.querySelector('body')
 
-const container = new Container(new NativeAdapter({
+const initialState = {
     todoApp: {
         meta: {
             loading: false,
@@ -25,15 +25,13 @@ const container = new Container(new NativeAdapter({
             sortDirection: null
         }
     }
-}))
+}
 
-const dispatcher = new Dispatcher({
-    container: container
-})
-const todoActions = new TodoActions(dispatcher)
+const container = new Container(new NativeAdapter(initialState))
+const dispatcher = container.get(Dispatcher)
+const todoActions = container.get(TodoActions)
 
 dispatcher.once(TodoList, state => {
-    console.log(state)
     React.render((
         <ReactComponent
             actions={todoActions}

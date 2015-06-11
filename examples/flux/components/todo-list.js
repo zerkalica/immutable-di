@@ -98,12 +98,10 @@ class StateComponent extends Component {
     }
 }
 
-function getMappedTodos({todos}) {
+function getMappedTodos(todos) {
     return todos.map(todo => Object.assign(todo, {extId: todo.id + '!!!'}))
 }
-Factory(getMappedTodos, {
-    todos: 'todoApp.todos'
-})
+Factory(['todoApp.todos'])(getMappedTodos)
 
 export default class TodoList extends StateComponent {
     static propTypes = {
@@ -143,7 +141,6 @@ export default class TodoList extends StateComponent {
         )
     }
 }
-Class(TodoList)
 Getter(TodoList, {
     todos: 'todoApp.todos',
     query: 'todoApp.query',

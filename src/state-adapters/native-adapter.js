@@ -1,3 +1,5 @@
+import AbstractStateAdapter from './abstract-adapter'
+
 function getInPath(obj, bits) {
     if (bits) {
         try {
@@ -5,7 +7,7 @@ function getInPath(obj, bits) {
                 obj = obj[bits[i]]
             }
         } catch (e) {
-            e.message = e.message + ': ' + bits
+            e.message = e.message + ': ' + bits.join('.')
             throw e
         }
     }
@@ -13,31 +15,22 @@ function getInPath(obj, bits) {
     return obj
 }
 
-export default class NativeAdapter {
+export default class NativeAdapter extends AbstractStateAdapter {
     constructor(state) {
         this._state = state || {}
-        this.getIn = this.getIn.bind(this)
-        this._setIn = this._setIn.bind(this)
     }
 
-    getIn(path) {
+    get(path) {
         return getInPath(this._state, path)
     }
 
-    _setIn(path, newState) {
+    set(path, newState) {
         if (!path || !path.length) {
             this._state = newState
         } else {
-            const statePart = this.getIn(path.slice(0, -1))
+            const statePart = this.get(path.slice(0, -1))
             statePart[path[path.length - 1]] = newState
         }
         return this
-    }
-
-    transformState(transform) {
-        return transform({
-            get: this.getIn,
-            set: this._setIn
-        })
     }
 }
