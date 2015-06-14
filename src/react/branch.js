@@ -1,12 +1,13 @@
-import React from 'react'
+import {createElement} from 'react'
 import StatefullComponent from './statefull-component'
 
-export function branch(stateMap = {}) {
+export default function branch(stateMap = {}) {
     return function wrapComponent(BaseComponent) {
         return class ComponentWrapper extends StatefullComponent {
             static stateMap = stateMap
+
             render() {
-                return <BaseComponent {...this.state} />
+                return createElement(BaseComponent, this.state)
             }
         }
     }

@@ -7,6 +7,10 @@ export default class StatefullComponent extends Component {
         container: p.instanceOf(Container).isRequired
     }
 
+    static childContextTypes = {
+        container: p.instanceOf(Container).isRequired
+    }
+
     static stateMap = {}
 
     constructor(props, context) {

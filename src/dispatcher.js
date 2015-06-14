@@ -42,20 +42,11 @@ export default class Dispatcher {
         return this
     }
 
-<<<<<<< HEAD:src/dispatcher.js
-    mount(spec, listener) {
-        const listenerDef = Factory(spec)(listener)
-        this._listeners.push(listenerDef)
-
-        return listenerDef
-=======
-    mount(definition: (v: any) => any, listener: ListenerDefType): ListenerDefType {
-        const {id, getter} = getDef(definition)
-        const mountedListener = Factory([getter], id + '__listener')(listener)
+    mount(stateMap: object, listener: ListenerDefType): ListenerDefType {
+        const mountedListener = Factory(stateMap)(listener)
         this._listeners.push(mountedListener)
 
         return mountedListener
->>>>>>> 38f6a3126c6a209b591f6f9fb6c31339f80f584c:src/dispatcher.js
     }
 
     unmount(listenerDef: ListenerDefType): Dispatcher {

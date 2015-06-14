@@ -2,10 +2,9 @@ import './bootstrap'
 
 import React from 'react'
 import {NativeAdapter, Dispatcher, Container} from '../../src'
-
-import TodoStore from './todo-store'
 import TodoActions from './todo-actions'
 import TodoList from './components/todo-list'
+
 import __debug from 'debug'
 const debug = __debug('immutable-di:flux:index')
 
@@ -31,4 +30,4 @@ container.get(Dispatcher).once(TodoList.stateMap, state => {
 
 //dispatcher.dispatch('reset', )
 //todoActions.addTodo({name: 'todo-new', id: 333})
-todoActions.loadTodos()
+container.get(TodoActions).loadTodos()

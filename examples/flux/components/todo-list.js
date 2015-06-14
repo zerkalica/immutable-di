@@ -1,8 +1,8 @@
 import React, {PropTypes as p, Component} from 'react'
 import branch from '../../../src/react/branch'
-
+import {Factory} from '../../../src/define'
 import TodoActions from '../todo-actions'
-
+import Container from '../../../src/container'
 import __debug from 'debug'
 const debug = __debug('immutable-di:flux:TodoList')
 
@@ -17,13 +17,14 @@ class TodoItem extends Component {
     }
 
     static contextTypes = {
-        actions: p.instanceOf(TodoActions).isRequired,
-        get: p.func.isRequired
+        actions: p.instanceOf(TodoActions).isRequired
     }
 
     constructor(state, context) {
         super(state, context)
-        this.state = {title: this.props.todo.title}
+        this.state = {
+            title: this.props.todo.title
+        }
     }
 
     render() {
@@ -49,7 +50,7 @@ class TodoItem extends Component {
                         />
                         <button
                             className="todo_item-save_button"
-                            onClick={() => actions.saveTodo(merge(todo, {
+                            onClick={() => actions.saveTodo(Object.assign({}, todo, {
                                 title: this.state.title
                             }))}
                         >
@@ -109,9 +110,23 @@ export default class TodoList extends React.Component {
         })
     }
 
+    static contextTypes = {
+        container: p.instanceOf(Container).isRequired
+    }
+
+    static childContextTypes = {
+        actions: p.instanceOf(TodoActions).isRequired
+    }
+
+    getChildContext() {
+        return {
+            actions: this.context.container.get(TodoActions)
+        }
+    }
+
     render() {
         const {todos, editId, loading, query} = this.props
-        const actions = this.context.actions
+        const actions = this.context.container.get(TodoActions)
         debug('len: %s, loading: %s', todos.length, loading)
 
         return (
@@ -131,7 +146,11 @@ export default class TodoList extends React.Component {
 
                 <ul className='todos-list'>
                     {todos.map(todo => (
-                        <TodoListItem todo={todo} key={todo.id} editMode={editId === todo.id} />
+                        <TodoListItem
+                            todo={todo}
+                            key={todo.id}
+                            editMode={editId === todo.id}
+                        />
                     ))}
                 </ul>
             </div>

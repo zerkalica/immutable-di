@@ -1,5 +1,5 @@
 import {Class} from '../../src/define'
-import Dispatcher from '../../src/flux/dispatcher'
+import Dispatcher from '../../src/dispatcher'
 
 @Class([Dispatcher])
 export default class TodoActions {

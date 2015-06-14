@@ -1,13 +1,14 @@
 import type {AbstractStateAdapter} from './state-adapters/abstract-adapter'
 import type {PathType} from './types'
+import {__pathToIdsMap} from './define'
 
 export default class Transformer {
     _adapter: AbstractStateAdapter
-    _affectedPaths: Set<PathType>
+    _cache: Map<string>
 
-    constructor(adapter: AbstractStateAdapter) {
+    constructor(adapter: AbstractStateAdapter, cache: Map<string>) {
         this._adapter = adapter
-        this._affectedPaths = new Set()
+        this._cache = cache
     }
 
     get(path: PathType): any {
@@ -15,11 +16,13 @@ export default class Transformer {
     }
 
     set(path: PathType, value: any) {
-        this._affectedPaths.add(path)
         this._adapter.set(path, value)
-    }
 
-    getAffectedPaths(): Array<PathType> {
-        return Array.from(this._affectedPaths.values())
+        const parts = []
+        for (let i = 0; i < path.length; i++) {
+            parts.push(path[i])
+            const pathMap = __pathToIdsMap.get(parts.toString()) || []
+            pathMap.forEach(id => this._cache.delete(id))
+        }
     }
 }

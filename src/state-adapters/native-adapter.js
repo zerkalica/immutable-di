@@ -17,6 +17,7 @@ function getInPath(obj, bits) {
 
 export default class NativeAdapter extends AbstractStateAdapter {
     constructor(state) {
+        super(state)
         this._state = state || {}
     }
 

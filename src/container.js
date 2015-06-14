@@ -1,44 +1,30 @@
 import type {AbstractStateAdapter, PathType} from './state-adapters/abstract-adapter'
+import Transformer from './transformer'
 
 import getDebugPath from './utils/get-debug-path'
 import convertArgsToOptions from './utils/convert-args-to-options'
 import {Class} from './define'
 import getDef from './define/get'
+import __debug from 'debug'
+const debug = __debug('immutable-di:container')
 
 @Class()
 export default class Container {
     _state: AbstractStateAdapter
-    _cache: Map<Map<any>>
+    _cache: Map<any>
 
-    constructor(state: AbstractStateAdapter, cache: Map<Map<any>>) {
+    constructor(state: AbstractStateAdapter, cache: Map<any>) {
         this._cache = cache || new Map()
         this._state = state
 
         this.get = this.get.bind(this)
         this.getAsync = this.getAsync.bind(this)
-        this._clear = this._clear.bind(this)
         this.transformState = this.transformState.bind(this)
     }
 
-    _getScope(scope) {
-        let cache
-        if (!this._cache.has(scope)) {
-            cache = new Map()
-            this._cache.set(scope, cache)
-        } else {
-            cache = this._cache.get(scope)
-        }
-        return cache
-    }
-
     transformState(transform: (v: Transformer) => any) {
-        const transformer = new Transformer(this._state)
+        const transformer = new Transformer(this._state, this._cache)
         transform(transformer)
-        transformer.getAffectedPaths().forEach(this._clear)
-    }
-
-    _clear(path: PathType) {
-        this._getScope(path[0]).clear()
     }
 
     _getDepValue(dep, isSync, ctx) {
@@ -71,9 +57,9 @@ export default class Container {
         if (!def) {
             throw new Error('Property .__id not exist in ' + getDebugPath(debugCtx || []))
         }
-        const {id, handler, deps, scope, isClass} = def
+        const {id, handler, deps, isClass} = def
         const debugPath = getDebugPath([debugCtx && debugCtx.length ? debugCtx[0] : [], id])
-        const cache = this._getScope(scope)
+        const cache = this._cache
         if (cache.has(id)) {
             return cache.get(id)
         }
