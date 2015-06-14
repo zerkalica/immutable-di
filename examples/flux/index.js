@@ -2,7 +2,6 @@ import './bootstrap'
 
 import React from 'react'
 import {NativeAdapter, Dispatcher, Container, ReactConnector} from '../../src'
-const ReactComponent = ReactConnector(React)
 
 import TodoStore from './todo-store'
 import TodoActions from './todo-actions'
@@ -27,21 +26,8 @@ const container = new Container(new NativeAdapter({
     }
 }))
 
-const dispatcher = new Dispatcher({
-    container: container
-})
-const todoActions = new TodoActions(dispatcher)
-
-dispatcher.once(TodoList, state => {
-    console.log(state)
-    React.render((
-        <ReactComponent
-            actions={todoActions}
-            component={TodoList}
-            dispatcher={dispatcher}
-            state={state}
-        />
-    ), el)
+container.get(Dispatcher).once(TodoList.stateMap, state => {
+    React.render(<TodoList {...state} container={container}/>, el)
 })
 
 //dispatcher.dispatch('reset', )

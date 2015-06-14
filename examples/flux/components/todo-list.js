@@ -1,5 +1,5 @@
 import React, {PropTypes as p, Component} from 'react'
-import {Class, Getter, Factory} from '../../../src/define'
+import branch from '../../../src/react/branch'
 
 import TodoActions from '../todo-actions'
 
@@ -86,26 +86,21 @@ class TodoListItem extends Component {
     }
 }
 
-class StateComponent extends Component {
-    constructor(props, context) {
-        super(props, context)
-        this.props = context.get(this.constructor, props)
-    }
-
-    static contextTypes = {
-        get: p.func.isRequired,
-        actions: p.object.isRequired
-    }
-}
-
 function getMappedTodos({todos}) {
-    return todos.map(todo => Object.assign(todo, {extId: todo.id + '!!!'}))
+    return todos.map(todo => Object.assign({}, todo, {
+        mappedValue: todo.id + '-mapped'
+    }))
 }
-Factory(getMappedTodos, {
-    todos: 'todoApp.todos'
-})
+Factory({
+    todos: ['todoApp', 'todos']
+})(getMappedTodos)
 
-export default class TodoList extends StateComponent {
+@branch({
+    todos: ['todoApp', 'todos'],
+    query: ['todoApp', 'query'],
+    mapped: getMappedTodos
+})
+export default class TodoList extends React.Component {
     static propTypes = {
         todos: p.arrayOf(TodoItem.propTypes.todo).isRequired,
         query: p.shape({
@@ -143,9 +138,3 @@ export default class TodoList extends StateComponent {
         )
     }
 }
-Class(TodoList)
-Getter(TodoList, {
-    todos: 'todoApp.todos',
-    query: 'todoApp.query',
-    calculated: getMappedTodos
-})

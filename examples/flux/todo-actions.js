@@ -3,7 +3,8 @@ import Dispatcher from '../../src/flux/dispatcher'
 
 @Class([Dispatcher])
 export default class TodoActions {
-    constructor(dispatcher) {
+    dispatcher: Dispatcher
+    constructor(dispatcher: Dispatcher) {
         this.dispatcher = dispatcher
     }
 

@@ -98,15 +98,3 @@ export function Factory(deps, id) {
         return Service
     }
 }
-
-export function Getter(deps, func, id) {
-    return function __Getter(Service) {
-        if (!Service.__di) {
-            Class()(Service)
-        }
-        id = (id || getId(Service)) + '__getter'
-        func = func || (p => p)
-        Service.__di.getter = Factory(deps, id)(func)
-        return Service
-    }
-}
