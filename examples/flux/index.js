@@ -1,14 +1,13 @@
 import './bootstrap'
 
 import React from 'react'
-import {NativeAdapter, Dispatcher, Container, ReactConnector} from '../../src'
+import {NativeAdapter, Dispatcher, Container} from '../../src'
 
 import TodoStore from './todo-store'
 import TodoActions from './todo-actions'
 import TodoList from './components/todo-list'
 import __debug from 'debug'
 const debug = __debug('immutable-di:flux:index')
-
 
 const el = document.querySelector('body')
 

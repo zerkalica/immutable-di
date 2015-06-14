@@ -11,7 +11,7 @@ function processDeps(deps) {
     const isArray = Array.isArray(deps)
     const names = isArray ? [] : Object.keys(deps)
     const len = isArray ? deps.length : names.length
-    for(let i = 0; i < len; i++) {
+    for (let i = 0; i < len; i++) {
         const name = names.length ? names[i] : undefined
         const dep = deps[name || i]
         const isArray = Array.isArray(dep)
@@ -33,7 +33,7 @@ function processDeps(deps) {
 }
 
 function getScopes(normalizedDeps, scopeSet) {
-    for(let i = 0; i < normalizedDeps.length; i++) {
+    for (let i = 0; i < normalizedDeps.length; i++) {
         const dep = normalizedDeps[i]
         if (dep.path && dep.path.length) {
             scopeSet.add(dep.path[0])
