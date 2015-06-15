@@ -1,45 +1,18 @@
-import type {PathType} from './state-adapters/abstract-adapter'
-
-import Container from './container'
 import {Class, Factory} from './define'
-import getDef from './define/get'
-import __debug from 'debug'
-const debug = __debug('immutable-di:dispatcher')
-
-export type TransformType = (state: any) => any
 export type ListenerDefType = (v: any) => any
 
-@Class([Container])
+@Class()
 export default class Dispatcher {
-    _container: Container
     _listeners: Array<ListenerDefType>
 
-    constructor(container: Container) {
-        this._container = container
+    constructor() {
         this._listeners = []
         this.mount = this.mount.bind(this)
         this.unmount = this.unmount.bind(this)
-        this.get = this.get.bind(this)
     }
 
-    get(definition, props) {
-        const {getter} = getDef(definition) || {}
-        props = props || {}
-
-        return getter
-            ? Object.assign(this._container.get(getter), props)
-            : props
-    }
-
-    update(path: PathType, transform: TransformType): Dispatcher {
-        function setState(state) {
-            state.set(path, transform(state.get(path)))
-            return [path]
-        }
-        this._container.transformState(setState)
-        this._listeners.forEach(this._container.get)
-
-        return this
+    getListeners() {
+        return this._listeners
     }
 
     mount(stateMap: object, listener: ListenerDefType): ListenerDefType {

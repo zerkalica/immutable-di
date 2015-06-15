@@ -1,22 +1,22 @@
 import {Class} from '../../src/define'
-import Dispatcher from '../../src/dispatcher'
+import Updater from '../../src/updater'
 
-@Class([Dispatcher])
+@Class([Updater])
 export default class TodoActions {
-    dispatcher: Dispatcher
-    constructor(dispatcher: Dispatcher) {
-        this.dispatcher = dispatcher
+    updater: Updater
+    constructor(updater: Updater) {
+        this.updater = Updater
     }
 
     deleteTodo(id) {
         const dataPromise = Promise.resolve({status: 'ok', id})
-        this.dispatcher.update(['todoApp', 'meta'], state =>
+        this.updater.set(['todoApp', 'meta'], state =>
             Object.assign(state, {error: false, loading: true})
         )
 
         return dataPromise
             .then(data =>
-                this.dispatcher.update(['todoApp'], state =>
+                this.updater.set(['todoApp'], state =>
                     Object.assign(state, {
                         meta: {loading: false, error: false},
                         todos: state.todos.filter(({id}) => id !== data.id)
@@ -24,14 +24,14 @@ export default class TodoActions {
                 )
             )
             .catch(err =>
-                this.dispatcher.update(['todoApp', 'meta'], state =>
+                this.updater.set(['todoApp', 'meta'], state =>
                     Object.assign(state, {error: err, loading: false})
                 )
             )
     }
 
     addTodo(todo) {
-        return this.dispatcher.update(['todoApp', 'todos'], todos =>
+        return this.updater.set(['todoApp', 'todos'], todos =>
             [].concat(todos).concat([todo])
         )
     }
@@ -43,7 +43,7 @@ export default class TodoActions {
         ])
 
         return dataPromise.then(data =>
-            this.dispatcher.update(['todoApp', 'todos'], state =>
+            this.updater.set(['todoApp', 'todos'], state =>
                 Object.assign(state, data)
             )
         )

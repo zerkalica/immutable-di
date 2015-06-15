@@ -23,7 +23,7 @@ const container = new Container(new NativeAdapter({
         }
     }
 }))
-
+_state
 container.get(Dispatcher).once(TodoList.stateMap, state => {
     React.render(<TodoList {...state} container={container}/>, el)
 })
