@@ -4,11 +4,11 @@ import __debug from 'debug'
 const debug = __debug('immutable-di:flux:TodoList')
 
 import statefull from 'immutable-di/react/statefull'
-import {Factory} from 'immutable-di/define'
 
 import TodoActions from '../todo-actions'
 import mapIds from '../state/map-ids'
-import TodoItem, {TodoItemType} from './todo-item'
+import {TodoItemType} from './todo-item'
+import TodoListItem from './todo-list-item'
 
 @statefull({
     todos: ['todoApp', 'todos'],
@@ -49,12 +49,11 @@ export default class TodoList extends React.Component {
 
                 <ul className='todos-list'>
                     {todos.map(todo => (
-                        <li className='todos-list-item' key={todo.id}>
-                            <TodoItem
-                                todo={todo}
-                                editMode={editId === todo.id}
-                            />
-                        </li>
+                        <TodoListItem
+                            key={todo.id}
+                            todo={todo}
+                            editMode={editId === todo.id}
+                        />
                     ))}
                 </ul>
             </div>
