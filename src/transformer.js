@@ -1,6 +1,8 @@
 import type {AbstractStateAdapter} from './state-adapters/abstract-adapter'
 import type {PathType} from './types'
 import {__pathToIdsMap} from './define'
+import __debug from 'debug'
+const debug = __debug('immutable-di:transformer')
 
 export default class Transformer {
     _adapter: AbstractStateAdapter
@@ -17,12 +19,8 @@ export default class Transformer {
 
     set(path: PathType, value: any) {
         this._adapter.set(path, value)
-
-        const parts = []
-        for (let i = 0; i < path.length; i++) {
-            parts.push(path[i])
-            const pathMap = __pathToIdsMap.get(parts.toString()) || []
-            pathMap.forEach(id => this._cache.delete(id))
-        }
+        const idsMap = __pathToIdsMap.get(path.toString()) || []
+        debug('upd path: %s; ids: %s; map: %o', path.toString(), idsMap.toString(), __pathToIdsMap)
+        idsMap.forEach(::this._cache.delete)
     }
 }

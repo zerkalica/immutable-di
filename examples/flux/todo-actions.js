@@ -1,39 +1,42 @@
-import {Class} from '../../src/define'
-import Updater from '../../src/updater'
+import {Class, Factory} from 'immutable-di/define'
+import Cursor from 'immutable-di/cursor'
 
-@Class([Updater])
+@Class([Cursor])
 export default class TodoActions {
-    updater: Updater
+    cursor: Cursor
 
-    constructor(updater: Updater) {
-        this.updater = updater.select(['todoApp'])
+    constructor(cursor: Cursor) {
+        this.cursor = cursor.select(['todoApp'])
+        this.__id = 3
     }
 
     deleteTodo(id) {
         const dataPromise = Promise.resolve({status: 'ok', id})
-        this.updater.set(['meta'], {
+        this.cursor.set(['meta'], {
             error: false,
             loading: true
         })
 
         return dataPromise
             .then(data =>
-                this.updater.set([], state => ({
-                    meta: {
-                        loading: false,
-                        error: false
-                    },
-                    todos: state.todos.filter(({id}) => id !== data.id)
-                }))
+                this.cursor.set([], state => {
+                    return {
+                        meta: {
+                            loading: false,
+                            error: false
+                        },
+                        todos: state.todos.filter(({id}) => id !== data.id)
+                    }
+                })
             )
             .catch(err =>
-                this.updater.set(['meta'], {error: err, loading: false}))
+                this.cursor.set(['meta'], {error: err, loading: false})
             )
     }
 
     addTodo(todo) {
-        return this.updater.set(['todos'], todos =>
-            [].concat(todos).concat([todo])
+        return this.cursor.set(['todos'], todos =>
+            todos.concat([{...todo, id: this.__id++}])
         )
     }
 
@@ -44,7 +47,7 @@ export default class TodoActions {
         ])
 
         return dataPromise.then(data =>
-            this.updater.set(['todos'], data)
+            this.cursor.set(['todos'], data)
         )
     }
 }

@@ -25,6 +25,11 @@ module.exports = {
         }
       ]
     },
+    resolve: {
+        alias: {
+            'immutable-di': path.join(__dirname, 'src')
+        }
+    },
     plugins: [
         new webpack.DefinePlugin({
             'process.env': {

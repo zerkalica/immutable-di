@@ -28,11 +28,23 @@ function processDeps(deps) {
     return resultDeps
 }
 
-function getScopes(normalizedDeps, scopeSet = new Set()) {
+function updateIdsMap(map, id, normalizedDeps) {
     for (let i = 0; i < normalizedDeps.length; i++) {
         const dep = normalizedDeps[i]
         if (dep.path && dep.path.length) {
-            scopeSet.add(dep.path.toString())
+            const parts = []
+            dep.path.forEach(part=> {
+                parts.push(part)
+                const key = parts.toString()
+                let ids = map.get(key)
+                if (!ids) {
+                    ids = []
+                    map.set(key, ids)
+                }
+                if (ids.indexOf(id) === -1) {
+                    ids.push(id)
+                }
+            })
         } else if (!dep.isProto) {
             if (!dep.definition) {
                 throw new Error('no definition in dep: ' + dep)
@@ -40,11 +52,9 @@ function getScopes(normalizedDeps, scopeSet = new Set()) {
             if (!dep.definition.__di) {
                 throw new Error('no definition in dep.definition: ' + dep.definition)
             }
-            getScopes(getDef(dep.definition).deps, scopeSet)
+            updateIdsMap(map, id, getDef(dep.definition).deps)
         }
     }
-
-    return scopeSet
 }
 
 let lastId = 1
@@ -63,12 +73,7 @@ const __pathToIdsMap = new Map()
 
 function extractDef({id, deps, isClass}) {
     const normalizedDeps = processDeps(deps)
-    getScopes(normalizedDeps).forEach(key => {
-        if (!__pathToIdsMap.has(key)) {
-            __pathToIdsMap.set(key, [])
-        }
-        __pathToIdsMap.get(key).push(id)
-    })
+    updateIdsMap(__pathToIdsMap, id, normalizedDeps)
 
     return {
         id,

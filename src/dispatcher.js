@@ -15,8 +15,8 @@ export default class Dispatcher {
         return this._listeners
     }
 
-    mount(stateMap: object, listener: ListenerDefType): ListenerDefType {
-        const mountedListener = Factory(stateMap)(listener)
+    mount(stateMap: object, listener: ListenerDefType, id: ?string): ListenerDefType {
+        const mountedListener = Factory(stateMap, id)(listener)
         this._listeners.push(mountedListener)
 
         return mountedListener

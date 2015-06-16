@@ -16,10 +16,9 @@ export default class Container {
     constructor(state: AbstractStateAdapter, cache: Map<any>) {
         this._cache = cache || new Map()
         this._state = state
-
-        this.get = this.get.bind(this)
-        this.getAsync = this.getAsync.bind(this)
-        this.transformState = this.transformState.bind(this)
+        this.get = ::this.get
+        this.getAsync = ::this.getAsync
+        this.transformState = ::this.transformState
     }
 
     transformState(transform: (v: Transformer) => any) {

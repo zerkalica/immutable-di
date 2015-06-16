@@ -1,0 +1,76 @@
+import React, {PropTypes as p, Component} from 'react'
+import TodoActions from '../todo-actions'
+import di from 'immutable-di/react/di'
+import __debug from 'debug'
+const debug = __debug('immutable-di:flux:todo-item')
+
+const TodoItemType = p.shape({
+    id: p.number.isRequired,
+    title: p.string.isRequired,
+    description: p.string
+})
+
+export {TodoItemType}
+
+@di({
+    actions: TodoActions
+})
+export default class TodoItem extends Component {
+    static propTypes = {
+        editMode: p.bool,
+        todo: TodoItemType.isRequired,
+        actions: p.instanceOf(TodoActions).isRequired
+    }
+
+    constructor(state, context) {
+        super(state, context)
+        this.state = {
+            title: this.props.todo.title
+        }
+    }
+
+    render() {
+        const {todo, editMode, actions} = this.props
+        const {id, title, description} = todo
+        return (
+            <div className='todo_item'>
+                {editMode ? (
+                    <div className ='todo_item-body'>
+                        <h3 className='todo_item-title'>
+                            {title}
+                        </h3>
+                        <button className='todo_item-edit_button' onClick={() => actions.editTodo(id)}>
+                            Edit
+                        </button>
+                    </div>
+                 ) : (
+                    <div className ='todo_item-body-edit'>
+                        <input type='text' className='todo_item-title__edit' value={title}
+                            onChange={e => this.setState({title: e.target.value})}
+                        />
+                        <button
+                            className="todo_item-save_button"
+                            onClick={() => actions.saveTodo(Object.assign({}, todo, {
+                                title: this.state.title
+                            }))}
+                        >
+                            Save
+                        </button>
+                    </div>
+                )}
+
+                <div className='todo_item-description'>
+                    {description}
+                </div>
+
+                <button
+                    className='todo_item-del_button'
+                    onClick={() => actions.deleteTodo(id)}
+                >
+                    Remove
+                </button>
+            </div>
+        )
+    }
+}
+
