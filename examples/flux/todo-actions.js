@@ -4,34 +4,35 @@ import Updater from '../../src/updater'
 @Class([Updater])
 export default class TodoActions {
     updater: Updater
+
     constructor(updater: Updater) {
-        this.updater = Updater
+        this.updater = updater.select(['todoApp'])
     }
 
     deleteTodo(id) {
         const dataPromise = Promise.resolve({status: 'ok', id})
-        this.updater.set(['todoApp', 'meta'], state =>
-            Object.assign(state, {error: false, loading: true})
-        )
+        this.updater.set(['meta'], {
+            error: false,
+            loading: true
+        })
 
         return dataPromise
             .then(data =>
-                this.updater.set(['todoApp'], state =>
-                    Object.assign(state, {
-                        meta: {loading: false, error: false},
-                        todos: state.todos.filter(({id}) => id !== data.id)
-                    })
-                )
+                this.updater.set([], state => ({
+                    meta: {
+                        loading: false,
+                        error: false
+                    },
+                    todos: state.todos.filter(({id}) => id !== data.id)
+                }))
             )
             .catch(err =>
-                this.updater.set(['todoApp', 'meta'], state =>
-                    Object.assign(state, {error: err, loading: false})
-                )
+                this.updater.set(['meta'], {error: err, loading: false}))
             )
     }
 
     addTodo(todo) {
-        return this.updater.set(['todoApp', 'todos'], todos =>
+        return this.updater.set(['todos'], todos =>
             [].concat(todos).concat([todo])
         )
     }
@@ -43,9 +44,7 @@ export default class TodoActions {
         ])
 
         return dataPromise.then(data =>
-            this.updater.set(['todoApp', 'todos'], state =>
-                Object.assign(state, data)
-            )
+            this.updater.set(['todos'], data)
         )
     }
 }
