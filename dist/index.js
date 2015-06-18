@@ -1,43 +1,33 @@
 'use strict';
 
-var _interopRequireWildcard = require('babel-runtime/helpers/interop-require-wildcard')['default'];
+var _Object$defineProperty = require('babel-runtime/core-js/object/define-property')['default'];
 
-exports.__esModule = true;
+var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
 
-var _ContainerCreator = require('./container-creator');
+_Object$defineProperty(exports, '__esModule', {
+    value: true
+});
 
-var _ContainerCreator2 = _interopRequireWildcard(_ContainerCreator);
+var _container = require('./container');
 
-var _Container = require('./container');
+var _container2 = _interopRequireDefault(_container);
 
-var _Container2 = _interopRequireWildcard(_Container);
+var _stateAdaptersNativeAdapter = require('./state-adapters/native-adapter');
 
-var _NativeAdapter = require('./state-adapters/native-adapter');
+var _stateAdaptersNativeAdapter2 = _interopRequireDefault(_stateAdaptersNativeAdapter);
 
-var _NativeAdapter2 = _interopRequireWildcard(_NativeAdapter);
+var _dispatcher = require('./dispatcher');
 
-var _WrapActionMethods = require('./flux/wrap-action-methods');
+var _dispatcher2 = _interopRequireDefault(_dispatcher);
 
-var _WrapActionMethods2 = _interopRequireWildcard(_WrapActionMethods);
+var _define = require('./define');
 
-var _Dispatcher = require('./flux/dispatcher');
-
-var _Dispatcher2 = _interopRequireWildcard(_Dispatcher);
-
-var _Define = require('./define');
-
-var _Define2 = _interopRequireWildcard(_Define);
-
-var _ReactConnector = require('./flux/connectors/react-connector');
-
-var _ReactConnector2 = _interopRequireWildcard(_ReactConnector);
+var _define2 = _interopRequireDefault(_define);
 
 exports['default'] = {
-    Define: _Define2['default'],
-    ContainerCreator: _ContainerCreator2['default'],
-    Container: _Container2['default'],
-    NativeAdapter: _NativeAdapter2['default'],
-    Dispatcher: _Dispatcher2['default'],
-    ReactConnector: _ReactConnector2['default']
+    Define: _define2['default'],
+    Container: _container2['default'],
+    NativeAdapter: _stateAdaptersNativeAdapter2['default'],
+    Dispatcher: _dispatcher2['default']
 };
 module.exports = exports['default'];

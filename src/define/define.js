@@ -1,10 +1,6 @@
 import getFunctionName from '../utils/get-function-name'
 import getDef from './get'
 
-function pass(p) {
-    return p
-}
-
 function processDeps(deps) {
     const resultDeps = []
     deps = deps || []
@@ -69,7 +65,7 @@ function getId(Service, idPrefix) {
     return id
 }
 
-const __pathToIdsMap = new Map()
+export const __pathToIdsMap = new Map()
 
 function extractDef({id, deps, isClass}) {
     const normalizedDeps = processDeps(deps)
@@ -81,8 +77,6 @@ function extractDef({id, deps, isClass}) {
         deps: normalizedDeps
     }
 }
-
-export {__pathToIdsMap}
 
 export function Class(deps, id) {
     return function __Class(Service) {

@@ -1,54 +1,70 @@
-"use strict";
+'use strict';
 
-var _classCallCheck = require("babel-runtime/helpers/class-call-check")["default"];
+var _inherits = require('babel-runtime/helpers/inherits')['default'];
 
-exports.__esModule = true;
+var _get = require('babel-runtime/helpers/get')['default'];
+
+var _createClass = require('babel-runtime/helpers/create-class')['default'];
+
+var _classCallCheck = require('babel-runtime/helpers/class-call-check')['default'];
+
+var _Object$defineProperty = require('babel-runtime/core-js/object/define-property')['default'];
+
+var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
+
+_Object$defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _abstractAdapter = require('./abstract-adapter');
+
+var _abstractAdapter2 = _interopRequireDefault(_abstractAdapter);
+
 function getInPath(obj, bits) {
-    for (var i = 0, j = bits.length; i < j; ++i) {
-        obj = obj[bits[i]];
+    if (bits) {
+        try {
+            for (var i = 0, j = bits.length; i < j; ++i) {
+                obj = obj[bits[i]];
+            }
+        } catch (e) {
+            e.message = e.message + ': ' + bits.join('.');
+            throw e;
+        }
     }
+
     return obj;
 }
 
-var NativeAdapter = (function () {
+var NativeAdapter = (function (_AbstractStateAdapter) {
     function NativeAdapter(state) {
         _classCallCheck(this, NativeAdapter);
 
+        _get(Object.getPrototypeOf(NativeAdapter.prototype), 'constructor', this).call(this, state);
         this._state = state || {};
     }
 
-    NativeAdapter.prototype.getIn = function getIn(path) {
-        return getInPath(this._state, path);
-    };
+    _inherits(NativeAdapter, _AbstractStateAdapter);
 
-    NativeAdapter.prototype.get = function get(id) {
-        return this._state[id];
-    };
-
-    NativeAdapter.prototype.deserialize = function deserialize(data) {
-        this._state = JSON.parse(data);
-        return this;
-    };
-
-    NativeAdapter.prototype.serialize = function serialize() {
-        return JSON.stringify(this._state);
-    };
-
-    NativeAdapter.prototype.transformState = function transformState(transform) {
-        var _this = this;
-
-        return transform({
-            get: function get(id) {
-                return _this._state[id];
-            },
-            set: function set(id, newState) {
-                _this._state[id] = newState;
+    _createClass(NativeAdapter, [{
+        key: 'get',
+        value: function get(path) {
+            return getInPath(this._state, path);
+        }
+    }, {
+        key: 'set',
+        value: function set(path, newState) {
+            if (!path || !path.length) {
+                this._state = newState;
+            } else {
+                var statePart = this.get(path.slice(0, -1));
+                statePart[path[path.length - 1]] = newState;
             }
-        });
-    };
+            return this;
+        }
+    }]);
 
     return NativeAdapter;
-})();
+})(_abstractAdapter2['default']);
 
-exports["default"] = NativeAdapter;
-module.exports = exports["default"];
+exports['default'] = NativeAdapter;
+module.exports = exports['default'];

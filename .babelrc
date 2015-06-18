@@ -3,8 +3,10 @@
     "optional": [
         "runtime",
         "es7.decorators",
-        "minification.deadCodeElimination",
         "utility.inlineEnvironmentVariables"
     ],
-    "plugins": ["closure-elimination"]
+    "plugins": [
+        "closure-elimination",
+        "babel-plugin-espower"
+    ]
 }

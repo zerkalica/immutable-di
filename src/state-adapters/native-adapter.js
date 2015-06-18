@@ -21,6 +21,10 @@ export default class NativeAdapter extends AbstractStateAdapter {
         this._state = state || {}
     }
 
+    select(path) {
+        return new NativeAdapter(this.get(path))
+    }
+
     get(path) {
         return getInPath(this._state, path)
     }
@@ -32,6 +36,8 @@ export default class NativeAdapter extends AbstractStateAdapter {
             const statePart = this.get(path.slice(0, -1))
             statePart[path[path.length - 1]] = newState
         }
+
+        this._update(path)
         return this
     }
 }

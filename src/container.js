@@ -3,9 +3,14 @@ import Transformer from './transformer'
 
 import getDebugPath from './utils/get-debug-path'
 import convertArgsToOptions from './utils/convert-args-to-options'
-import {Class} from './define'
+import {Class, Factory} from './define'
 import getDef from './define/get'
 import __debug from 'debug'
+
+import {__pathToIdsMap} from './define'
+
+export type ListenerDefType = (v: any) => any
+
 const debug = __debug('immutable-di:container')
 
 @Class()
@@ -13,17 +18,21 @@ export default class Container {
     _state: AbstractStateAdapter
     _cache: Map<any>
 
-    constructor(state: AbstractStateAdapter, cache: Map<any>) {
-        this._cache = cache || new Map()
+    constructor(state: AbstractStateAdapter, async: bool = true) {
+        this._cache = new Map()
         this._state = state
+
         this.get = ::this.get
         this.getAsync = ::this.getAsync
-        this.transformState = ::this.transformState
-    }
+        this.select = ::this.select
+        this.once = ::this.once
+        this.mount = ::this.mount
+        this.unmount = ::this.unmount
 
-    transformState(transform: (v: Transformer) => any) {
-        const transformer = new Transformer(this._state, this._cache)
-        transform(transformer)
+        this._async = async
+        this._timeOutInProgress = false
+
+        this._state.setUpdate(::this._update)
     }
 
     _getDepValue(dep, isSync, ctx) {
@@ -41,6 +50,57 @@ export default class Container {
         }
 
         return {value, name: dep.name}
+    }
+
+    _clear(path) {
+        const idsMap = __pathToIdsMap.get(path.toString()) || []
+        debug('upd path: %s; ids: %s; map: %o', path.toString(), idsMap.toString(), __pathToIdsMap)
+        for (let i = 0; i < idsMap.length; i++) {
+            this._cache.delete(idsMap[i])
+        }
+    }
+
+    _update(path) {
+        this._clear(path)
+        if (this._async && !this._timeOutInProgress) {
+            this._timeOutInProgress = true
+            setTimeout(() => {
+                this._updateListeners()
+                this._timeOutInProgress = false
+            }, 0)
+        } else {
+            this._updateListeners()
+        }
+    }
+
+    _updateListeners() {
+        this._listeners.forEach(listener => this.get(listener))
+    }
+
+    select(path) {
+        this._state.select(path)
+    }
+
+    mount(stateMap: object, listener: ListenerDefType, id: ?string): ListenerDefType {
+        const mountedListener = Factory(stateMap, id)(listener)
+        this._listeners.push(mountedListener)
+
+        return mountedListener
+    }
+
+    unmount(listenerDef: ListenerDefType): Dispatcher {
+        this._listeners = this._listeners.filter(d => listenerDef !== d)
+
+        return this
+    }
+
+    once(definition: (v: any) => any, listener: (v: any) => any): Dispatcher {
+        const listenerDef = this.mount(definition, (...args) => {
+            this.unmount(listenerDef)
+            return listener(...args)
+        })
+
+        return this
     }
 
     getAsync(definition, isSync, debugCtx) {

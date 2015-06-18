@@ -1,14 +1,21 @@
 'use strict';
 
-var _interopRequireWildcard = require('babel-runtime/helpers/interop-require-wildcard')['default'];
+var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
 
-var _NativeAdapter = require('../native-adapter');
+var _nativeAdapter = require('../native-adapter');
 
-var _NativeAdapter2 = _interopRequireWildcard(_NativeAdapter);
+var _nativeAdapter2 = _interopRequireDefault(_nativeAdapter);
 
-var _describe$it$expect = require('../../test-helper');
+var _testHelper = require('../../test-helper');
 
-_describe$it$expect.describe('state-adapters/native-adapter', function () {
+function _ref(_ref2) {
+    var get = _ref2.get;
+    var set = _ref2.set;
+
+    set(['a'], { c: 'test' });
+}
+
+(0, _testHelper.describe)('state-adapters/native-adapter', function () {
     var testState = undefined;
 
     beforeEach(function () {
@@ -21,28 +28,23 @@ _describe$it$expect.describe('state-adapters/native-adapter', function () {
         };
     });
 
-    _describe$it$expect.it('should get part of object by path', function () {
-        var nativeAdapter = new _NativeAdapter2['default'](testState);
+    (0, _testHelper.it)('should get part of object by path', function () {
+        var nativeAdapter = new _nativeAdapter2['default'](testState);
         nativeAdapter.getIn(['a', 'b']).should.to.be.deep.equal(testState.a.b);
     });
 
-    _describe$it$expect.it('should throw error, if data in path not exists', function () {
-        var nativeAdapter = new _NativeAdapter2['default'](testState);
+    (0, _testHelper.it)('should throw error, if data in path not exists', function () {
+        var nativeAdapter = new _nativeAdapter2['default'](testState);
         (function () {
             return nativeAdapter.getIn(['a', 'c', 'b']);
         }).should['throw']();
-        _describe$it$expect.expect(nativeAdapter.getIn(['a', 'c'])).to.be.undefined;
+        (0, _testHelper.expect)(nativeAdapter.getIn(['a', 'c'])).to.be.undefined;
     });
 
-    _describe$it$expect.it('should transformState', function () {
-        var nativeAdapter = new _NativeAdapter2['default'](testState);
+    (0, _testHelper.it)('should transformState', function () {
+        var nativeAdapter = new _nativeAdapter2['default'](testState);
         nativeAdapter.getIn(['a', 'b']).should.to.be.deep.equal(testState.a.b);
-        nativeAdapter.transformState(function (_ref) {
-            var get = _ref.get;
-            var set = _ref.set;
-
-            set('a', { c: 'test' });
-        });
+        nativeAdapter.transformState(_ref);
         nativeAdapter.getIn(['a', 'c']).should.to.equal('test');
     });
 });
