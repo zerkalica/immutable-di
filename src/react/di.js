@@ -8,13 +8,16 @@ export class DiComponent extends Component {
     }
 }
 
-export default function di(deps) {
+export default function di(Deps) {
     return function wrapComponent(BaseComponent) {
-        const Getter = Factory(deps, BaseComponent.displayName)(p => p)
+        const Getter = Factory(Deps, BaseComponent.displayName)(params => params)
         return class ComponentWrapper extends DiComponent {
             render() {
-                const di = this.context.container.get(Getter)
-                return createElement(BaseComponent, {...this.props, ...di})
+                const deps = (this.context && this.context.container) ?
+                    this.context.container.get(Getter)
+                    : {}
+
+                return createElement(BaseComponent, {...this.props, ...deps})
             }
         }
     }

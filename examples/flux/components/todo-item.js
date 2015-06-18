@@ -4,13 +4,11 @@ import di from 'immutable-di/react/di'
 import __debug from 'debug'
 const debug = __debug('immutable-di:flux:todo-item')
 
-const TodoItemType = p.shape({
+export const TodoItemType = p.shape({
     id: p.number.isRequired,
     title: p.string.isRequired,
     description: p.string
 })
-
-export {TodoItemType}
 
 @di({
     actions: TodoActions

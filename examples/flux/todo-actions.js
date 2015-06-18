@@ -1,4 +1,4 @@
-import {Class, Factory} from 'immutable-di/define'
+import {Class} from 'immutable-di/define'
 import Container from 'immutable-di'
 import type {AbstractCursor} from 'immutable-di/cursors/abstract'
 
@@ -27,13 +27,18 @@ export default class TodoActions {
             })
             .catch(err =>
                 this._cursor.set(['meta'], {
-                    error: err, loading: false
+                    error: err,
+                    loading: false
                 })
             )
     }
 
+    _createId() {
+        return ++this.__id
+    }
+
     addTodo(todo) {
-        return this._cursor.apply(['todos'], todos => todos.concat([{...todo, id: this.__id++}]))
+        return this._cursor.apply(['todos'], todos => todos.concat([{...todo, id: this._createId()}]))
     }
 
     loadTodos() {
