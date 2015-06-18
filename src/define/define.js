@@ -1,6 +1,14 @@
 import getFunctionName from '../utils/get-function-name'
 import getDef from './get'
 
+export type DependencyType = (v: any) => any
+
+export type DiDefinitionType = {
+    name: ?string,
+    path: ?Array<string>,
+    definition: DependencyType
+}
+
 function processDeps(deps) {
     const resultDeps = []
     deps = deps || []
@@ -15,9 +23,7 @@ function processDeps(deps) {
         resultDeps.push({
             name,
             path: isArray ? dep : null,
-            definition: isArray ? null : dep,
-            promiseHandler: null,
-            isProto: false
+            definition: isArray ? null : dep
         })
     }
 
@@ -41,7 +47,7 @@ function updateIdsMap(map, id, normalizedDeps) {
                     ids.push(id)
                 }
             })
-        } else if (!dep.isProto) {
+        } else {
             if (!dep.definition) {
                 throw new Error('no definition in dep: ' + dep)
             }

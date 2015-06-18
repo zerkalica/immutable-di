@@ -2,243 +2,218 @@
 
 [![NPM](https://nodei.co/npm/immutable-di.png?downloads=true&stars=true)](https://nodei.co/npm/immutable-di/)
 
-Simple, promise-based dependency injection container with some state handling functions (for facebook flux-like state-management).
+Simple, dependency injection container with some state handling functions.
 
 ## General
 * Install: `npm install --save immutable-di`
 * Tests: `npm test`
-* Examples: `node examples/run.js [simple, promise, invoker, state, transform-state]-example.js`
-To run immutable-di without transpiler, you need a polyfill for Map and Promise.
+* Examples: `npm run dev.examples`
 
-## Dictionary
-* Definition - factory function or class with meta info
-* Meta info - some static array (definition name, dependency, etc), assigned to definition
-* Dependency - any definition can have a other definitions as dependency
-* State - state object, can be assigned as dependecy to any definition
-* Definition name - unique string id for each service
-* Promise handler - Each dependency in definition can have a promise handler for modifying promises (catch errors, fail ignore, etc)
-* Invoker - invoke handle-method of definition with actionType and payload as arguments (like facebook flux store)
-* WaitFor - analog of waitFor in facebook flux dispatcher
-
-## Meta info structure: 
-* T.__class = [NameOfDefinition, dep1, dep2, ...]
-* or T.__factory = [NameOfDefinition, dep1, dep2, ...]
-* dep1..N can be another definition or [definition, promiseHandlerFunction] array
-
-## Usage
-To run immutable-di without transpiler, you need a polyfill for Map and Promise.
-If transpiler (like [babel](http://babeljs.io/)) used in project, you can include es6 version of immutable di:
+## Define dependency
 ```js
-//es6-example.js
-import {Builder, NativeAdapter} from 'immutable-di/es6'
-```
+import {Factory, Class} from 'immutable-di/define'
+// A, B - functions or classes with di definitions
 
-Or include compiled es5 version:
-```js
-//es5-example.js
-var ImmutableDi = require('immutable-di');
-var Builder = ImmutableDi.Builder;
-var NativeAdapter = ImmutableDi.NativeAdapter;
-```
+// For functions:
+Factory([A, B])(C) // resolve functions A, B and pass them as arguments to C
+Factory({a: A, b: B})(C) // resolve functions A, B and pass them as object {a, b} to C
 
-* Builder - function, which returns ImmutableDi instance
-* ImmutableDi - function, which returns di container with get, clear and createMethod methods
-* NativeAdapter - provide object part by array path for raw object
+// For classes:
+@Class([A, B])
+class C {
+    constructor(a, b) {
 
-For additional docs see [immutable-di.d.ts](./immutable-di.d.ts)
-
-## Examples
-
-### Simple example
-```js
-//simple-example.js
-import {Builder, NativeAdapter} from 'immutable-di/es6'
-class Logger {
-    // babel + playground feature enabled
-    static __class = ['Logger']
-}
-
-const ImmutableDi = Builder()
-const di = ImmutableDi(new NativeAdapter({}))
-di.get(Logger).then(logger => console.log(logger instanceof Logger)) // true
-```
-
-### Promise example
-```js
-//promise-example.js
-import {Builder, NativeAdapter} from 'immutable-di/es6'
-import fs from 'fs'
-
-function Reader(name) {
-    return new Promise((resolve, reject) => {
-        fs.readFile(name, (err, data) => {
-            return err ? reject(err) : resolve(data.toString())
-        })
-    })
-}
-Reader.__factory = ['Reader', ['reader', 'name']]
-
-/**
- * di auto resolves promise and return data from Reader
- */
-function GetFileData(data) {
-    return Promise.resolve(data)
-}
-GetFileData.__factory = ['GetFileData', Reader];
-
-const state  = {
-    reader: {
-        name: './test.txt'
     }
 }
-const ImmutableDi = Builder()
-const di = ImmutableDi(new NativeAdapter(state))
-di.get(GetFileData)
-    .then(data => console.log(data))
-    .catch(err => console.log(err.stack))
-// test
-```
 
-### Class and state example
-```js
-//state-example.js
-import {Builder, NativeAdapter} from 'immutable-di/es6'
-const config = {
-    logger: {
-        level: 'debug'
-    }
-};
-
-function ConsoleOut() {
-    return (message) => console.log(message)
-}
-ConsoleOut.__factory = ['ConsoleOut']
-
-class Logger {
-    // babel + playground feature enabled
-    static __class = [
-        'Logger',
-        ['req', 'query'],
-        ['config', 'logger'],
-        ConsoleOut
-    ]
-
-    constructor(query, config, out) {
-        this.query = query
-        this.level = config.level
-        this.out = out
-    }
-
-    warn(message) {
-        this.out('[WARN] .' + this.level + '. ' + message + ' (' + this.query + ')')
+// or 
+class C {
+    constructor(a, b) {
+        
     }
 }
-//Use Logger.__class =, if properties in classes is not supported by tsranspiler
-//Logger.__class = ['Logger', ['req', 'query'], ['config', 'logger'], ConsoleOut]
 
-// Need for static caching meta-info from di-classes between middleware calls
-const ImmutableDi = Builder()
+export default Class([A, B])(C)
 
-// emulate server call
-function middleware(req) {
-    const state = {
-        req: req,
-        config: config
-    }
-
-    const di = ImmutableDi(new NativeAdapter(state))
-
-    di.get(Logger)
-        .then(logger => logger.warn('test-string'))
-        .catch(err => console.log(err.stack))
-}
-
-middleware({
-    query: 'test-query'
+// or
+@Class({
+    a: A,
+    b: B
 })
-// [WARN] .debug. test-string (test-query)
-```
-
-### Invoker example
-```js
-//invoker-example.js
-import {Builder, NativeAdapter} from 'immutable-di/es6'
-class Store2 {
-    static __class = ['Store2', ['registry']]
-    constructor(registry) {
-        this.registry = registry
-    }
-    handle(actionType, payload) {
-        this.registry.counter++;
-        return Promise.resolve({a2: actionType, p2: this.registry.counter})
+class C {
+    constructor({a, b}) {
     }
 }
 
-class Store1 {
-    static __class = ['Store1', ['registry']]
-    static __waitFor = [Store2]
-    constructor(registry) {
-        this.registry = registry
+// for State
+@Class([
+    A,
+    B,
+    options: ['config', 'c']
+])
+class C {
+    constructor(a, b, options) {
+
     }
-    handle(actionType, payload) {
-        if (this.registry.counter) {
-            this.registry.counter++
+}
+```
+
+## Working with state
+```js
+const container = new Container(new NativeCursor({
+    config: {
+        logger: {
+            opt1: 'test1'
         }
-        return Promise.resolve({a1: actionType, p1: this.registry.counter})
     }
+}))
+
+function MyFaset(state) {
+    return 'data'
+}
+Factory()(MyFaset)
+
+function myHandler({state, faset}) {
+    console.log(state, faset)
 }
 
-const ImmutableDi = Builder()
-const di = ImmutableDi(new NativeAdapter({registry: {counter: 0}}))
-const method = di.createMethod('testAction', {data: 0})
+const listener = container.on({
+    state: ['config', 'logger'],
+    faset: MyFaset
+}, myHandler)
 
-method.handle(Store1).then(data => console.log(data)) // {a1: 'testAction', p1: 2}
-//without static __waitFor = [Store2] Store1 returns p1: 0
+container.select(['config']).set(['logger', 'opt1'], 'test') // trigger my hander
 
-method.handle(Store2).then(data => console.log(data)) // {a2: 'testAction', p2: 1}
-
+container.off(listener)
 ```
 
-## Transform state example
+## Di factory example
 ```js
-//transform-state-example.js
-import {Builder, NativeAdapter} from 'immutable-di/es6'
+import Container from 'immutable-di'
+import {Factory, Class} from 'immutable-di/define'
+import NativeCursor from 'immutable-di/cursors/native'
+const container = new Container(new NativeCursor({
+    config: {
+        logger: {
+            opt1: 'test1'
+        }
+    }
+}))
 
+function ConsoleOutputDriver() {
+    return function consoleOutputDriver(str) {
+        console.log(str)
+    }
+}
+Factory()(ConsoleOutputDriver)
+
+@Class([
+    ConsoleOutputDriver,
+    ['config', 'logger']
+])
 class Logger {
-    // babel + playground feature enabled
-    static __class = ['Logger']
-    log(message) {
-        console.log('msg: ' + message)
+    constructor(outputDriver, dep, config) {
+        this._outputDriver = outputDriver
+        this._config = config
+    }
+    log(val) {
+        this._outputDriver('val:' + val + ', opt:' + this._config.opt1)
     }
 }
 
-function SrvFactory2(logger, message) {
-    return logger.log(message)
+function SomeDep() {
+    return 'dep'
 }
-SrvFactory2.__factory = ['SrvFactory2', Logger, ['TestStore', 'a', 'message']]
+Factory()(SomeDep)
 
-const states = [
-    {},
-    {
-        a: {
-            message: 'test-message-1'
-        }
-    },
-    {
-        a: {
-            message: 'test-message-2'
+function App({logger, someDep}) {
+    return function app(val) {
+        logger.log(val + someDep)
+    }
+}
+Factory({
+    logger: logger,
+    someDep: SomeDep
+})(App)
+
+container.get(App)('test') // outputs: val: testdep, opt: test1
+```
+
+## Cache example
+```js
+import Container from 'immutable-di'
+import {Factory, Class} from 'immutable-di/define'
+import NativeCursor from 'immutable-di/cursors/native'
+const container = new Container(new NativeCursor({
+    config: {
+        myModule: {
+            opt1: 'test1'
         }
     }
-]
+}))
 
-const ImmutableDi = Builder([SrvFactory2])
-const di = ImmutableDi(new NativeAdapter({TestStore: states[0]}))
-di.transformState([{id: 'TestStore', data: states[1]}])
-//output: msg: test-message-1
+function MyModule({opt1}) {
+    console.log('init', opt1)
 
-di.get(SrvFactory2)
-//output: nothing
+    return function myModule(val) {
+        console.log('out', opt1, ', val', val)
+    }
+}
+Factory([
+    ['config', 'myModule']
+])(MyModule)
 
-di.transformState([{id: 'TestStore', data: states[2]}])
-//output: msg: test-message-2
+container.get(MyModule) // outputs init test1
+container.get(MyModule) // no outputs, return from cache
+container
+    .select(['config', 'myModule'])
+    .set(['opt1'], 'test2') // outputs test2
+container.get(MyModule) // no outputs: return from cache
+
+container.get(MyModule)('test3') // outputs out test2, val test3
+```
+
+## React example
+
+```js
+import statefull from 'immutable-di/react/statefull'
+@statefull({
+    todos: ['todoApp', 'todos'],
+    query: ['todoApp', 'query'],
+    mapped: mapIds, // faset
+    actions: TodoActions // class with actions
+})
+export default class TodoList extends React.Component {
+    render() {
+        const {todos, query, mapped, actions} = this.props
+    }
+}
+```
+
+## Simple react widget
+
+```js
+
+import React from 'react'
+import Widget from 'immutable-di/react/widget'
+import Di from 'immutable-di/react/di'
+import TodoItem from './todo-item'
+import TodoActions from '../todo-actions'
+
+function TodoListItem({todo, editMode, actions}) {
+    return (
+        <li className='todos-list-item'>
+            {typeof actions}
+            <TodoItem
+                todo={todo}
+                editMode={editMode}
+            />
+        </li>
+    )
+}
+
+export default Di({
+    actions: TodoActions
+})(Widget(TodoListItem))
+
 ```

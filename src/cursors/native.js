@@ -1,4 +1,4 @@
-import AbstractStateAdapter from './abstract-adapter'
+import AbstractCursor from './abstract'
 
 function getInPath(obj, bits) {
     if (bits) {
@@ -15,14 +15,10 @@ function getInPath(obj, bits) {
     return obj
 }
 
-export default class NativeAdapter extends AbstractStateAdapter {
+export default class NativeCursor extends AbstractCursor {
     constructor(state) {
         super(state)
         this._state = state || {}
-    }
-
-    select(path) {
-        return new NativeAdapter(this.get(path))
     }
 
     get(path) {

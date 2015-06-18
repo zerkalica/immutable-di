@@ -1,43 +1,39 @@
 import {Class, Factory} from 'immutable-di/define'
-import Cursor from 'immutable-di/cursor'
+import Container from 'immutable-di'
+import type {AbstractCursor} from 'immutable-di/cursors/abstract'
 
-@Class([Cursor])
+@Class([Container])
 export default class TodoActions {
-    cursor: Cursor
+    _cursor: AbstractCursor
 
-    constructor(cursor: Cursor) {
-        this.cursor = cursor.select(['todoApp'])
+    constructor(container: Container) {
+        this._cursor = container.select(['todoApp'])
         this.__id = 3
     }
 
     deleteTodo(id) {
-        const dataPromise = Promise.resolve({status: 'ok', id})
-        this.cursor.set(['meta'], {
+        this._cursor.set(['meta'], {
             error: false,
             loading: true
         })
 
-        return dataPromise
-            .then(data =>
-                this.cursor.set([], state => {
-                    return {
-                        meta: {
-                            loading: false,
-                            error: false
-                        },
-                        todos: state.todos.filter(({id}) => id !== data.id)
-                    }
+        return Promise.resolve({status: 'ok', id})
+            .then(data => {
+                this._cursor.apply(['todos'], todos => todos.filter(todo => todo.id !== data.id))
+                this._cursor.set(['meta'], {
+                    loading: false,
+                    error: false
                 })
-            )
+            })
             .catch(err =>
-                this.cursor.set(['meta'], {error: err, loading: false})
+                this._cursor.set(['meta'], {
+                    error: err, loading: false
+                })
             )
     }
 
     addTodo(todo) {
-        return this.cursor.set(['todos'], todos =>
-            todos.concat([{...todo, id: this.__id++}])
-        )
+        return this._cursor.apply(['todos'], todos => todos.concat([{...todo, id: this.__id++}]))
     }
 
     loadTodos() {
@@ -47,7 +43,7 @@ export default class TodoActions {
         ])
 
         return dataPromise.then(data =>
-            this.cursor.set(['todos'], data)
+            this._cursor.set(['todos'], data)
         )
     }
 }

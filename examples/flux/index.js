@@ -1,7 +1,8 @@
 import './bootstrap'
 
 import React from 'react'
-import {NativeAdapter, Dispatcher, Container} from 'immutable-di'
+import Container from 'immutable-di'
+import NativeCursor from 'immutable-di/cursors/native'
 import TodoActions from './todo-actions'
 import TodoList from './components/todo-list'
 import state from './state'
@@ -10,9 +11,9 @@ const debug = __debug('immutable-di:flux:index')
 
 const el = document.querySelector('body')
 
-const container = new Container(new NativeAdapter(state))
+const container = new Container(new NativeCursor(state))
 
-container.get(Dispatcher).once(TodoList.stateMap, state => {
+container.once(TodoList.stateMap, state => {
     React.render(<TodoList {...state} container={container}/>, el)
 })
 

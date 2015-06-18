@@ -1,5 +1,4 @@
 import Container from '../container'
-import Dispatcher from '../dispatcher'
 import React, {createElement, Component, PropTypes as p} from 'react'
 
 export class StatefullComponent extends Component {
@@ -26,7 +25,7 @@ export class StatefullComponent extends Component {
     }
 
     componentDidMount() {
-        this.__listener = this.props.container.get(Dispatcher).mount(
+        this.__listener = this.props.container.on(
             this.constructor.stateMap,
             state => this.setState(state),
             this.constructor.displayName
@@ -34,7 +33,7 @@ export class StatefullComponent extends Component {
     }
 
     componentWillUnmount() {
-        this.props.container.get(Dispatcher).unmount(this.__listener)
+        this.props.container.off(this.__listener)
     }
 }
 

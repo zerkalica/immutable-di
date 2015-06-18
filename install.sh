@@ -1,6 +1,6 @@
 #!/bin/sh
 
-npm i --save core-js debug babel-runtime
+npm i --save debug babel-runtime
 
 npm i --save-dev babel-core babel babel-plugin-closure-elimination \
     eslint babel-eslint \
