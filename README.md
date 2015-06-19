@@ -60,30 +60,45 @@ class C {
 
 ## Working with state
 ```js
+import Container from 'immutable-di'
+import NativeCursor from 'immutable-di/cursors/native'
+
+// define di container with state:
 const container = new Container(new NativeCursor({
     config: {
         logger: {
             opt1: 'test1'
+        },
+        mod2: {
+            opt1: 'test2'
         }
     }
 }))
 
+// dep 1:
 function MyFaset(state) {
     return 'data'
 }
 Factory()(MyFaset)
 
+// dep 2:
 function myHandler({state, faset}) {
     console.log(state, faset)
 }
 
+// bind listener:
 const listener = container.on({
     state: ['config', 'logger'],
     faset: MyFaset
 }, myHandler)
 
-container.select(['config']).set(['logger', 'opt1'], 'test') // trigger my hander
+// trigger my hander
+container.select(['config']).set(['logger', 'opt1'], 'test') 
 
+// path config.logger not affected, myHandler is not triggered
+container.select(['config']).set(['mod2', 'opt1'], '1')
+
+// unbind listener:
 container.off(listener)
 ```
 
@@ -165,9 +180,9 @@ Factory([
 
 container.get(MyModule) // outputs init test1
 container.get(MyModule) // no outputs, return from cache
-container
-    .select(['config', 'myModule'])
-    .set(['opt1'], 'test2') // outputs test2
+const cursor = container.select(['config', 'myModule'])
+
+cursor.set(['opt1'], 'test2') // outputs test2
 container.get(MyModule) // no outputs: return from cache
 
 container.get(MyModule)('test3') // outputs out test2, val test3
@@ -176,44 +191,89 @@ container.get(MyModule)('test3') // outputs out test2, val test3
 ## React example
 
 ```js
+// my-faset.js
+function myFaset(todos) {
+    return todos.map(todo => todo.id + '-mapped')
+}
+
+export default Factory([
+    ['todoApp', 'todos']
+])(myFaset)
+```
+
+```js
+// todo-list.js
 import statefull from 'immutable-di/react/statefull'
+import root from 'immutable-di/react/root'
+import TodoListItem from './todo-list-item'
+import myFaset from './my-faset'
+
+// set container from props to context:
+@root 
+// bind to setState:
 @statefull({
-    todos: ['todoApp', 'todos'],
-    query: ['todoApp', 'query'],
-    mapped: mapIds, // faset
+    todos: ['todoApp', 'todos'], // state path
+    query: ['todoApp', 'query'], // state path
+    mapped: myFaset, // faset
     actions: TodoActions // class with actions
 })
 export default class TodoList extends React.Component {
-    render() {
-        const {todos, query, mapped, actions} = this.props
+    render({todos, mapped, actions}) {
+        return (
+            <div>
+                <div>
+                    <h3>Mapped todo ids:</h3>
+                    {mapped.toString()}
+                </div>
+                <ul>
+                    {todos.map(todo => (
+                        <TodoListItem todo={todo}/>
+                    ))}
+                </ul>
+            </div>
+        )
+
     }
 }
 ```
 
-## Simple react widget
-
 ```js
-
+// todo-list-item.js
 import React from 'react'
-import Widget from 'immutable-di/react/widget'
-import Di from 'immutable-di/react/di'
-import TodoItem from './todo-item'
+import widget from 'immutable-di/react/widget'
+import di from 'immutable-di/react/di'
 import TodoActions from '../todo-actions'
 
 function TodoListItem({todo, editMode, actions}) {
     return (
         <li className='todos-list-item'>
-            {typeof actions}
-            <TodoItem
-                todo={todo}
-                editMode={editMode}
-            />
+            {todo.title}
         </li>
     )
 }
 
 export default Di({
     actions: TodoActions
-})(Widget(TodoListItem))
+})(widget(TodoListItem))
+```
 
+```js
+// index.js
+import React from 'react'
+import Container from 'immutable-di'
+import NativeCursor from 'immutable-di/cursors/native'
+import TodoList from './todo-list'
+
+// define di container with state:
+const container = new Container(new NativeCursor({
+    todoApp: {
+        todos: [],
+        query: {
+            
+        }
+    }
+}))
+
+const initialProps = container.select(['todoApp']).get()
+React.render(<TodoList ...initialProps container={container}/>, document.querySelector('body'))
 ```

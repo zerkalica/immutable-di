@@ -12,29 +12,23 @@ const debug = __debug('immutable-di:container')
 @Class()
 export default class Container {
     _state: AbstractCursor
-    _cache: Map<any>
+    _cache: Map<any> = new Map()
     _async: bool
-    _timeOutInProgress: bool
-    _affectedPaths: Array<PathType>
+    _timeOutInProgress: bool = false
+    _affectedPaths: Array<PathType> = []
+    _listeners: Array<DependencyType> = []
 
     constructor(state: AbstractCursor, options: {async: ?bool} = {}) {
-        this._cache = new Map()
-        this._state = state
-
         this.get = ::this.get
         this.select = ::this.select
         this.once = ::this.once
         this.on = ::this.on
         this.off = ::this.off
-
         this._clear = ::this._clear
         this._update = ::this._update
 
+        this._state = state
         this._async = options.async === undefined ? true : options.async
-        this._timeOutInProgress = false
-        this._affectedPaths = []
-        this._listeners = []
-
         this._state.setUpdate(this._update)
     }
 
