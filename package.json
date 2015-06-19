@@ -1,6 +1,6 @@
 {
   "name": "immutable-di",
-  "version": "1.1.9",
+  "version": "1.1.10",
   "description": "Simple, promise-based dependency injection container with some state handling functions (for facebook flux-like state-management)",
   "scripts": {
     "build": "babel src --out-dir=.",
