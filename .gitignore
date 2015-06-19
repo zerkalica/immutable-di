@@ -30,3 +30,10 @@ node_modules
 flow
 build
 dist
+
+/index.js
+/container.js
+/cursors
+/define
+/react
+/utils
