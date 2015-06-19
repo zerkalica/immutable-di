@@ -16,11 +16,6 @@ function getInPath(obj, bits) {
 }
 
 export default class NativeCursor extends AbstractCursor {
-    constructor(state) {
-        super(state)
-        this._state = state || {}
-    }
-
     get(path) {
         return getInPath(this._state, path)
     }

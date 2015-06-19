@@ -20,15 +20,7 @@ export default class TodoItem extends Component {
         actions: p.instanceOf(TodoActions).isRequired
     }
 
-    constructor(state, context) {
-        super(state, context)
-        this.state = {
-            title: this.props.todo.title
-        }
-    }
-
-    render() {
-        const {todo, editMode, actions} = this.props
+    render({todo, editMode, actions}) {
         const {id, title, description} = todo
         return (
             <div className='todo_item'>
@@ -49,7 +41,7 @@ export default class TodoItem extends Component {
                         <button
                             className="todo_item-save_button"
                             onClick={() => actions.saveTodo(Object.assign({}, todo, {
-                                title: this.state.title
+                                title: '123'
                             }))}
                         >
                             Save

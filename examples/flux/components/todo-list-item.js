@@ -1,6 +1,6 @@
 import React from 'react'
-import Widget from 'immutable-di/react/widget'
-import Di from 'immutable-di/react/di'
+import di from 'immutable-di/react/di'
+import widget from 'immutable-di/react/widget'
 import TodoItem from './todo-item'
 import TodoActions from '../todo-actions'
 
@@ -16,6 +16,6 @@ function TodoListItem({todo, editMode, actions}) {
     )
 }
 
-export default Di({
+export default di({
     actions: TodoActions
-})(Widget(TodoListItem))
+})(widget(TodoListItem))

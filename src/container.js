@@ -17,7 +17,7 @@ export default class Container {
     _timeOutInProgress: bool
     _affectedPaths: Array<PathType>
 
-    constructor(state: AbstractCursor, options: {async: bool}) {
+    constructor(state: AbstractCursor, options: {async: ?bool} = {}) {
         this._cache = new Map()
         this._state = state
 
@@ -33,6 +33,7 @@ export default class Container {
         this._async = options.async === undefined ? true : options.async
         this._timeOutInProgress = false
         this._affectedPaths = []
+        this._listeners = []
 
         this._state.setUpdate(this._update)
     }
@@ -79,8 +80,8 @@ export default class Container {
         this._listeners = this._listeners.filter(d => listenerDef !== d)
     }
 
-    once(definition: DependencyType, listener: (v: any) => any) {
-        const listenerDef = this.on(definition, (...args) => {
+    once(stateMap: DiDefinitionType, listener: (v: any) => any) {
+        const listenerDef = this.on(stateMap, (...args) => {
             this.off(listenerDef)
             return listener(...args)
         })
@@ -124,10 +125,10 @@ export default class Container {
         }
 
         const defArgs = argNames.length ?
-            [convertArgsToOptions(resolvedArgs, argNames)] :
-            resolvedArgs
+            [convertArgsToOptions(args, argNames)] :
+            args
 
-        result = isClass ? new definition(...defArgs) : definition(...defArgs)
+        const result = isClass ? new definition(...defArgs) : definition(...defArgs)
 
         cache.set(id, result)
 

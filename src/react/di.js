@@ -1,23 +1,31 @@
 import {Factory} from '../define'
 import Container from '../container'
-import React, {createElement, Component, PropTypes as p} from 'react'
-
-export class DiComponent extends Component {
-    static contextTypes = {
-        container: p.instanceOf(Container).isRequired
-    }
-}
+import {Component, createElement, PropTypes as p} from 'react'
 
 export default function di(Deps) {
     return function wrapComponent(BaseComponent) {
         const Getter = Factory(Deps, BaseComponent.displayName)(params => params)
-        return class ComponentWrapper extends DiComponent {
+        class MarkupComponent extends BaseComponent {
             render() {
-                const deps = (this.context && this.context.container) ?
-                    this.context.container.get(Getter)
-                    : {}
+                return super.render(this.props, this.context)
+            }
+        }
 
-                return createElement(BaseComponent, {...this.props, ...deps})
+        return class DiComponent extends Component {
+            static contextTypes = {
+                container: p.instanceOf(Container).isRequired
+            }
+            static depsDefaults = {}
+
+            constructor(props, context) {
+                super(props, context)
+                this.deps = context && context.container ?
+                    context.container.get(Getter) :
+                    this.constructor.depsDefaults
+            }
+
+            render() {
+                return createElement(MarkupComponent, {...this.deps, ...this.props})
             }
         }
     }

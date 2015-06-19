@@ -6,7 +6,6 @@
         "utility.inlineEnvironmentVariables"
     ],
     "plugins": [
-        "closure-elimination",
         "babel-plugin-espower"
     ]
 }

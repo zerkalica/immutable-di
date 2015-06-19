@@ -3,6 +3,7 @@ import React, {PropTypes as p, Component} from 'react'
 import __debug from 'debug'
 const debug = __debug('immutable-di:flux:TodoList')
 
+import root from 'immutable-di/react/root'
 import statefull from 'immutable-di/react/statefull'
 
 import TodoActions from '../todo-actions'
@@ -10,6 +11,7 @@ import mapIds from '../state/map-ids'
 import {TodoItemType} from './todo-item'
 import TodoListItem from './todo-list-item'
 
+@root
 @statefull({
     todos: ['todoApp', 'todos'],
     query: ['todoApp', 'query'],
@@ -27,8 +29,7 @@ export default class TodoList extends React.Component {
         actions: p.instanceOf(TodoActions)
     }
 
-    render() {
-        const {todos, editId, loading, query, actions, mapped} = this.props
+    render({todos, editId, loading, query, actions, mapped}) {
         debug('len: %s, loading: %s', todos.length, loading)
 
         return (
