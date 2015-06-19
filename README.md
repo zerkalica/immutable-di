@@ -207,6 +207,7 @@ import statefull from 'immutable-di/react/statefull'
 import root from 'immutable-di/react/root'
 import TodoListItem from './todo-list-item'
 import myFaset from './my-faset'
+import TodoActions from './todo-actions'
 
 // set container from props to context:
 @root 
@@ -242,7 +243,7 @@ export default class TodoList extends React.Component {
 import React from 'react'
 import widget from 'immutable-di/react/widget'
 import di from 'immutable-di/react/di'
-import TodoActions from '../todo-actions'
+import TodoActions from './todo-actions'
 
 function TodoListItem({todo, editMode, actions}) {
     return (
@@ -258,6 +259,23 @@ export default Di({
 ```
 
 ```js
+// todo-actions.js
+import Container from 'immutable-di'
+import {Class} from 'immutable-di/define'
+
+@Class([Container])
+export default class TodoActions {
+    constructor(container) {
+        this._cursor = container.select(['todoApp'])
+    }
+
+    addTodo(todo) {
+        this._cursor.apply(['todos'] => todos.concat(todo))
+    }
+}
+```
+
+```js
 // index.js
 import React from 'react'
 import Container from 'immutable-di'
@@ -269,7 +287,7 @@ const container = new Container(new NativeCursor({
     todoApp: {
         todos: [],
         query: {
-            
+
         }
     }
 }))
