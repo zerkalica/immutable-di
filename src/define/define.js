@@ -19,11 +19,11 @@ function processDeps(deps) {
     for (let i = 0; i < len; i++) {
         const name = names.length ? names[i] : undefined
         const dep = deps[name || i]
-        const isArray = Array.isArray(dep)
+        const path = Array.isArray(dep) ? dep : null
         resultDeps.push({
             name,
-            path: isArray ? dep : null,
-            definition: isArray ? null : dep
+            path,
+            definition: path ? null : dep
         })
     }
 
@@ -31,13 +31,14 @@ function processDeps(deps) {
 }
 
 function updateIdsMap(map, id, normalizedDeps) {
-    for (let i = 0; i < normalizedDeps.length; i++) {
+    for (let i = 0, j = normalizedDeps.length; i < j; i++) {
         const dep = normalizedDeps[i]
-        if (dep.path && dep.path.length) {
-            const parts = []
+        const path = dep.path
+        if (path && path.length) {
             if (id) {
-                dep.path.forEach(part=> {
-                    parts.push(part)
+                const parts = []
+                for (let ii = 0, jj = path.length; ii < jj; ii++) {
+                    parts.push(path[ii])
                     const key = parts.toString()
                     let ids = map[key]
                     if (!ids) {
@@ -47,7 +48,7 @@ function updateIdsMap(map, id, normalizedDeps) {
                     if (ids.indexOf(id) === -1) {
                         ids.push(id)
                     }
-                })
+                }
             }
         } else {
             if (!dep.definition) {
@@ -76,10 +77,10 @@ function Dep({deps, displayName, isClass, isCachedTemporary}) {
         Service.__di = {
             id,
             displayName: displayName || getFunctionName(Service) || id,
-            isClass: true,
+            isClass,
             isCachedTemporary,
             isOptions: !Array.isArray(deps),
-            deps: getDeps(isCachedTemporary ? id : null, deps, isCachedTemporary)
+            deps: getDeps(isCachedTemporary ? id : null, deps)
         }
 
         return Service

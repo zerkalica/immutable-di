@@ -11,12 +11,14 @@ Simple, dependency injection container with some state handling functions.
 
 ## Define dependency
 ```js
-import {Factory, Class} from 'immutable-di/define'
+import {Facet, Factory, Class} from 'immutable-di/define'
 // A, B - functions or classes with di definitions
 
 // For functions:
 Factory([A, B])(C) // resolve functions A, B and pass them as arguments to C
 Factory({a: A, b: B})(C) // resolve functions A, B and pass them as object {a, b} to C
+
+Facet - same as Factory, but do not cache factory return value
 
 // For classes:
 @Class([A, B])

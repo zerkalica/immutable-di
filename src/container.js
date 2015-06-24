@@ -1,18 +1,14 @@
 import type {AbstractCursor, PathType} from './cursors/abstract'
 import type {DiDefinitionType, DependencyType} from './define'
 
-import getDebugPath from './utils/get-debug-path'
-import convertArgsToOptions from './utils/convert-args-to-options'
-import {Class, Factory, __pathToIdsMap} from './define'
+import {Class, Facet, __pathToIdsMap} from './define'
+import getFunctionName from './utils/get-function-name'
 import getDef from './define/get'
-
-import __debug from 'debug'
-const debug = __debug('immutable-di:container')
 
 @Class()
 export default class Container {
     _state: AbstractCursor
-    _cache: Array<any> = []
+    _cache: Map<any> = {}
     _async: bool
     _timeOutInProgress: bool = false
     _affectedPaths: Array<PathType> = []
@@ -55,7 +51,7 @@ export default class Container {
     _updateListeners() {
         const affected = this._affectedPaths
         for (let i = 0, j = affected.length; i < j; i++) {
-            this._clear(affected[i])       
+            this._clear(affected[i])
         }
         this._affectedPaths = []
         const listeners = this._listeners
@@ -68,25 +64,23 @@ export default class Container {
         return this._state.select(path)
     }
 
-    on(stateMap: DiDefinitionType, listener: (v: any) => any, displayName: ?string): DependencyType {
-        const listenerDef = Factory(stateMap, displayName)(listener)
-        this._listeners.push(listenerDef)
-
-        return listenerDef
+    mount(definition: DependencyType) {
+        this._listeners.push(definition)
     }
 
-    off(listenerDef: DependencyType) {
+    unmount(listenerDef: DependencyType) {
         this._listeners = this._listeners.filter(d => listenerDef !== d)
     }
 
     once(stateMap: DiDefinitionType, listener: (v: any) => any, displayName: ?string) {
-        const listenerDef = this.on(stateMap, (...args) => {
-            this.off(listenerDef)
+        const definition = Facet(stateMap, displayName || getFunctionName(listener))((...args) => {
+            this.unmount(definition)
             return listener(...args)
-        }, displayName)
+        })
+        this.mount(definition)
     }
 
-    get(definition: DependencyType, tempCache = [], debugCtx: ?Array<string> = []): any {
+    get(definition: DependencyType, tempCache = {}, debugCtx: ?Array<string> = []): any {
         if (definition) {
             if (this instanceof definition) {
                 return this

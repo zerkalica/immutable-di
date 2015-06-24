@@ -1,4 +1,4 @@
-export type PathType = Array<string>
+export type PathType = Array<string> | string
 
 export default class AbstractCursor<State> {
     constructor(state, update, prefix = []) {
@@ -15,7 +15,7 @@ export default class AbstractCursor<State> {
         this.__update(this._prefix.concat(path))
     }
 
-    select(path: PathType): AbstractCursor<State> {
+    select(path: PathType = []): AbstractCursor<State> {
         return new this.constructor(this.get(path), this.__update, this._prefix.concat(path))
     }
 
@@ -28,6 +28,24 @@ export default class AbstractCursor<State> {
     }
 
     apply(path: PathType, fn: (v: State) => State) {
+        if (fn === undefined) {
+            fn = path
+            path = []
+        } else {
+            path = [].concat(path || [])
+        }
+
         this.set(path, fn(this.get(path)))
+    }
+
+    merge(path: PathType, data: object) {
+        if (data === undefined) {
+            data = path
+            path = []
+        } else {
+            path = [].concat(path || [])
+        }
+
+        this.set(path, {...this.get(path), ...data})
     }
 }

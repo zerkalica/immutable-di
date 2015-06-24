@@ -1,4 +1,5 @@
 import Container from '../container'
+import {Factory} from '../define'
 import {createElement, Component, PropTypes as p} from 'react'
 
 export class StatefullComponent extends Component {
@@ -11,19 +12,19 @@ export class StatefullComponent extends Component {
     constructor(props, context) {
         super(props, context)
         this.state = props
-        this.__listener = null
+        this.__listener = Factory(this.constructor.stateMap, this.constructor.displayName || 'StatefullComponent')(::this.setState)
+    }
+
+    componentWillReceiveProps(props) {
+        this.setState({...this.state, ...props})
     }
 
     componentDidMount() {
-        this.__listener = this.context.container.on(
-            this.constructor.stateMap,
-            state => this.setState(state),
-            this.constructor.displayName
-        )
+        this.context.container.mount(this.__listener)
     }
 
     componentWillUnmount() {
-        this.context.container.off(this.__listener)
+        this.context.container.unmount(this.__listener)
     }
 }
 
