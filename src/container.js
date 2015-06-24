@@ -12,7 +12,7 @@ const debug = __debug('immutable-di:container')
 @Class()
 export default class Container {
     _state: AbstractCursor
-    _cache: Map<any> = new Map()
+    _cache: Array<any> = []
     _async: bool
     _timeOutInProgress: bool = false
     _affectedPaths: Array<PathType> = []
@@ -33,10 +33,9 @@ export default class Container {
     }
 
     _clear(path: PathType) {
-        const idsMap = __pathToIdsMap.get(path.toString()) || []
-        debug('upd path: %s; ids: %s; map: %o', path.toString(), idsMap.toString(), __pathToIdsMap)
-        for (let i = 0; i < idsMap.length; i++) {
-            this._cache.delete(idsMap[i])
+        const idsMap = __pathToIdsMap[path.toString()] || []
+        for (let i = 0, j = idsMap.length; i < j; i++) {
+            delete this._cache[idsMap[i]]
         }
     }
 
@@ -54,17 +53,23 @@ export default class Container {
     }
 
     _updateListeners() {
-        this._affectedPaths.forEach(this._clear)
+        const affected = this._affectedPaths
+        for (let i = 0, j = affected.length; i < j; i++) {
+            this._clear(affected[i])       
+        }
         this._affectedPaths = []
-        this._listeners.forEach(this.get)
+        const listeners = this._listeners
+        for (let i = 0, j = listeners.length; i < j; i++) {
+            this.get(listeners[i])
+        }
     }
 
     select(path: PathType) {
         return this._state.select(path)
     }
 
-    on(stateMap: DiDefinitionType, listener: (v: any) => any, id: ?string): DependencyType {
-        const listenerDef = Factory(stateMap, id)(listener)
+    on(stateMap: DiDefinitionType, listener: (v: any) => any, displayName: ?string): DependencyType {
+        const listenerDef = Factory(stateMap, displayName)(listener)
         this._listeners.push(listenerDef)
 
         return listenerDef
@@ -74,57 +79,51 @@ export default class Container {
         this._listeners = this._listeners.filter(d => listenerDef !== d)
     }
 
-    once(stateMap: DiDefinitionType, listener: (v: any) => any) {
+    once(stateMap: DiDefinitionType, listener: (v: any) => any, displayName: ?string) {
         const listenerDef = this.on(stateMap, (...args) => {
             this.off(listenerDef)
             return listener(...args)
-        })
+        }, displayName)
     }
 
-    _getDepValue(dep: DependencyType, ctx: Array<string>): any {
-        return dep.path ?
-            this._state.get(dep.path) :
-            this.get(dep.definition, ctx)
-    }
-
-    get(definition: DependencyType, debugCtx: ?Array<string>): any {
+    get(definition: DependencyType, tempCache = [], debugCtx: ?Array<string> = []): any {
         if (definition) {
             if (this instanceof definition) {
                 return this
             }
         } else {
-            throw new Error('Getter is not a definition in ' + getDebugPath(debugCtx || []))
+            throw new Error('Getter is not a definition in ' + debugCtx)
         }
 
-        const cache = this._cache
         const def = getDef(definition)
         if (!def) {
-            throw new Error('Property .__id not exist in ' + getDebugPath(debugCtx || []))
+            throw new Error('Property .__id not exist in ' + debugCtx)
         }
-        const {id, handler, deps, isClass} = def
-        const debugPath = getDebugPath([debugCtx && debugCtx.length ? debugCtx[0] : [], id])
-        if (cache.has(id)) {
-            return cache.get(id)
-        }
+        const {id, displayName, deps, isClass, isCachedTemporary, isOptions} = def
+        const cache = isCachedTemporary ? tempCache : this._cache
+        let result = cache[id]
+        if (result === undefined) {
+            const args = {}
+            const defArgs = isOptions ? [args] : []
+            for (let i = 0, j = deps.length; i < j; i++) {
+                const dep = deps[i]
+                const value = dep.path ?
+                    this._state.get(dep.path) :
+                    this.get(dep.definition, tempCache, debugCtx.concat([displayName, i]))
 
-        const args = []
-        const argNames = []
-        for (let i = 0; i < deps.length; i++) {
-            const dep = deps[i]
-            const value = this._getDepValue(dep, [debugPath, i])
-            if (dep.name) {
-                argNames.push(dep.name)
+                if(isOptions) {
+                    args[dep.name] = value
+                } else {
+                    defArgs.push(value)
+                }
             }
-            args.push(value)
+
+            result = isClass ? new definition(...defArgs) : definition(...defArgs)
+            if (result === undefined) {
+                result = null
+            }
+            cache[id] = result
         }
-
-        const defArgs = argNames.length ?
-            [convertArgsToOptions(args, argNames)] :
-            args
-
-        const result = isClass ? new definition(...defArgs) : definition(...defArgs)
-
-        cache.set(id, result)
 
         return result
     }
