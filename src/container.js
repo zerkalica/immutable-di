@@ -116,7 +116,7 @@ export default class Container {
             if (result === undefined) {
                 result = null
             }
-            cache[id] = result
+            // cache[id] = result
         }
 
         return result

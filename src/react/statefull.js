@@ -11,8 +11,16 @@ export class StatefullComponent extends Component {
 
     constructor(props, context) {
         super(props, context)
-        this.state = props
-        this.__listener = Factory(this.constructor.stateMap, this.constructor.displayName || 'StatefullComponent')(::this.setState)
+        const Getter = Factory(this.constructor.stateMap, this.constructor.displayName || 'StatefullComponent')(state => {
+            if (this.__listener) {
+                this.setState(state)
+            }
+            return state
+        })
+
+        this.state = {...props, ...context.container.get(Getter)}
+
+        this.__listener = Getter
     }
 
     componentWillReceiveProps(props) {
