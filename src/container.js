@@ -18,8 +18,8 @@ export default class Container {
         this.get = ::this.get
         this.select = ::this.select
         this.once = ::this.once
-        this.on = ::this.on
-        this.off = ::this.off
+        this.mount = ::this.mount
+        this.unmount = ::this.unmount
         this._clear = ::this._clear
         this._update = ::this._update
 
