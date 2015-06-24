@@ -36,7 +36,9 @@ export default class TodoItem extends Component {
                  ) : (
                     <div className ='todo_item-body-edit'>
                         <input type='text' className='todo_item-title__edit' value={title}
-                            onChange={e => this.setState({title: e.target.value})}
+                            onChange={e => actions.setTodo(id, {
+                                title: e.currentTarget.value
+                            })}
                         />
                         <button
                             className="todo_item-save_button"

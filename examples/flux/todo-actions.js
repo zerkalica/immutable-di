@@ -7,8 +7,19 @@ export default class TodoActions {
     _cursor: AbstractCursor
 
     constructor(container: Container) {
+        this._state = container
         this._cursor = container.select(['todoApp'])
         this.__id = 3
+    }
+
+    setTodo(id, data) {
+        this._cursor.apply(['todos'], todos => todos.map(todo =>
+            todo.id === id ?
+                {...todo, ...data} :
+                todo
+        ))
+        // prevent cursor jump to end in input in async setState
+        this._state.flush()
     }
 
     deleteTodo(id) {

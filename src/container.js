@@ -10,8 +10,7 @@ export default class Container {
     _state: AbstractCursor
     _cache: Map<any> = {}
     _async: bool
-    _timeOutInProgress: bool = false
-    _affectedPaths: Array<PathType> = []
+    _timerId: number = null
     _listeners: Array<DependencyType> = []
 
     constructor(state: AbstractCursor, options: {async: ?bool} = {}) {
@@ -22,6 +21,7 @@ export default class Container {
         this.unmount = ::this.unmount
         this._clear = ::this._clear
         this._update = ::this._update
+        this.flush = ::this.flush
 
         this._state = state
         this._async = options.async === undefined ? true : options.async
@@ -36,24 +36,17 @@ export default class Container {
     }
 
     _update(path: PathType) {
-        this._affectedPaths.push(path)
-        if (this._async && !this._timeOutInProgress) {
-            this._timeOutInProgress = true
-            setTimeout(() => {
-                this._updateListeners()
-                this._timeOutInProgress = false
-            }, 0)
+        this._clear(path)
+        if (this._async && !this._timerId) {
+            this._timerId = setTimeout(this.flush, 0)
         } else {
-            this._updateListeners()
+            this.flush()
         }
     }
 
-    _updateListeners() {
-        const affected = this._affectedPaths
-        for (let i = 0, j = affected.length; i < j; i++) {
-            this._clear(affected[i])
-        }
-        this._affectedPaths = []
+    flush() {
+        clearTimeout(this._timerId)
+        this._timerId = null
         const listeners = this._listeners
         for (let i = 0, j = listeners.length; i < j; i++) {
             this.get(listeners[i])
@@ -116,7 +109,7 @@ export default class Container {
             if (result === undefined) {
                 result = null
             }
-            // cache[id] = result
+            cache[id] = result
         }
 
         return result

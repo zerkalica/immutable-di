@@ -73,14 +73,15 @@ function getDeps(id, deps) {
 
 function Dep({deps, displayName, isClass, isCachedTemporary}) {
     return function __Dep(Service) {
-        const id = Service.__di ? Service.__di.id : lastId++
+        const id = (Service.__di ? Service.__di.id : lastId++)
+        // + '#' + getFunctionName(Service)
         Service.__di = {
-            id,
+            id: id,
             displayName: displayName || getFunctionName(Service) || id,
             isClass,
             isCachedTemporary,
             isOptions: !Array.isArray(deps),
-            deps: getDeps(isCachedTemporary ? id : null, deps)
+            deps: getDeps(isCachedTemporary ? null : id, deps)
         }
 
         return Service
