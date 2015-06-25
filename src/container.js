@@ -9,11 +9,9 @@ import getDef from './define/get'
 export default class Container {
     _state: AbstractCursor
     _cache: Map<any> = {}
-    _async: bool
-    _timerId: number = null
     _listeners: Array<DependencyType> = []
 
-    constructor(state: AbstractCursor, options: {async: ?bool} = {}) {
+    constructor(state: AbstractCursor) {
         this.get = ::this.get
         this.select = ::this.select
         this.once = ::this.once
@@ -21,11 +19,10 @@ export default class Container {
         this.unmount = ::this.unmount
         this._clear = ::this._clear
         this._update = ::this._update
-        this.flush = ::this.flush
+        this.notify = ::this.notify
 
         this._state = state
-        this._async = options.async === undefined ? true : options.async
-        this._state.setUpdate(this._update)
+        this._state.setUpdate(this.notify)
     }
 
     _clear(path: PathType) {
@@ -35,18 +32,11 @@ export default class Container {
         }
     }
 
-    _update(path: PathType) {
-        this._clear(path)
-        if (this._async && !this._timerId) {
-            this._timerId = setTimeout(this.flush, 0)
-        } else {
-            this.flush()
+    notify(paths: Array<PathType>) {
+        for (let i = 0; i < paths.length; i++) {
+            this._clear(paths[i])
         }
-    }
 
-    flush() {
-        clearTimeout(this._timerId)
-        this._timerId = null
         const listeners = this._listeners
         for (let i = 0, j = listeners.length; i < j; i++) {
             this.get(listeners[i])
@@ -73,13 +63,9 @@ export default class Container {
         this.mount(definition)
     }
 
-    get(definition: DependencyType, tempCache = {}, debugCtx: ?Array<string> = []): any {
-        if (definition) {
-            if (this instanceof definition) {
-                return this
-            }
-        } else {
-            throw new Error('Getter is not a definition in ' + debugCtx)
+    _get(definition: DependencyType, tempCache: object, getState: (path: PathType) => any, debugCtx: Array<string>): any {
+        if (this instanceof definition) {
+            return this
         }
 
         const def = getDef(definition)
@@ -95,8 +81,8 @@ export default class Container {
             for (let i = 0, j = deps.length; i < j; i++) {
                 const dep = deps[i]
                 const value = dep.path ?
-                    this._state.get(dep.path) :
-                    this.get(dep.definition, tempCache, debugCtx.concat([displayName, i]))
+                    getState(dep.path) :
+                    this._get(dep.definition, tempCache, getState, debugCtx.concat([displayName, i]))
 
                 if(isOptions) {
                     args[dep.name] = value
@@ -113,5 +99,13 @@ export default class Container {
         }
 
         return result
+    }
+
+    get(definition: DependencyType): any {
+        if (!definition) {
+            throw new Error('Getter is not a definition')
+        }
+
+        return this._get(definition, {}, this._state.createGetter(), [])
     }
 }

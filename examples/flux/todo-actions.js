@@ -19,7 +19,7 @@ export default class TodoActions {
                 todo
         ))
         // prevent cursor jump to end in input in async
-        this._state.flush()
+        this._cursor.commit()
     }
 
     deleteTodo(id) {
