@@ -16,7 +16,7 @@ export default class AbstractCursor<State> {
     }
 
     _update(path: PathType) {
-        this._affectedPaths.push(path)
+        this._affectedPaths.push(this._prefix.concat(path))
         if (!this._timerId) {
             this._timerId = setTimeout(this.commit, 0)
         }
@@ -59,16 +59,5 @@ export default class AbstractCursor<State> {
         }
 
         this.set(path, fn(this.get(path)))
-    }
-
-    merge(path: PathType, data: object) {
-        if (data === undefined) {
-            data = path
-            path = []
-        } else {
-            path = [].concat(path || [])
-        }
-
-        this.set(path, {...this.get(path), ...data})
     }
 }
