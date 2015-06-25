@@ -5,7 +5,7 @@ export default class AbstractCursor<State> {
     _affectedPaths: Array<PathType> = []
     __notify: ?(paths: Array<PathType>) => void = null
 
-    constructor(state, {prefix, notify}) {
+    constructor(state, {prefix, notify} = {prefix: [], notify: null}) {
         this._state = state || {}
         this.setNotify(notify)
         this._prefix = prefix

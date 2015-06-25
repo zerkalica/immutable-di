@@ -17,12 +17,10 @@ export default class Container {
         this.once = ::this.once
         this.mount = ::this.mount
         this.unmount = ::this.unmount
-        this._clear = ::this._clear
-        this._update = ::this._update
         this.notify = ::this.notify
 
         this._state = state
-        this._state.setUpdate(this.notify)
+        this._state.setNotify(this.notify)
     }
 
     _clear(path: PathType) {
