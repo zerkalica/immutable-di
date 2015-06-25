@@ -18,7 +18,7 @@ export default class TodoActions {
                 {...todo, ...data} :
                 todo
         ))
-        // prevent cursor jump to end in input in async setState
+        // prevent cursor jump to end in input in async
         this._state.flush()
     }
 

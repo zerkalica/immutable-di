@@ -9,7 +9,7 @@ export type DiDefinitionType = {
     definition: DependencyType
 }
 
-function processDeps(deps) {
+function normalizeDeps(deps) {
     const resultDeps = []
     deps = deps || []
     const isArray = Array.isArray(deps)
@@ -66,7 +66,7 @@ let lastId = 1
 export const __pathToIdsMap = {}
 
 function getDeps(id, deps) {
-    const normalizedDeps = processDeps(deps || {})
+    const normalizedDeps = normalizeDeps(deps)
     updateIdsMap(__pathToIdsMap, id, normalizedDeps)
     return normalizedDeps
 }

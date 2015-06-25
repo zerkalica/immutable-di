@@ -11,20 +11,18 @@ export class StatefullComponent extends Component {
 
     constructor(props, context) {
         super(props, context)
-        const Getter = Factory(this.constructor.stateMap, this.constructor.displayName || 'StatefullComponent')(state => {
-            if (this.__listener) {
+        const Getter = this.__listener = Factory(this.constructor.stateMap, this.constructor.displayName)(state => {
+            if (this.state) {
                 this.setState(state)
             }
             return state
         })
 
         this.state = {...props, ...context.container.get(Getter)}
-
-        this.__listener = Getter
     }
 
     componentWillReceiveProps(props) {
-        this.setState({...this.state, ...props})
+        this.setState(props)
     }
 
     componentDidMount() {
@@ -45,7 +43,9 @@ export default function statefull(stateMap = {}) {
         }
 
         return class StatefullComponentWrapper extends StatefullComponent {
+            static displayName = BaseComponent.displayName
             static stateMap = stateMap
+
             render() {
                 return createElement(MarkupComponent, this.state)
             }
