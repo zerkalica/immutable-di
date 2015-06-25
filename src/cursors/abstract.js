@@ -9,6 +9,12 @@ export default class AbstractCursor<State> {
         this._state = state || {}
         this.setNotify(notify)
         this._prefix = prefix
+        this.commit = ::this.commit
+        this.createGetter = ::this.createGetter
+        this.get = ::this.get
+        this.set = ::this.set
+        this.select = ::this.select
+        this.apply = ::this.apply
     }
 
     setNotify(notify) {
