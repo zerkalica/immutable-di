@@ -8,8 +8,8 @@
     "release-minor": "git checkout master && npm version minor && git push origin master --tags && npm publish",
     "release-major": "git checkout master && npm version major && git push origin master --tags && npm publish",
     "build": "babel src --out-dir=.",
-    "test": "exit 0 && mocha --compilers js:babel-core/register --recursive src/**/__tests__/*.js",
-    "dev": "mocha --compilers js:babel-core/register --recursive --watch src/**/__tests__/*.js",
+    "test": "mocha --compilers js:babel-core/register --recursive **/__tests__/*.js",
+    "dev": "mocha --compilers js:babel-core/register --recursive --watch src/**/*-test.js",
     "dev.examples": "webpack-dev-server --config webpack.config.js --hot --inline"
   },
   "author": "Stefan Zerkalica <zerkalica@gmail.com>",
