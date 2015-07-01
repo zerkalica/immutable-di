@@ -1,7 +1,7 @@
 import assert from 'power-assert'
 import Container from '../container'
 import NativeCursor from '../cursors/native'
-import {Factory, Class, Faset} from '../define'
+import {Factory, Class, Facet} from '../define'
 import sinon from 'sinon'
 
 describe('container', () => {
@@ -18,6 +18,7 @@ describe('container', () => {
     })
 
     describe('get', () => {
+
         it('should throws exception if no arguments passed', () => {
             assert.throws(() => container.get())
         })
@@ -96,14 +97,13 @@ describe('container', () => {
             })
 
             @Class([Fac1])
-            class Test {
-            }
+            class Test {}
             const TestFake = sinon.spy(Test)
             container.get(TestFake)
-            container.select(['todo']).set('id', 321)
+            container.select(['todo']).set('id', 321).commit()
             container.get(TestFake)
             assert(TestFake.firstCall.calledWith(0))
-            // assert(TestFake.secondCall.calledWith(1))
+            assert(TestFake.secondCall.calledWith(321))
         })
 
     })
