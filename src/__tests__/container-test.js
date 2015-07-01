@@ -17,8 +17,13 @@ describe('container', () => {
         container = new Container(new NativeCursor(initialState))
     })
 
-    describe('get', () => {
+    describe('basics', () => {
+        it('should throws exception if incorrect data passed to constructor', () => {
+            assert.throws(() => new Container(), /undefined/)
+        })
+    })
 
+    describe('get', () => {
         it('should throws exception if no arguments passed', () => {
             assert.throws(() => container.get())
         })
@@ -44,31 +49,34 @@ describe('container', () => {
 
         it('should cache class instance', () => {
             @Class()
-            class Test {
+            class TestBase {
 
             }
+            const Test = sinon.spy(TestBase)
+
 
             const instance1 = container.get(Test)
             const instance2 = container.get(Test)
 
-            assert(instance1, instance2)
+            assert.strictEqual(instance1, instance2)
+            assert(Test.calledOnce)
         })
 
         it('should cache factory return value', () => {
-            const Fac1 = Factory()(function _Fac1() {
+            const MyDep = Factory()(function _MyDep() {
                 return 123
             })
 
-            const instance1 = container.get(Fac1)
+            const instance1 = container.get(MyDep)
             assert.strictEqual(instance1, 123)
         })
 
         it('should handle simple deps from array definition', () => {
-            const Fac1 = Factory()(function _Fac1() {
+            const MyDep = Factory()(function _MyDep() {
                 return 123
             })
 
-            @Class([Fac1])
+            @Class([MyDep])
             class Test {
             }
             const TestFake = sinon.spy(Test)
@@ -77,11 +85,11 @@ describe('container', () => {
         })
 
         it('should handle simple deps from object definition', () => {
-            const Fac1 = Factory()(function _Fac1() {
+            const MyDep = Factory()(function _MyDep() {
                 return 123
             })
 
-            @Class({fac: Fac1})
+            @Class({fac: MyDep})
             class Test {
             }
             const TestFake = sinon.spy(Test)
@@ -90,22 +98,82 @@ describe('container', () => {
         })
 
         it('should handle state changes', () => {
-            const Fac1 = Factory([
+            const MyDep = Factory([
                 ['todo', 'id']
-            ])(function _Fac1(id) {
+            ])(function _MyDep(id) {
                 return id
             })
 
-            @Class([Fac1])
+            @Class([MyDep])
             class Test {}
             const TestFake = sinon.spy(Test)
             container.get(TestFake)
             container.select(['todo']).set('id', 321).commit()
             container.get(TestFake)
+            container.get(TestFake)
+            assert(TestFake.calledTwice)
             assert(TestFake.firstCall.calledWith(0))
             assert(TestFake.secondCall.calledWith(321))
         })
-
     })
 
+    describe('selection', () => {
+        it.skip('should update state on next timer tick', () => {
+            const MyDep = sinon.spy(Factory([
+                ['todo', 'id']
+            ])(function _MyDep(id) {
+                //assert(id === 321)
+                //done()
+                return id
+            }))
+
+            container.get(MyDep)
+            container.select(['todo']).set('id', 321)
+            assert(container.get(MyDep) === 0)
+            //container.mount(MyDep)
+            //assert(MyDep.calledOnce)
+        })
+    })
+
+    describe('events', () => {
+        it('should update mounted listener', done => {
+            const MyDep = sinon.spy(Factory([
+                ['todo', 'id']
+            ])(function _MyDep(id) {
+                assert(id === 321)
+                done()
+                return id
+            }))
+
+            container.mount(MyDep)
+            container.select(['todo']).set('id', 321)
+        })
+
+        it('should not update listener with another path', () => {
+            const MyDep = sinon.spy(Factory([
+                ['todo', 'id']
+            ])(function _MyDep(id) {
+                return id
+            }))
+
+            container.mount(MyDep)
+            container.select(['todo']).set('id2', 321).commit()
+            assert(MyDep.notCalled)
+        })
+
+        it('should not update unmounted listener', () => {
+            const MyDep = sinon.spy(Factory([
+                ['todo', 'id']
+            ])(function _MyDep(id) {
+                assert(id === 321)
+                done()
+                return id
+            }))
+
+            container.mount(MyDep)
+            container.unmount(MyDep)
+            container.select(['todo']).set('id', 321).commit()
+            assert(MyDep.notCalled)
+        })
+    })
 })

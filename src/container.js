@@ -46,6 +46,9 @@ export default class Container {
     }
 
     mount(definition: DependencyType) {
+        const {id} = getDef(definition)
+        // do not call listener on another state change
+        this._cache[id] = null
         this._listeners.push(definition)
     }
 
