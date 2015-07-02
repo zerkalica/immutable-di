@@ -14,7 +14,7 @@ describe('container', () => {
     }
 
     beforeEach(() => {
-        container = new Container(new NativeCursor(initialState))
+        container = new Container(new NativeCursor({todo: {...initialState.todo}}))
     })
 
     describe('basics', () => {
@@ -118,20 +118,24 @@ describe('container', () => {
     })
 
     describe('selection', () => {
-        it.skip('should update state on next timer tick', () => {
+        it('should update state on next timer tick', (done) => {
+            const container2 = new Container(new NativeCursor(initialState))
             const MyDep = sinon.spy(Factory([
                 ['todo', 'id']
             ])(function _MyDep(id) {
-                //assert(id === 321)
-                //done()
                 return id
             }))
 
-            container.get(MyDep)
-            container.select(['todo']).set('id', 321)
-            assert(container.get(MyDep) === 0)
-            //container.mount(MyDep)
-            //assert(MyDep.calledOnce)
+            container2.get(MyDep)
+            assert(container2.get(MyDep) === 0)
+            container2.select(['todo']).set('id', 321)
+            assert(container2.get(MyDep) === 0)
+            setTimeout(() => {
+                assert(container2.get(MyDep) === 321)
+                assert(MyDep.calledTwice)
+                assert(MyDep.secondCall.calledWith(321))
+                done()
+            }, 1)
         })
     })
 
