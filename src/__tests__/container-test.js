@@ -119,19 +119,18 @@ describe('container', () => {
 
     describe('selection', () => {
         it('should update state on next timer tick', (done) => {
-            const container2 = new Container(new NativeCursor(initialState))
             const MyDep = sinon.spy(Factory([
                 ['todo', 'id']
             ])(function _MyDep(id) {
                 return id
             }))
 
-            container2.get(MyDep)
-            assert(container2.get(MyDep) === 0)
-            container2.select(['todo']).set('id', 321)
-            assert(container2.get(MyDep) === 0)
+            container.get(MyDep)
+            assert(container.get(MyDep) === 0)
+            container.select(['todo']).set('id', 321)
+            assert(container.get(MyDep) === 0)
             setTimeout(() => {
-                assert(container2.get(MyDep) === 321)
+                assert(container.get(MyDep) === 321)
                 assert(MyDep.calledTwice)
                 assert(MyDep.secondCall.calledWith(321))
                 done()
