@@ -31,8 +31,10 @@ export default class NativeCursor extends AbstractCursor {
         } else {
             const statePart = this.get(path.slice(0, -1))
             const key = path[path.length - 1]
-            isUpdated = newState !== statePart[key]
-            statePart[key] = newState
+            if (newState !== statePart[key]) {
+                isUpdated = true
+                statePart[key] = newState
+            }
         }
 
         if (isUpdated) {
