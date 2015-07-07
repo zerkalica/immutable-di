@@ -27,7 +27,12 @@ export default class NativeCursor extends AbstractCursor {
         }
         let isUpdated = false
         if (!path.length) {
-            throw new Error('path is empty')
+            const keys = Object.keys(this._state)
+            for (let i = 0, j = keys.length; i < j; i++) {
+                delete this._state[keys[i]]
+            }
+            Object.assign(this._state, newState)
+            isUpdated = true
         } else {
             const statePart = this.get(path.slice(0, -1))
             const key = path[path.length - 1]
