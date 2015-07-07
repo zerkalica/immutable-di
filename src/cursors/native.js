@@ -25,19 +25,20 @@ export default class NativeCursor extends AbstractCursor {
         } else {
             path = [].concat(path || [])
         }
-
+        let isUpdated = false
         if (!path.length) {
-            const keys = Object.keys(this._state)
-            for (let i = 0, j = keys.length; i < j; i++) {
-                delete this._state[keys[i]]
-            }
-            Object.assign(this._state, newState)
+            throw new Error('path is empty')
         } else {
             const statePart = this.get(path.slice(0, -1))
-            statePart[path[path.length - 1]] = newState
+            const key = path[path.length - 1]
+            isUpdated = newState !== statePart[key]
+            statePart[key] = newState
         }
 
-        this._update(path)
+        if (isUpdated) {
+            this._update(path)
+        }
+
         return this
     }
 }
