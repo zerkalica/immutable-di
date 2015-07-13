@@ -116,18 +116,18 @@ export function Facet(deps, displayName) {
     })
 }
 
-export function Getter(path, displayName = 'Getter') {
+export function Getter(path, displayName) {
     function getter(container) {
         return container.select(path).get
     }
 
-    return Facet([Container], displayName)(getter)
+    return Facet([Container], displayName || 'get_' + path.join('_'))(getter)
 }
 
-export function Setter(path, displayName = 'Setter') {
+export function Setter(path, displayName) {
     function setter(container) {
         return container.select(path).set
     }
 
-    return Facet([Container], displayName)(setter)
+    return Facet([Container], displayName || 'set_' + path.join('_'))(setter)
 }

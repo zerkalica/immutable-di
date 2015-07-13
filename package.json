@@ -7,7 +7,7 @@
     "release-patch": "git checkout master && npm version patch && git push origin master --tags && npm publish",
     "release-minor": "git checkout master && npm version minor && git push origin master --tags && npm publish",
     "release-major": "git checkout master && npm version major && git push origin master --tags && npm publish",
-    "build": "babel src --out-dir=.",
+    "build": "babel src --source-maps --out-dir=.",
     "test": "mocha --compilers js:babel-core/register tests.js",
     "dev": "mocha --compilers js:babel-core/register --watch --growl tests.js",
     "dev.examples": "webpack-dev-server --config webpack.config.js --hot --inline"

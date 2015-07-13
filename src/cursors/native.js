@@ -12,7 +12,7 @@ export default class NativeCursor extends AbstractCursor {
                 obj = obj[bits[i]]
             }
         } catch (e) {
-            e.message = e.message + ': ' + bits.join('.')
+            e.message = e.message + ': ' + this._prefix.concat(bits).join('.')
             throw e
         }
 
