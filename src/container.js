@@ -71,7 +71,7 @@ export default class Container {
 
         const def = getDef(definition)
         if (!def) {
-            throw new Error('Property .__id not exist in ' + debugCtx)
+            return definition
         }
         const {id, displayName, deps, isClass, isCachedTemporary, isOptions} = def
         const cache = isCachedTemporary ? tempCache : this._cache

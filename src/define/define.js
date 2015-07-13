@@ -1,6 +1,8 @@
 import getFunctionName from '../utils/get-function-name'
 import getDef from './get'
 
+import Container from '../container'
+
 export type DependencyType = (v: any) => any
 
 export type DiDefinitionType = {
@@ -112,4 +114,20 @@ export function Facet(deps, displayName) {
         isClass: false,
         isCachedTemporary: true
     })
+}
+
+export function Getter(path, displayName = 'Getter') {
+    function getter(container) {
+        return container.selector(path).get
+    }
+
+    return Facet([Container], displayName)(getter)
+}
+
+export function Setter(path, displayName = 'Setter') {
+    function setter(container) {
+        return container.selector(path).set
+    }
+
+    return Facet([Container], displayName)(setter)
 }
