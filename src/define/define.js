@@ -118,7 +118,7 @@ export function Facet(deps, displayName) {
 
 export function Getter(path, displayName = 'Getter') {
     function getter(container) {
-        return container.selector(path).get
+        return container.select(path).get
     }
 
     return Facet([Container], displayName)(getter)
@@ -126,7 +126,7 @@ export function Getter(path, displayName = 'Getter') {
 
 export function Setter(path, displayName = 'Setter') {
     function setter(container) {
-        return container.selector(path).set
+        return container.select(path).set
     }
 
     return Facet([Container], displayName)(setter)
