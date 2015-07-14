@@ -5,13 +5,13 @@ import {Class, Facet, __pathToIdsMap} from './define'
 import getFunctionName from './utils/get-function-name'
 import getDef from './define/get'
 
-let lastId = 1
-
 @Class()
 export default class Container {
     _state: AbstractCursor
     _cache: Map<any> = {}
     _listeners: Array<DependencyType> = []
+    _setterCache = {}
+    _getterCache = {}
 
     constructor(state: AbstractCursor) {
         this.get = ::this.get
@@ -22,7 +22,6 @@ export default class Container {
         this.notify = ::this.notify
 
         this._state = state
-        this.id = lastId++
         this._state.setNotify(this.notify)
     }
 
@@ -42,6 +41,22 @@ export default class Container {
         for (let i = 0, j = listeners.length; i < j; i++) {
             this.get(listeners[i])
         }
+    }
+
+    getter(path, key) {
+        let selector = this._getterCache[key]
+        if (!selector) {
+            selector = this._getterCache[key] = this._state.select(path).get     
+        }
+        return selector
+    }
+
+    setter(path, key) {
+        let selector = this._setterCache[key]
+        if (!selector) {
+            selector = this._setterCache[key] = this._state.select(path).set     
+        }
+        return selector
     }
 
     select(path: PathType) {
