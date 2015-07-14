@@ -3,7 +3,7 @@ import AbstractCursor from './abstract'
 
 export default class NativeCursor extends AbstractCursor {
     get(path) {
-        return this._getNode(this._currentNode, path)
+        return this._getNode(this._parentNode[this._currentNodeName], path)
     }
 
     _getNode(obj, bits = []) {
@@ -26,7 +26,6 @@ export default class NativeCursor extends AbstractCursor {
         } else {
             path = [].concat(path || [])
         }
-        let isUpdated = false
         let node
         let key
         if (!path.length) {
@@ -38,11 +37,7 @@ export default class NativeCursor extends AbstractCursor {
         }
 
         if (newState !== node[key]) {
-            isUpdated = true
             node[key] = newState
-        }
-
-        if (isUpdated) {
             this._update(path)
         }
 

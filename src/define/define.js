@@ -22,9 +22,11 @@ function normalizeDeps(deps) {
         const name = names.length ? names[i] : undefined
         const dep = deps[name || i]
         const path = Array.isArray(dep) ? dep : null
+        const pathKey = path ? path.join('.') : null
         resultDeps.push({
             name,
             path,
+            pathKey,
             definition: path ? null : dep
         })
     }
@@ -119,7 +121,7 @@ export function Facet(deps, displayName) {
 export function Getter(path, displayName) {
     const key = path.join('.')
     function getter(container) {
-        return container.getter(path, key)
+        return container.select(path, key).get
     }
 
     return Facet([Container], displayName || 'get_' + path.join('_'))(getter)
@@ -128,7 +130,7 @@ export function Getter(path, displayName) {
 export function Setter(path, displayName) {
     const key = path.join('.')
     function setter(container) {
-        return container.setter(path, key)
+        return container.select(path, key).set
     }
 
     return Facet([Container], displayName || 'set_' + path.join('_'))(setter)

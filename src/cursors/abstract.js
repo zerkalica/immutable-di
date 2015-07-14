@@ -10,12 +10,11 @@ export default class AbstractCursor<State> {
         this._prefix = prefix
 
         this._parentNode = this._getNode(state, prefix.slice(0, -1))
-        this._currentNode = this._getNode(state, prefix)
         this._currentNodeName = prefix[prefix.length - 1]
+        this._currentNode = this._parentNode[this._currentNodeName]
 
         this.setNotify(notify)
         this.commit = ::this.commit
-        this.createGetter = ::this.createGetter
         this.get = ::this.get
         this.set = ::this.set
         this.select = ::this.select
@@ -40,10 +39,6 @@ export default class AbstractCursor<State> {
         }
         this.__notify(this._affectedPaths)
         this._affectedPaths = []
-    }
-
-    createGetter() {
-        return ::this.get
     }
 
     select(path: PathType = []): AbstractCursor<State> {

@@ -10,8 +10,7 @@ export default class Container {
     _state: AbstractCursor
     _cache: Map<any> = {}
     _listeners: Array<DependencyType> = []
-    _setterCache = {}
-    _getterCache = {}
+    _selectorCache = {}
 
     constructor(state: AbstractCursor) {
         this.get = ::this.get
@@ -43,24 +42,12 @@ export default class Container {
         }
     }
 
-    getter(path, key) {
-        let selector = this._getterCache[key]
+    select(path, key) {
+        let selector = this._selectorCache[key]
         if (!selector) {
-            selector = this._getterCache[key] = this._state.select(path).get     
+            selector = this._selectorCache[key] = this._state.select(path)     
         }
         return selector
-    }
-
-    setter(path, key) {
-        let selector = this._setterCache[key]
-        if (!selector) {
-            selector = this._setterCache[key] = this._state.select(path).set     
-        }
-        return selector
-    }
-
-    select(path: PathType) {
-        return this._state.select(path)
     }
 
     mount(definition: DependencyType) {
@@ -82,7 +69,7 @@ export default class Container {
         this.mount(definition)
     }
 
-    _get(definition: DependencyType, tempCache: object, getState: (path: PathType) => any, debugCtx: Array<string>): any {
+    _get(definition: DependencyType, tempCache: object, debugCtx: Array<string>): any {
         if (this instanceof definition) {
             return this
         }
@@ -100,8 +87,8 @@ export default class Container {
             for (let i = 0, j = deps.length; i < j; i++) {
                 const dep = deps[i]
                 const value = dep.path ?
-                    getState(dep.path) :
-                    this._get(dep.definition, tempCache, getState, debugCtx.concat([displayName, i]))
+                    this.select(dep.path, dep.pathKey).get() :
+                    this._get(dep.definition, tempCache, debugCtx.concat([displayName, i]))
 
                 if(isOptions) {
                     args[dep.name] = value
@@ -125,6 +112,6 @@ export default class Container {
             throw new Error('Getter is not a definition')
         }
 
-        return this._get(definition, {}, this._state.createGetter(), [])
+        return this._get(definition, {}, [])
     }
 }
