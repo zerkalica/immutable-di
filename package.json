@@ -19,6 +19,9 @@
     "url": "http://github.com/zerkalica/immutable-di.git"
   },
   "files": [
+    "container.map",
+    "container.js",
+    "index.map",
     "index.js",
     "container.js",
     "cursors",
