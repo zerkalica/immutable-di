@@ -5,6 +5,8 @@ import {Class, Facet, __pathToIdsMap} from './define'
 import getFunctionName from './utils/get-function-name'
 import getDef from './define/get'
 
+let lastId = 1
+
 @Class()
 export default class Container {
     _state: AbstractCursor
@@ -20,6 +22,7 @@ export default class Container {
         this.notify = ::this.notify
 
         this._state = state
+        this.id = lastId++
         this._state.setNotify(this.notify)
     }
 

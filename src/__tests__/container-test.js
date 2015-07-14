@@ -164,6 +164,16 @@ describe('container', () => {
             assert(MyDep.notCalled)
         })
 
+        it('should update listener once', () => {
+            const MyDep = sinon.spy()
+
+            container.once([['todo', 'id']], MyDep)
+            container.select(['todo']).set('id', 321).commit()
+            container.select(['todo']).set('id', 432).commit()
+            assert(MyDep.calledOnce)
+            assert(MyDep.calledWith(321))
+        })
+
         it('should not update unmounted listener', () => {
             const MyDep = sinon.spy(Factory([
                 ['todo', 'id']

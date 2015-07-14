@@ -117,16 +117,18 @@ export function Facet(deps, displayName) {
 }
 
 export function Getter(path, displayName) {
+    let cached = {}
     function getter(container) {
-        return container.select(path).get
+        return cached[container.id] || (cached[container.id] = container.select(path).get)
     }
 
     return Facet([Container], displayName || 'get_' + path.join('_'))(getter)
 }
 
 export function Setter(path, displayName) {
+    let cached = {}
     function setter(container) {
-        return container.select(path).set
+        return cached[container.id] || (cached[container.id] = container.select(path).set)
     }
 
     return Facet([Container], displayName || 'set_' + path.join('_'))(setter)
