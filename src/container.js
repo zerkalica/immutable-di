@@ -45,7 +45,8 @@ export default class Container {
     select(path, key) {
         let selector = this._selectorCache[key]
         if (!selector) {
-            selector = this._selectorCache[key] = this._state.select(path)     
+            // this._selectorCache[key]
+            selector = this._state.select(path)
         }
         return selector
     }

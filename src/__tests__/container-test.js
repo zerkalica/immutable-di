@@ -126,6 +126,21 @@ describe('container', () => {
             assert.throws(() => container.select(['todo', 'id2', 'id']), /read.*undefined/)
         })
 
+        it('should track parent changes', () => {
+            const MyDep = sinon.spy(Factory([
+                ['todo', 'id']
+            ])(function _MyDep(id) {
+                return id
+            }))
+
+            container.get(MyDep)
+            assert(container.get(MyDep) === 0)
+            container.select(['todo', 'id']).set(321).commit()
+            assert(container.get(MyDep) === 321)
+            container.select('todo').set({id : 456, todos: []}).commit()
+            assert(container.get(MyDep) === 456)
+        })
+
         it('should update state on next timer tick', (done) => {
             const MyDep = sinon.spy(Factory([
                 ['todo', 'id']

@@ -190,7 +190,7 @@ describe('container', function () {
 
             var TestFake = _sinon2['default'].spy(Test);
             container.get(TestFake);
-            container.select(['todo']).set('id', 321).commit();
+            container.select(['todo', 'id']).set(321).commit();
             container.get(TestFake);
             container.get(TestFake);
             (0, _powerAssert2['default'])(_powerAssert2['default']._expr(_powerAssert2['default']._capt(_powerAssert2['default']._capt(TestFake, 'arguments/0/object').calledTwice, 'arguments/0'), {
@@ -212,6 +212,20 @@ describe('container', function () {
     });
 
     describe('selection', function () {
+        it('select should return instance of Cursor', function () {
+            (0, _powerAssert2['default'])(_powerAssert2['default']._expr(_powerAssert2['default']._capt(_powerAssert2['default']._capt(_powerAssert2['default']._capt(container, 'arguments/0/left/callee/object').select(_powerAssert2['default']._capt(['todo', 'id'], 'arguments/0/left/arguments/0')), 'arguments/0/left') instanceof _powerAssert2['default']._capt(_cursorsNative2['default'], 'arguments/0/right'), 'arguments/0'), {
+                content: 'assert(container.select([\'todo\',\'id\']) instanceof NativeCursor)',
+                filepath: 'src/__tests__/container-test.js',
+                line: 122
+            }));
+        });
+
+        it('should throw error if node does not exists in the middle of path', function () {
+            _powerAssert2['default'].throws(function () {
+                return container.select(['todo', 'id2', 'id']);
+            }, /read.*undefined/);
+        });
+
         it('should update state on next timer tick', function (done) {
             var MyDep = _sinon2['default'].spy((0, _define.Factory)([['todo', 'id']])(function _MyDep(id) {
                 return id;
@@ -221,29 +235,29 @@ describe('container', function () {
             (0, _powerAssert2['default'])(_powerAssert2['default']._expr(_powerAssert2['default']._capt(_powerAssert2['default']._capt(_powerAssert2['default']._capt(container, 'arguments/0/left/callee/object').get(_powerAssert2['default']._capt(MyDep, 'arguments/0/left/arguments/0')), 'arguments/0/left') === 0, 'arguments/0'), {
                 content: 'assert(container.get(MyDep) === 0)',
                 filepath: 'src/__tests__/container-test.js',
-                line: 129
+                line: 137
             }));
-            container.select(['todo']).set('id', 321);
+            container.select(['todo', 'id']).set(321);
             (0, _powerAssert2['default'])(_powerAssert2['default']._expr(_powerAssert2['default']._capt(_powerAssert2['default']._capt(_powerAssert2['default']._capt(container, 'arguments/0/left/callee/object').get(_powerAssert2['default']._capt(MyDep, 'arguments/0/left/arguments/0')), 'arguments/0/left') === 0, 'arguments/0'), {
                 content: 'assert(container.get(MyDep) === 0)',
                 filepath: 'src/__tests__/container-test.js',
-                line: 131
+                line: 139
             }));
             setTimeout(function () {
                 (0, _powerAssert2['default'])(_powerAssert2['default']._expr(_powerAssert2['default']._capt(_powerAssert2['default']._capt(_powerAssert2['default']._capt(container, 'arguments/0/left/callee/object').get(_powerAssert2['default']._capt(MyDep, 'arguments/0/left/arguments/0')), 'arguments/0/left') === 321, 'arguments/0'), {
                     content: 'assert(container.get(MyDep) === 321)',
                     filepath: 'src/__tests__/container-test.js',
-                    line: 133
+                    line: 141
                 }));
                 (0, _powerAssert2['default'])(_powerAssert2['default']._expr(_powerAssert2['default']._capt(_powerAssert2['default']._capt(MyDep, 'arguments/0/object').calledTwice, 'arguments/0'), {
                     content: 'assert(MyDep.calledTwice)',
                     filepath: 'src/__tests__/container-test.js',
-                    line: 134
+                    line: 142
                 }));
                 (0, _powerAssert2['default'])(_powerAssert2['default']._expr(_powerAssert2['default']._capt(_powerAssert2['default']._capt(_powerAssert2['default']._capt(MyDep, 'arguments/0/callee/object/object').secondCall, 'arguments/0/callee/object').calledWith(321), 'arguments/0'), {
                     content: 'assert(MyDep.secondCall.calledWith(321))',
                     filepath: 'src/__tests__/container-test.js',
-                    line: 135
+                    line: 143
                 }));
                 done();
             }, 1);
@@ -256,14 +270,14 @@ describe('container', function () {
                 (0, _powerAssert2['default'])(_powerAssert2['default']._expr(_powerAssert2['default']._capt(_powerAssert2['default']._capt(id, 'arguments/0/left') === 321, 'arguments/0'), {
                     content: 'assert(id === 321)',
                     filepath: 'src/__tests__/container-test.js',
-                    line: 146
+                    line: 154
                 }));
                 done();
                 return id;
             }));
 
             container.mount(MyDep);
-            container.select(['todo']).set('id', 321);
+            container.select(['todo', 'id']).set(321);
         });
 
         it('should not update listener with another path', function () {
@@ -272,11 +286,11 @@ describe('container', function () {
             }));
 
             container.mount(MyDep);
-            container.select(['todo']).set('id2', 321).commit();
+            container.select(['todo', 'id2']).set(321).commit();
             (0, _powerAssert2['default'])(_powerAssert2['default']._expr(_powerAssert2['default']._capt(_powerAssert2['default']._capt(MyDep, 'arguments/0/object').notCalled, 'arguments/0'), {
                 content: 'assert(MyDep.notCalled)',
                 filepath: 'src/__tests__/container-test.js',
-                line: 164
+                line: 172
             }));
         });
 
@@ -284,17 +298,17 @@ describe('container', function () {
             var MyDep = _sinon2['default'].spy();
 
             container.once([['todo', 'id']], MyDep);
-            container.select(['todo']).set('id', 321).commit();
-            container.select(['todo']).set('id', 432).commit();
+            container.select(['todo', 'id']).set(321).commit();
+            container.select(['todo', 'id']).set(432).commit();
             (0, _powerAssert2['default'])(_powerAssert2['default']._expr(_powerAssert2['default']._capt(_powerAssert2['default']._capt(MyDep, 'arguments/0/object').calledOnce, 'arguments/0'), {
                 content: 'assert(MyDep.calledOnce)',
                 filepath: 'src/__tests__/container-test.js',
-                line: 173
+                line: 181
             }));
             (0, _powerAssert2['default'])(_powerAssert2['default']._expr(_powerAssert2['default']._capt(_powerAssert2['default']._capt(MyDep, 'arguments/0/callee/object').calledWith(321), 'arguments/0'), {
                 content: 'assert(MyDep.calledWith(321))',
                 filepath: 'src/__tests__/container-test.js',
-                line: 174
+                line: 182
             }));
         });
 
@@ -303,7 +317,7 @@ describe('container', function () {
                 (0, _powerAssert2['default'])(_powerAssert2['default']._expr(_powerAssert2['default']._capt(_powerAssert2['default']._capt(id, 'arguments/0/left') === 321, 'arguments/0'), {
                     content: 'assert(id === 321)',
                     filepath: 'src/__tests__/container-test.js',
-                    line: 181
+                    line: 189
                 }));
                 done();
                 return id;
@@ -311,11 +325,11 @@ describe('container', function () {
 
             container.mount(MyDep);
             container.unmount(MyDep);
-            container.select(['todo']).set('id', 321).commit();
+            container.select(['todo', 'id']).set(321).commit();
             (0, _powerAssert2['default'])(_powerAssert2['default']._expr(_powerAssert2['default']._capt(_powerAssert2['default']._capt(MyDep, 'arguments/0/object').notCalled, 'arguments/0'), {
                 content: 'assert(MyDep.notCalled)',
                 filepath: 'src/__tests__/container-test.js',
-                line: 189
+                line: 197
             }));
         });
     });
