@@ -280,12 +280,30 @@ describe('container', function () {
             }));
         });
 
+        it('should update listener once', function () {
+            var MyDep = _sinon2['default'].spy();
+
+            container.once([['todo', 'id']], MyDep);
+            container.select(['todo']).set('id', 321).commit();
+            container.select(['todo']).set('id', 432).commit();
+            (0, _powerAssert2['default'])(_powerAssert2['default']._expr(_powerAssert2['default']._capt(_powerAssert2['default']._capt(MyDep, 'arguments/0/object').calledOnce, 'arguments/0'), {
+                content: 'assert(MyDep.calledOnce)',
+                filepath: 'src/__tests__/container-test.js',
+                line: 173
+            }));
+            (0, _powerAssert2['default'])(_powerAssert2['default']._expr(_powerAssert2['default']._capt(_powerAssert2['default']._capt(MyDep, 'arguments/0/callee/object').calledWith(321), 'arguments/0'), {
+                content: 'assert(MyDep.calledWith(321))',
+                filepath: 'src/__tests__/container-test.js',
+                line: 174
+            }));
+        });
+
         it('should not update unmounted listener', function () {
             var MyDep = _sinon2['default'].spy((0, _define.Factory)([['todo', 'id']])(function _MyDep(id) {
                 (0, _powerAssert2['default'])(_powerAssert2['default']._expr(_powerAssert2['default']._capt(_powerAssert2['default']._capt(id, 'arguments/0/left') === 321, 'arguments/0'), {
                     content: 'assert(id === 321)',
                     filepath: 'src/__tests__/container-test.js',
-                    line: 171
+                    line: 181
                 }));
                 done();
                 return id;
@@ -297,7 +315,7 @@ describe('container', function () {
             (0, _powerAssert2['default'])(_powerAssert2['default']._expr(_powerAssert2['default']._capt(_powerAssert2['default']._capt(MyDep, 'arguments/0/object').notCalled, 'arguments/0'), {
                 content: 'assert(MyDep.notCalled)',
                 filepath: 'src/__tests__/container-test.js',
-                line: 179
+                line: 189
             }));
         });
     });

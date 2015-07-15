@@ -108,7 +108,7 @@ describe('container', () => {
             class Test {}
             const TestFake = sinon.spy(Test)
             container.get(TestFake)
-            container.select(['todo']).set('id', 321).commit()
+            container.select(['todo', 'id']).set(321).commit()
             container.get(TestFake)
             container.get(TestFake)
             assert(TestFake.calledTwice)
@@ -118,6 +118,14 @@ describe('container', () => {
     })
 
     describe('selection', () => {
+        it('select should return instance of Cursor', () => {
+            assert(container.select(['todo', 'id']) instanceof NativeCursor)
+        })
+
+        it('should throw error if node does not exists in the middle of path', () => {
+            assert.throws(() => container.select(['todo', 'id2', 'id']), /read.*undefined/)
+        })
+
         it('should update state on next timer tick', (done) => {
             const MyDep = sinon.spy(Factory([
                 ['todo', 'id']
@@ -127,7 +135,7 @@ describe('container', () => {
 
             container.get(MyDep)
             assert(container.get(MyDep) === 0)
-            container.select(['todo']).set('id', 321)
+            container.select(['todo', 'id']).set(321)
             assert(container.get(MyDep) === 0)
             setTimeout(() => {
                 assert(container.get(MyDep) === 321)
@@ -149,7 +157,7 @@ describe('container', () => {
             }))
 
             container.mount(MyDep)
-            container.select(['todo']).set('id', 321)
+            container.select(['todo', 'id']).set(321)
         })
 
         it('should not update listener with another path', () => {
@@ -160,7 +168,7 @@ describe('container', () => {
             }))
 
             container.mount(MyDep)
-            container.select(['todo']).set('id2', 321).commit()
+            container.select(['todo', 'id2']).set(321).commit()
             assert(MyDep.notCalled)
         })
 
@@ -168,8 +176,8 @@ describe('container', () => {
             const MyDep = sinon.spy()
 
             container.once([['todo', 'id']], MyDep)
-            container.select(['todo']).set('id', 321).commit()
-            container.select(['todo']).set('id', 432).commit()
+            container.select(['todo', 'id']).set(321).commit()
+            container.select(['todo', 'id']).set(432).commit()
             assert(MyDep.calledOnce)
             assert(MyDep.calledWith(321))
         })
@@ -185,7 +193,7 @@ describe('container', () => {
 
             container.mount(MyDep)
             container.unmount(MyDep)
-            container.select(['todo']).set('id', 321).commit()
+            container.select(['todo', 'id']).set(321).commit()
             assert(MyDep.notCalled)
         })
     })

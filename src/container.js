@@ -18,10 +18,10 @@ export default class Container {
         this.once = ::this.once
         this.mount = ::this.mount
         this.unmount = ::this.unmount
-        this.notify = ::this.notify
+        this._notify = ::this._notify
 
         this._state = state
-        this._state.setNotify(this.notify)
+        this._state.setNotify(this._notify)
     }
 
     _clear(path: PathType) {
@@ -31,7 +31,7 @@ export default class Container {
         }
     }
 
-    notify(paths: Array<PathType>) {
+    _notify(paths: Array<PathType>) {
         for (let i = 0; i < paths.length; i++) {
             this._clear(paths[i])
         }

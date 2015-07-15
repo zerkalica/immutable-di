@@ -19,6 +19,28 @@ export default class NativeCursor extends AbstractCursor {
         return obj
     }
 
+    apply(path: PathType, fn: (v: State) => State) {
+        if (fn === undefined) {
+            fn = path
+            path = []
+        } else {
+            path = [].concat(path || [])
+        }
+
+        let node = this._parentNode
+        let key = this._currentNodeName
+        if (path.length) {
+            node = this._getNode(node[key], path.slice(0, -1))
+            key = path[path.length - 1]
+        }
+        const newState = fn(node[key])
+
+        if (newState !== node[key]) {
+            node[key] = newState
+            this._update(path)
+        }
+    }
+
     set(path, newState) {
         if (newState === undefined) {
             newState = path
