@@ -8,11 +8,12 @@ export default class AbstractCursor<State> {
     constructor(state = {}, {prefix, notify} = {prefix: [], notify: null}) {
         this._state = state
         this._prefix = prefix
-
-        this._parentNode = this._getNode(state, prefix.slice(0, -1))
-        this._currentNodeName = prefix[prefix.length - 1]
-        this._currentNode = this._parentNode[this._currentNodeName]
-
+        this._cnName = prefix[prefix.length - 1]
+        ['s'].concat(prefix) 
+        this._parentSelector = new Function('s', 'return s' + 
+            (prefix.length ? '.' + prefix.slice(0, -1).join('.') : ''))
+        this._selector = new Function('s', 'return s' +
+            (prefix.length ? '.' + prefix.join('.') : ''))
         this.setNotify(notify)
         this.commit = ::this.commit
         this.get = ::this.get
@@ -25,8 +26,8 @@ export default class AbstractCursor<State> {
         this.__notify = notify
     }
 
-    _update(path: PathType) {
-        this._affectedPaths.push(this._prefix.concat(path))
+    _update() {
+        this._affectedPaths = this._prefix
         if (!this._timerId) {
             this._timerId = setTimeout(this.commit, 0)
         }
@@ -37,7 +38,7 @@ export default class AbstractCursor<State> {
             clearTimeout(this._timerId)
             this._timerId = null
         }
-        this.__notify(this._affectedPaths)
+        this.__notify([this._affectedPaths])
         this._affectedPaths = []
     }
 
@@ -48,22 +49,15 @@ export default class AbstractCursor<State> {
         })
     }
 
-    get(path: PathType): State {
+    get(): State {
         throw new Error('implement')
     }
 
-    set(path: PathType, newState: State) {
+    set(newState: State) {
         throw new Error('implement')
     }
 
-    apply(path: PathType, fn: (v: State) => State) {
-        if (fn === undefined) {
-            fn = path
-            path = []
-        } else {
-            path = [].concat(path || [])
-        }
-
-        this.set(path, fn(this.get(path)))
+    apply(fn: (v: State) => State) {
+        this.set(fn(this.get()))
     }
 }
