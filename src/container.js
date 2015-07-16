@@ -27,7 +27,14 @@ export default class Container {
     _clear(path: PathType) {
         const idsMap = __pathToIdsMap[path.toString()] || []
         for (let i = 0, j = idsMap.length; i < j; i++) {
-            delete this._cache[idsMap[i]]
+            const key = idsMap[i]
+            const instance = this._cache[key]
+            if (instance !== undefined) {
+                if (typeof instance === 'object' && instance.destruct) {
+                    instance.destruct()
+                }
+                delete this._cache[key]
+            }
         }
     }
 
