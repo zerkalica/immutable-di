@@ -3,15 +3,13 @@ import AbstractCursor from './abstract'
 
 export default class NativeCursor extends AbstractCursor {
     get() {
-        return this._selector(this._state)
+        return this._selector(this._state)[this._cnName]
     }
 
     set(newState) {
-        const node = this._parentSelector(this._state)
-        const key = this._cnName
-
-        if (newState !== node[key]) {
-            node[key] = newState
+        const node = this._selector(this._state)
+        if (newState !== node[this._cnName]) {
+            node[this._cnName] = newState
             this._update()
         }
 

@@ -9,11 +9,7 @@ export default class AbstractCursor<State> {
         this._state = state
         this._prefix = prefix
         this._cnName = prefix[prefix.length - 1]
-        ['s'].concat(prefix) 
-        this._parentSelector = new Function('s', 'return s' + 
-            (prefix.length ? '.' + prefix.slice(0, -1).join('.') : ''))
-        this._selector = new Function('s', 'return s' +
-            (prefix.length ? '.' + prefix.join('.') : ''))
+        this._selector = new Function('s', 'return ' + ['s'].concat(prefix).slice(0, -1).join('.'))
         this.setNotify(notify)
         this.commit = ::this.commit
         this.get = ::this.get

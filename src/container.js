@@ -42,7 +42,11 @@ export default class Container {
         }
     }
 
-    select(path, key) {
+    select(path: PathType, key: ?string) {
+        path = [].concat(path)
+        if (!key) {
+            key = path.join('.')
+        }
         let selector = this._selectorCache[key]
         if (!selector) {
             selector = this._selectorCache[key] = this._state.select(path)
