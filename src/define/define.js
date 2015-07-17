@@ -135,3 +135,11 @@ export function Setter(path, displayName) {
 
     return Facet([Container], displayName || 'set_' + path.join('_'))(setter)
 }
+
+export function Def(data) {
+    function def() {
+        return data
+    }
+
+    return Facet([], 'def_' + JSON.stringify(data))(def)
+}
