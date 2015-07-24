@@ -222,7 +222,7 @@ describe('container', function () {
 
         it('should throw error if node does not exists in the middle of path', function () {
             _powerAssert2['default'].throws(function () {
-                return container.select(['todo', 'id2', 'id']);
+                return container.select(['todo', 'id2', 'id']).get();
             }, /read.*undefined/);
         });
 

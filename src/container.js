@@ -1,11 +1,10 @@
 import type {AbstractCursor, PathType} from './cursors/abstract'
 import type {DiDefinitionType, DependencyType} from './define'
 
-import {Class, Facet, __pathToIdsMap} from './define'
+import {Facet, __pathToIdsMap, __Container} from './define'
 import getFunctionName from './utils/get-function-name'
 import getDef from './define/get'
 
-@Class()
 export default class Container {
     _state: AbstractCursor
     _cache: Map<any> = {}
@@ -74,7 +73,7 @@ export default class Container {
     }
 
     _get(definition: DependencyType, tempCache: object, debugCtx: Array<string>): any {
-        if (this instanceof definition) {
+        if (definition === __Container) {
             return this
         }
 

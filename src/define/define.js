@@ -1,8 +1,6 @@
 import getFunctionName from '../utils/get-function-name'
 import getDef from './get'
 
-import Container from '../container'
-
 export type DependencyType = (v: any) => any
 
 export type DiDefinitionType = {
@@ -118,13 +116,15 @@ export function Facet(deps, displayName) {
     })
 }
 
+export const __Container = Facet([], 'Container')(p => p)
+
 export function Getter(path, displayName) {
     const key = path.join('.')
     function getter(container) {
         return container.select(path, key).get
     }
 
-    return Facet([Container], displayName || 'get_' + path.join('_'))(getter)
+    return Facet([__Container], displayName || 'get#' + key)(getter)
 }
 
 export function Setter(path, displayName) {
@@ -133,7 +133,7 @@ export function Setter(path, displayName) {
         return container.select(path, key).set
     }
 
-    return Facet([Container], displayName || 'set_' + path.join('_'))(setter)
+    return Facet([__Container], displayName || 'set#' + key)(setter)
 }
 
 export function Def(data) {

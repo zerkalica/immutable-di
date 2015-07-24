@@ -2,7 +2,7 @@
 /* eslint-disable no-var, no-process-env */
 var path = require('path');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
-var exampleDir = path.join(__dirname, 'examples', 'flux');
+var exampleDir = path.resolve(__dirname, '..', 'examples', 'flux');
 var webpack = require('webpack')
 
 const DEBUG = 'immutable-di:*'
@@ -12,7 +12,7 @@ module.exports = {
     debug: true,
     devtool: 'source-map',
     output: {
-        path: path.join(__dirname, 'build'),
+        path: path.resolve(__dirname, '..', 'build'),
         filename: 'app.js'
     },
     entry: path.join(exampleDir, 'index.js'),
@@ -27,7 +27,7 @@ module.exports = {
     },
     resolve: {
         alias: {
-            'immutable-di': path.join(__dirname, 'src')
+            'immutable-di': path.resolve(__dirname, '..', 'src')
         }
     },
     plugins: [

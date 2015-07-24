@@ -1,7 +1,7 @@
 import assert from 'power-assert'
 import Container from '../container'
 import NativeCursor from '../cursors/native'
-import {Factory, Class, Facet} from '../define'
+import {Factory, Class, Facet, Getter, Setter} from '../define'
 import sinon from 'sinon'
 
 describe('container', () => {
@@ -158,6 +158,32 @@ describe('container', () => {
                 assert(MyDep.secondCall.calledWith(321))
                 done()
             }, 1)
+        })
+    })
+
+    describe('setters/getters', () => {
+        it('should get state in run-time', () => {
+            const MyDep = sinon.spy(Factory([
+                Getter(['todo', 'id'])
+            ])(function _MyDep(getId) {
+                return getId
+            }))
+
+            container.get(MyDep)
+            assert(container.get(MyDep)() === 0)
+            container.select(['todo', 'id']).set(321).commit()
+            assert(container.get(MyDep)() === 321)
+        })
+
+        it('should set state in run-time', () => {
+            const MyDep = sinon.spy(Factory([
+                Setter(['todo', 'id'])
+            ])(function _MyDep(setId) {
+                return (id) => setId(id).commit()
+            }))
+            assert(container.select(['todo', 'id']).get() === 0)
+            container.get(MyDep)(321)
+            assert(container.select(['todo', 'id']).get() === 321)
         })
     })
 
