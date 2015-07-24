@@ -289,13 +289,53 @@ describe('container', function () {
         });
     });
 
+    describe('setters/getters', function () {
+        it('should get state in run-time', function () {
+            var MyDep = _sinon2['default'].spy((0, _define.Factory)([(0, _define.Getter)(['todo', 'id'])])(function _MyDep(getId) {
+                return getId;
+            }));
+
+            container.get(MyDep);
+            (0, _powerAssert2['default'])(_powerAssert2['default']._expr(_powerAssert2['default']._capt(_powerAssert2['default']._capt(_powerAssert2['default']._capt(container, 'arguments/0/left/callee/callee/object').get(_powerAssert2['default']._capt(MyDep, 'arguments/0/left/callee/arguments/0'))(), 'arguments/0/left') === 0, 'arguments/0'), {
+                content: 'assert(container.get(MyDep)() === 0)',
+                filepath: 'src/__tests__/container-test.js',
+                line: 173
+            }));
+            container.select(['todo', 'id']).set(321).commit();
+            (0, _powerAssert2['default'])(_powerAssert2['default']._expr(_powerAssert2['default']._capt(_powerAssert2['default']._capt(_powerAssert2['default']._capt(container, 'arguments/0/left/callee/callee/object').get(_powerAssert2['default']._capt(MyDep, 'arguments/0/left/callee/arguments/0'))(), 'arguments/0/left') === 321, 'arguments/0'), {
+                content: 'assert(container.get(MyDep)() === 321)',
+                filepath: 'src/__tests__/container-test.js',
+                line: 175
+            }));
+        });
+
+        it('should set state in run-time', function () {
+            var MyDep = _sinon2['default'].spy((0, _define.Factory)([(0, _define.Setter)(['todo', 'id'])])(function _MyDep(setId) {
+                return function (id) {
+                    return setId(id).commit();
+                };
+            }));
+            (0, _powerAssert2['default'])(_powerAssert2['default']._expr(_powerAssert2['default']._capt(_powerAssert2['default']._capt(_powerAssert2['default']._capt(_powerAssert2['default']._capt(container, 'arguments/0/left/callee/object/callee/object').select(_powerAssert2['default']._capt(['todo', 'id'], 'arguments/0/left/callee/object/arguments/0')), 'arguments/0/left/callee/object').get(), 'arguments/0/left') === 0, 'arguments/0'), {
+                content: 'assert(container.select([\'todo\',\'id\']).get() === 0)',
+                filepath: 'src/__tests__/container-test.js',
+                line: 184
+            }));
+            container.get(MyDep)(321);
+            (0, _powerAssert2['default'])(_powerAssert2['default']._expr(_powerAssert2['default']._capt(_powerAssert2['default']._capt(_powerAssert2['default']._capt(_powerAssert2['default']._capt(container, 'arguments/0/left/callee/object/callee/object').select(_powerAssert2['default']._capt(['todo', 'id'], 'arguments/0/left/callee/object/arguments/0')), 'arguments/0/left/callee/object').get(), 'arguments/0/left') === 321, 'arguments/0'), {
+                content: 'assert(container.select([\'todo\',\'id\']).get() === 321)',
+                filepath: 'src/__tests__/container-test.js',
+                line: 186
+            }));
+        });
+    });
+
     describe('events', function () {
         it('should update mounted listener', function (done) {
             var MyDep = _sinon2['default'].spy((0, _define.Factory)([['todo', 'id']])(function _MyDep(id) {
                 (0, _powerAssert2['default'])(_powerAssert2['default']._expr(_powerAssert2['default']._capt(_powerAssert2['default']._capt(id, 'arguments/0/left') === 321, 'arguments/0'), {
                     content: 'assert(id === 321)',
                     filepath: 'src/__tests__/container-test.js',
-                    line: 169
+                    line: 195
                 }));
                 done();
                 return id;
@@ -315,7 +355,7 @@ describe('container', function () {
             (0, _powerAssert2['default'])(_powerAssert2['default']._expr(_powerAssert2['default']._capt(_powerAssert2['default']._capt(MyDep, 'arguments/0/object').notCalled, 'arguments/0'), {
                 content: 'assert(MyDep.notCalled)',
                 filepath: 'src/__tests__/container-test.js',
-                line: 187
+                line: 213
             }));
         });
 
@@ -328,12 +368,12 @@ describe('container', function () {
             (0, _powerAssert2['default'])(_powerAssert2['default']._expr(_powerAssert2['default']._capt(_powerAssert2['default']._capt(MyDep, 'arguments/0/object').calledOnce, 'arguments/0'), {
                 content: 'assert(MyDep.calledOnce)',
                 filepath: 'src/__tests__/container-test.js',
-                line: 196
+                line: 222
             }));
             (0, _powerAssert2['default'])(_powerAssert2['default']._expr(_powerAssert2['default']._capt(_powerAssert2['default']._capt(MyDep, 'arguments/0/callee/object').calledWith(321), 'arguments/0'), {
                 content: 'assert(MyDep.calledWith(321))',
                 filepath: 'src/__tests__/container-test.js',
-                line: 197
+                line: 223
             }));
         });
 
@@ -342,7 +382,7 @@ describe('container', function () {
                 (0, _powerAssert2['default'])(_powerAssert2['default']._expr(_powerAssert2['default']._capt(_powerAssert2['default']._capt(id, 'arguments/0/left') === 321, 'arguments/0'), {
                     content: 'assert(id === 321)',
                     filepath: 'src/__tests__/container-test.js',
-                    line: 204
+                    line: 230
                 }));
                 done();
                 return id;
@@ -354,7 +394,7 @@ describe('container', function () {
             (0, _powerAssert2['default'])(_powerAssert2['default']._expr(_powerAssert2['default']._capt(_powerAssert2['default']._capt(MyDep, 'arguments/0/object').notCalled, 'arguments/0'), {
                 content: 'assert(MyDep.notCalled)',
                 filepath: 'src/__tests__/container-test.js',
-                line: 212
+                line: 238
             }));
         });
     });
