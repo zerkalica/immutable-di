@@ -4,10 +4,10 @@
   "description": "Simple, promise-based dependency injection container with some state handling functions (for facebook flux-like state-management)",
   "scripts": {
     "postinstall": "cp -f conf/git-hooks/* .git/hooks || exit 0",
-    "prepublish": "npm run lint && npm run test",
+    "prepublish": "npm run lint && npm run test && npm run build",
     "pre-commit": "npm run lint",
     "update": "npm-check-updates -u",
-    "pull": "git checkout master && git pull origin master && npm run build",
+    "pull": "git checkout master && git pull origin master",
     "push": "git push origin master --tags && npm publish",
     "release-patch": "npm run pull && npm version patch && npm run push",
     "release-minor": "npm run pull && npm version minor && npm run push",
