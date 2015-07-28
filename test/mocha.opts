@@ -1,0 +1,4 @@
+--timeout 5000
+--compilers js:babel/register
+--scan src/**/__tests__/*.js
+test/tests.js
