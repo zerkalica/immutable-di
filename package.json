@@ -15,7 +15,7 @@
     "release-patch": "npm run pull && npm version patch && npm run push",
     "release-minor": "npm run pull && npm version minor && npm run push",
     "release-major": "npm run pull && npm version major && npm run push",
-    "clean": "rm -rf cursors define react utils __tests__ container.js index.js *.map",
+    "clean": "rm -rf cursors define react utils __tests__ container.js index.js *.map build",
     "build": "npm run clean && babel src --source-maps --out-dir .",
     "prod": "npm run build -- --production",
     "dev": "npm run build -- --watch",
@@ -32,11 +32,7 @@
     "url": "http://github.com/zerkalica/immutable-di.git"
   },
   "files": [
-    "container.map",
-    "container.js",
-    "index.map",
-    "index.js",
-    "container.js",
+    "*.map",
     "cursors",
     "define",
     "react",
