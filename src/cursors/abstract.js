@@ -4,12 +4,18 @@ export default class AbstractCursor<State> {
     _timerId: number = null
     _affectedPaths: Array<PathType> = []
     __notify: ?(paths: Array<PathType>) => void = null
+    _selector = null
+    _cnName = null
 
     constructor(state = {}, {prefix, notify} = {prefix: [], notify: null}) {
         this._state = state
         this._prefix = prefix
-        this._cnName = prefix[prefix.length - 1]
-        this._selector = new Function('s', 'return ' + ['s'].concat(prefix).slice(0, -1).join('.'))
+        if (prefix.length) {
+            this._cnName = prefix[prefix.length - 1]
+            /* eslint-disable no-new-func */
+            this._selector = new Function('s', 'return ' + ['s'].concat(prefix).slice(0, -1).join('.'))
+            /* eslint-enable no-new-func */
+        }
         this.setNotify(notify)
         this.commit = ::this.commit
         this.get = ::this.get
