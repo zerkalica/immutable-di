@@ -18,7 +18,7 @@ import {Facet, Factory, Class} from 'immutable-di/define'
 Factory([A, B])(C) // resolve functions A, B and pass them as arguments to C
 Factory({a: A, b: B})(C) // resolve functions A, B and pass them as object {a, b} to C
 
-Facet - same as Factory, but do not cache factory return value
+//Facet - same as Factory, but do not cache factory return value
 
 // For classes:
 @Class([A, B])
