@@ -9,6 +9,63 @@ Simple, dependency injection container with some state handling functions.
 * Tests: `npm test`
 * Examples: `npm run dev.examples`
 
+##Why not *-flux?
+
+
+##Usecases
+
+##React all-in example
+```js
+import {default as React, Component} from 'react';
+import {Getter, Facet, Factory, Setter} from 'immutable-di/define'
+import root from 'immutable-di/react/root'
+import statefull from 'immutable-di/react/statefull'
+import Container from 'immutable-di'
+import NativeCursor from 'immutable-di/cursors/native'
+
+
+const container = new Container(new NativeCursor({
+  tis: {
+    a: 1,
+    b: 2
+  }
+}));
+
+var abbaFacet = Facet({
+  a: ['tis', 'a']
+})(function bloomyFacet({a}) {
+  return a + 10;
+})
+
+
+var ChangeAction = Factory({
+  setA: Setter(['tis', 'a'])
+})(function ({setA}) {
+  return function (num) {
+    setA(num);
+  }
+});
+
+@root
+@statefull({
+    abba: abbaFacet,
+    changeAction: ChangeAction
+})
+class Application extends React.Component {
+  handleClick () {
+    this.props.changeAction(100);
+  }
+  render () {
+    return <div onClick={this.handleClick.bind(this)}>Bloom: {this.props.abba}</div>
+  }
+}
+
+
+export default function () {
+  React.render(<Application container={container} />, document.querySelector('.app'));
+}
+``
+
 ## Define dependency
 ```js
 import {Facet, Factory, Class} from 'immutable-di/define'
@@ -298,54 +355,4 @@ const initialProps = container.select(['todoApp']).get()
 React.render(<TodoList ...initialProps container={container}/>, document.querySelector('body'))
 ```
 
-##React all-in example
-```js
-import {default as React, Component} from 'react';
-import {Getter, Facet, Factory, Setter} from 'immutable-di/define'
-import root from 'immutable-di/react/root'
-import statefull from 'immutable-di/react/statefull'
-import Container from 'immutable-di'
-import NativeCursor from 'immutable-di/cursors/native'
 
-
-const container = new Container(new NativeCursor({
-  tis: {
-    a: 1,
-    b: 2
-  }
-}));
-
-var abbaFacet = Facet({
-  a: ['tis', 'a']
-})(function bloomyFacet({a}) {
-  return a + 10;
-})
-
-
-var ChangeAction = Factory({
-  setA: Setter(['tis', 'a'])
-})(function ({setA}) {
-  return function (num) {
-    setA(num);
-  }
-});
-
-@root
-@statefull({
-    abba: abbaFacet,
-    changeAction: ChangeAction
-})
-class Application extends React.Component {
-  handleClick () {
-    this.props.changeAction(100);
-  }
-  render () {
-    return <div onClick={this.handleClick.bind(this)}>Bloom: {this.props.abba}</div>
-  }
-}
-
-
-export default function () {
-  React.render(<Application container={container} />, document.querySelector('.app'));
-}
-``
