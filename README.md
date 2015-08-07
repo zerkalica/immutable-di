@@ -152,10 +152,10 @@ const listener = container.on({
 }, myHandler)
 
 // trigger my hander
-container.select(['config']).set(['logger', 'opt1'], 'test') 
+container.select(['config', 'logger', 'opt1']).set('test') 
 
 // path config.logger not affected, myHandler is not triggered
-container.select(['config']).set(['mod2', 'opt1'], '1')
+container.select(['config', 'mod2', 'opt1']).set('1')
 
 // unbind listener:
 container.off(listener)
@@ -239,9 +239,9 @@ Factory([
 
 container.get(MyModule) // outputs init test1
 container.get(MyModule) // no outputs, return from cache
-const cursor = container.select(['config', 'myModule'])
+const cursor = container.select(['config', 'myModule', 'opt1'])
 
-cursor.set(['opt1'], 'test2') // outputs test2
+cursor.set('test2') // outputs test2
 container.get(MyModule) // no outputs: return from cache
 
 container.get(MyModule)('test3') // outputs out test2, val test3
