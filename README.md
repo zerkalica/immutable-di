@@ -64,7 +64,7 @@ class Application extends React.Component {
 export default function () {
   React.render(<Application container={container} />, document.querySelector('.app'));
 }
-``
+```
 
 ## Define dependency
 ```js
