@@ -33,6 +33,8 @@
   },
   "files": [
     "*.map",
+    "*.js",
+    "package.json",
     "cursors",
     "define",
     "react",
