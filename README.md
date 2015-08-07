@@ -10,7 +10,7 @@ Simple, dependency injection container with some state handling functions.
 * Examples: `npm run dev.examples`
 
 ##Why not *-flux?
-
+Our main focus make Flux-like API as less and simple as possible. Which with less words you can express more. The ideas behind similar to the redux or baobab, but implementation based on dependency injection. And of course you can use dependency injection as standalone.
 
 ##Usecases
 
