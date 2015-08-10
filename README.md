@@ -9,7 +9,7 @@ Simple, dependency injection container with some state handling functions.
 * Tests: `npm test`
 * Examples: `npm run dev.examples`
 
-##Why not *-flux?
+##Why not \*-flux?
 Our main focus make Flux-like API as less and simple as possible. Which with less words you can express more. The ideas behind similar to the [redux](https://github.com/gaearon/redux), [baobab](https://github.com/Yomguithereal/baobab), [nuclear-js](https://github.com/optimizely/nuclear-js), but implementation based on dependency injection. And of course you can use dependency injection as standalone.
 
 ##Usecases
@@ -85,10 +85,10 @@ class C {
     }
 }
 
-// or 
+// or
 class C {
     constructor(a, b) {
-        
+
     }
 }
 
@@ -152,7 +152,7 @@ const listener = container.on({
 }, myHandler)
 
 // trigger my hander
-container.select(['config', 'logger', 'opt1']).set('test') 
+container.select(['config', 'logger', 'opt1']).set('test')
 
 // path config.logger not affected, myHandler is not triggered
 container.select(['config', 'mod2', 'opt1']).set('1')
@@ -269,7 +269,7 @@ import myFaset from './my-faset'
 import TodoActions from './todo-actions'
 
 // set container from props to context:
-@root 
+@root
 // bind to setState:
 @statefull({
     todos: ['todoApp', 'todos'], // state path
@@ -354,5 +354,3 @@ const container = new Container(new NativeCursor({
 const initialProps = container.select(['todoApp']).get()
 React.render(<TodoList ...initialProps container={container}/>, document.querySelector('body'))
 ```
-
-

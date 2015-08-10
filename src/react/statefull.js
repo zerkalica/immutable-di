@@ -1,5 +1,5 @@
 import Container from '../container'
-import {Factory} from '../define'
+import {Factory, Facet} from '../define'
 import {createElement, Component, PropTypes as p} from 'react'
 
 export class StatefullComponent extends Component {
@@ -11,13 +11,12 @@ export class StatefullComponent extends Component {
 
     constructor(props, context) {
         super(props, context)
-        const Getter = this.__listener = Factory(this.constructor.stateMap, this.constructor.displayName)(state => {
-            if (this.state) {
-                this.setState(state)
-            }
+        function pass(state) {
             return state
-        })
-
+        }
+        const {stateMap, displayName} = this.constructor
+        const Getter = Facet(stateMap, displayName)(pass)
+        this.__listener = Factory(stateMap, displayName)(::this.setState)
         this.state = {...props, ...context.container.get(Getter)}
     }
 
@@ -36,18 +35,13 @@ export class StatefullComponent extends Component {
 
 export default function statefull(stateMap = {}) {
     return function wrapComponent(BaseComponent) {
-        class MarkupComponent extends BaseComponent {
-            render() {
-                return super.render(this.props, this.context)
-            }
-        }
-
         return class StatefullComponentWrapper extends StatefullComponent {
-            static displayName = BaseComponent.displayName
+            static propTypes = BaseComponent.propTypes
+            static displayName = BaseComponent.displayName + '#statefull'
             static stateMap = stateMap
 
             render() {
-                return createElement(MarkupComponent, this.state)
+                return createElement(BaseComponent, this.state)
             }
         }
     }
