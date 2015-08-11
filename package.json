@@ -16,7 +16,7 @@
     "release-minor": "npm run pull && npm version minor && npm run push",
     "release-major": "npm run pull && npm version major && npm run push",
     "clean": "rm -rf cursors define react utils __tests__ container.js index.js *.map build",
-    "build": "npm run clean && babel src --source-maps --out-dir . --source-root immutable-di",
+    "build": "npm run clean && babel src --source-maps --out-dir .",
     "prod": "npm run build -- --production",
     "dev": "npm run build -- --watch",
     "lint": "exit 0 && eslint src",
