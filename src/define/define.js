@@ -1,5 +1,4 @@
 import getFunctionName from '../utils/get-function-name'
-import getDef from './get'
 
 export type DependencyType = (v: any) => any
 
@@ -19,13 +18,9 @@ function normalizeDeps(deps) {
     for (let i = 0; i < len; i++) {
         const name = names.length ? names[i] : undefined
         const dep = deps[name || i]
-        const path = Array.isArray(dep) ? dep : null
-        const pathKey = path ? path.join('.') : null
         resultDeps.push({
             name,
-            path,
-            pathKey,
-            definition: path ? null : dep
+            definition: Array.isArray(dep) ? Path(dep) : dep
         })
     }
 
@@ -35,7 +30,7 @@ function normalizeDeps(deps) {
 function updateIdsMap(map, id, normalizedDeps) {
     for (let i = 0, j = normalizedDeps.length; i < j; i++) {
         const dep = normalizedDeps[i]
-        const path = dep.path
+        const path = dep.definition.__di.path
         if (path && path.length) {
             if (id) {
                 const parts = []
@@ -59,7 +54,7 @@ function updateIdsMap(map, id, normalizedDeps) {
             if (!dep.definition.__di) {
                 throw new Error('no definition in dep.definition: ' + dep.definition)
             }
-            updateIdsMap(map, id, getDef(dep.definition).deps)
+            updateIdsMap(map, id, dep.definition.__di.deps)
         }
     }
 }
@@ -124,22 +119,41 @@ export function Getter(path, displayName) {
         return container.select(path, key).get
     }
 
-    return Facet([__Container], displayName || 'get#' + key)(getter)
+    const definition = Facet([__Container], displayName || 'get#' + key)(getter)
+    definition.__di.id = key
+    definition.__di.path = path
+    return definition
 }
 
-export function Setter(path, displayName) {
+export function Path(path) {
+    const key = path.join('.')
+    function getter(container) {
+        return container.select(path, key).get()
+    }
+
+    const definition = Facet([__Container], 'path#' + key)(getter)
+    definition.__di.id = key
+    definition.__di.path = path
+    return definition
+}
+
+export function Setter(path) {
     const key = path.join('.')
     function setter(container) {
         return container.select(path, key).set
     }
 
-    return Facet([__Container], displayName || 'set#' + key)(setter)
+    const definition = Facet([__Container], 'set#' + key)(setter)
+    definition.__di.id = key
+    definition.__di.path = path
+    return definition
 }
 
 export function Def(data) {
     function def() {
         return data
     }
+    const id = 'def_' + JSON.stringify(data)
 
-    return Facet([], 'def_' + JSON.stringify(data))(def)
+    return Facet([], id)(def)
 }

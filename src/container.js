@@ -3,7 +3,6 @@ import type {DiDefinitionType, DependencyType} from './define'
 
 import {Facet, __pathToIdsMap, __Container} from './define'
 import getFunctionName from './utils/get-function-name'
-import getDef from './define/get'
 
 export default class Container {
     _state: AbstractCursor
@@ -54,7 +53,7 @@ export default class Container {
     }
 
     mount(definition: DependencyType) {
-        const {id} = getDef(definition)
+        const {id} = definition.__di
         // do not call listener on another state change
         this._cache[id] = null
         this._listeners.push(definition)
@@ -72,12 +71,12 @@ export default class Container {
         this.mount(definition)
     }
 
-    _get(definition: DependencyType, tempCache: object, debugCtx: Array<string>): any {
+    _get(definition: DependencyType, tempCache, debugCtx: Array<string>): any {
         if (definition === __Container) {
             return this
         }
 
-        const def = getDef(definition)
+        const def = definition.__di
         if (!def) {
             throw new Error('Property .__id not exist in ' + debugCtx)
         }
@@ -89,18 +88,18 @@ export default class Container {
             const defArgs = isOptions ? [args] : []
             for (let i = 0, j = deps.length; i < j; i++) {
                 const dep = deps[i]
-                const value = dep.path ?
-                    this.select(dep.path, dep.pathKey).get() :
-                    this._get(dep.definition, tempCache, debugCtx.concat([displayName, i]))
-
-                if(isOptions) {
+                const value = this._get(dep.definition, tempCache, debugCtx.concat([displayName, i]))
+                if (isOptions) {
                     args[dep.name] = value
                 } else {
                     defArgs.push(value)
                 }
             }
-
-            result = isClass ? new definition(...defArgs) : definition(...defArgs)
+            /* eslint-disable new-cap */
+            result = isClass
+                ? new definition(...defArgs)
+                : definition(...defArgs)
+            /* eslint-enable new-cap */
             if (result === undefined) {
                 result = null
             }
