@@ -1,6 +1,7 @@
-import Container from '../container'
-import {Factory, Facet} from '../define'
 import {createElement, Component, PropTypes as p} from 'react'
+import {Factory, Facet} from '../define'
+import Container from '../container'
+import getFunctionName from '../utils/get-function-name'
 
 export class StatefullComponent extends Component {
     static contextTypes = {
@@ -35,9 +36,10 @@ export class StatefullComponent extends Component {
 
 export default function statefull(stateMap = {}) {
     return function wrapComponent(BaseComponent) {
+        const dn = BaseComponent.displayName || getFunctionName(BaseComponent)
+
         return class StatefullComponentWrapper extends StatefullComponent {
-            static propTypes = BaseComponent.propTypes
-            static displayName = BaseComponent.displayName + '#statefull'
+            static displayName = dn + '#statefull'
             static stateMap = stateMap
 
             render() {

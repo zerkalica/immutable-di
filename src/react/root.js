@@ -1,6 +1,7 @@
+import React, {Component, createElement, PropTypes as p} from 'react'
 import Container from '../container'
+import getFunctionName from '../utils/get-function-name'
 import NativeCursor from '../cursors/native'
-import {Component, createElement, PropTypes as p} from 'react'
 
 export class RootComponent extends Component {
     static propTypes = {
@@ -12,23 +13,17 @@ export class RootComponent extends Component {
         container: p.instanceOf(Container).isRequired
     }
 
-    constructor(props, context) {
-        super(props, context)
-        this.__container = props.container || new Container(new NativeCursor(props.state))
-    }
-
     getChildContext() {
         return {
-            container: this.__container
+            container: this.props.container || new Container(new NativeCursor(this.props.state))
         }
     }
 }
 
 export default function root(BaseComponent) {
+    const dn = BaseComponent.displayName || getFunctionName(BaseComponent)
     return class RootComponentWrapper extends RootComponent {
-        static stateMap = BaseComponent.stateMap
-        static propTypes = BaseComponent.propTypes
-        static displayName = BaseComponent.displayName + '#root'
+        static displayName = dn + '#root'
 
         render() {
             return createElement(BaseComponent, this.props)
