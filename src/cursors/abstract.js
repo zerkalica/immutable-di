@@ -22,6 +22,7 @@ export default class AbstractCursor<State> {
         this.set = ::this.set
         this.select = ::this.select
         this.apply = ::this.apply
+        this.assign = ::this.assign
     }
 
     setNotify(notify) {
@@ -61,5 +62,9 @@ export default class AbstractCursor<State> {
 
     apply(fn: (v: State) => State) {
         this.set(fn(this.get()))
+    }
+
+    assign(newState: State) {
+        throw new Error('implement')
     }
 }
