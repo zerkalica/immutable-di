@@ -41,9 +41,10 @@ export default class Container {
     }
 
     select(path: PathType, key: ?string) {
-        path = [].concat(path)
         if (!key) {
+            /* eslint-disable no-param-reassign */
             key = path.join('.')
+            /* eslint-enable no-param-reassign */
         }
         let selector = this._selectorCache[key]
         if (!selector) {

@@ -1,7 +1,8 @@
+/* eslint-env mocha */
 import assert from 'power-assert'
 import Container from '../container'
 import NativeCursor from '../cursors/native'
-import {Factory, Class, Facet, Getter, Setter} from '../define'
+import {Factory, Class, Getter, Setter} from '../define'
 import sinon from 'sinon'
 
 describe('container', () => {
@@ -36,17 +37,17 @@ describe('container', () => {
             assert.throws(() => container.get(WrongDep))
         })
 
+        /* eslint-disable padded-blocks */
         it('should return class instance', () => {
             @Class()
             class Test {
-
             }
-
             const instance = container.get(Test)
-
             assert(instance instanceof Test)
         })
+        /* eslint-enable padded-blocks */
 
+        /* eslint-disable padded-blocks */
         it('should cache class instance', () => {
             @Class()
             class TestBase {
@@ -61,6 +62,7 @@ describe('container', () => {
             assert.strictEqual(instance1, instance2)
             assert(Test.calledOnce)
         })
+        /* eslint-enable padded-blocks */
 
         it('should cache factory return value', () => {
             const MyDep = Factory()(function _MyDep() {
@@ -108,12 +110,12 @@ describe('container', () => {
             class Test {}
             const TestFake = sinon.spy(Test)
             container.get(TestFake)
-            //container.select(['todo', 'id']).set(321).commit()
-            //container.get(TestFake)
-            //container.get(TestFake)
-            // assert(TestFake.calledTwice)
-            //assert(TestFake.firstCall.calledWith(0))
-            // assert(TestFake.secondCall.calledWith(321))
+            container.select(['todo', 'id']).set(321).commit()
+            container.get(TestFake)
+            container.get(TestFake)
+            assert(TestFake.calledTwice)
+            assert(TestFake.firstCall.calledWith(0))
+            assert(TestFake.secondCall.calledWith(321))
         })
     })
 
@@ -137,7 +139,7 @@ describe('container', () => {
             assert(container.get(MyDep) === 0)
             container.select(['todo', 'id']).set(321).commit()
             assert(container.get(MyDep) === 321)
-            container.select('todo').set({id : 456, todos: []}).commit()
+            container.select(['todo']).set({id: 456, todos: []}).commit()
             assert(container.get(MyDep) === 456)
         })
 
@@ -228,7 +230,6 @@ describe('container', () => {
                 ['todo', 'id']
             ])(function _MyDep(id) {
                 assert(id === 321)
-                done()
                 return id
             }))
 
