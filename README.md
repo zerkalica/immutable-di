@@ -39,10 +39,18 @@ var abbaFacet = Facet({
 
 
 var ChangeAction = Factory({
-  setA: Setter(['tis', 'a'])
-})(function ({setA}) {
+  setA: Setter(['tis', 'a']),
+  setIsLoading: Setter(['tis', 'isLoading'])
+})(function ({setA, setIsLoading}) {
   return function (num) {
-    setA(num);
+    // Here will be all mutate state logic. for example server side request, communication with API layer and etc.
+    setIsLoading(true);
+    $.get('/server/route').then((data) => {
+      setIsLoading(false);
+      var a = num + data.a;
+      setA(a);
+    })
+    
   }
 });
 
