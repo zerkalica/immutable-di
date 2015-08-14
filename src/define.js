@@ -139,6 +139,17 @@ export function Path(path) {
     return definition
 }
 
+export function Assign(path) {
+    const key = path.join('.')
+    function assigner(container) {
+        return container.select(path, key).assign
+    }
+
+    const definition = Facet([__Container], 'set#' + key)(assigner)
+    definition.__di.id = 'assign#' + key
+    return definition
+}
+
 export function Setter(path) {
     const key = path.join('.')
     function setter(container) {
