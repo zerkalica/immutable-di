@@ -145,7 +145,7 @@ export function Assign(path) {
         return container.select(path, key).assign
     }
 
-    const definition = Facet([__Container], 'set#' + key)(assigner)
+    const definition = Facet([__Container], 'assign#' + key)(assigner)
     definition.__di.id = 'assign#' + key
     return definition
 }
