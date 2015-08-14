@@ -1,4 +1,4 @@
-import getFunctionName from '../utils/get-function-name'
+import getFunctionName from './utils/get-function-name'
 
 export type DependencyType = (v: any) => any
 
@@ -8,9 +8,11 @@ export type DiDefinitionType = {
     definition: DependencyType
 }
 
-function normalizeDeps(deps) {
+export const __Container = '__DICONTAINER__'
+
+function normalizeDeps(d) {
     const resultDeps = []
-    deps = deps || []
+    const deps = d || []
     const isArray = Array.isArray(deps)
     const names = isArray ? [] : Object.keys(deps)
     const len = isArray ? deps.length : names.length
@@ -30,6 +32,9 @@ function normalizeDeps(deps) {
 function updateIdsMap(map, id, normalizedDeps) {
     for (let i = 0, j = normalizedDeps.length; i < j; i++) {
         const dep = normalizedDeps[i]
+        if (dep.definition === __Container) {
+            break
+        }
         const path = dep.definition.__di.path
         if (path && path.length) {
             if (id) {
@@ -111,8 +116,6 @@ export function Facet(deps, displayName) {
     })
 }
 
-export const __Container = Facet([], 'Container')(p => p)
-
 export function Getter(path, displayName) {
     const key = path.join('.')
     function getter(container) {
@@ -120,8 +123,7 @@ export function Getter(path, displayName) {
     }
 
     const definition = Facet([__Container], displayName || 'get#' + key)(getter)
-    definition.__di.id = key
-    definition.__di.path = path
+    definition.__di.id = 'get#' + key
     return definition
 }
 
@@ -132,7 +134,7 @@ export function Path(path) {
     }
 
     const definition = Facet([__Container], 'path#' + key)(getter)
-    definition.__di.id = key
+    definition.__di.id = 'path#' + key
     definition.__di.path = path
     return definition
 }
@@ -144,8 +146,7 @@ export function Setter(path) {
     }
 
     const definition = Facet([__Container], 'set#' + key)(setter)
-    definition.__di.id = key
-    definition.__di.path = path
+    definition.__di.id = 'set#' + key
     return definition
 }
 

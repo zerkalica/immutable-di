@@ -1,4 +1,4 @@
-import React, {Component, createElement, PropTypes as p} from 'react'
+import {Component, createElement, PropTypes as p} from 'react'
 import Container from '../container'
 import getFunctionName from '../utils/get-function-name'
 import NativeCursor from '../cursors/native'
