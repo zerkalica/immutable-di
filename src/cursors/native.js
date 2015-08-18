@@ -11,6 +11,12 @@ export default class NativeCursor extends AbstractCursor {
             /* eslint-disable no-new-func */
             this._selector = new Function('s', 'return ' + ['s'].concat(prefix).slice(0, -1).join('.'))
             /* eslint-enable no-new-func */
+        } else {
+            this._cnName = '_state'
+            // trick to obtain this._state in get/set/apply/assign
+            this._selector = function __selector() {
+                return this
+            }
         }
     }
 
