@@ -1,12 +1,27 @@
+import Dep from '../utils/Dep'
+
 export type PathType = Array<string>
 
-export default class AbstractCursor<State> {
-    __notify: ?(paths: PathType) => void = null
+function pass() {
+}
 
-    constructor(state = {}, {prefix, notify} = {prefix: [], notify: null}) {
-        this._state = state
-        this._prefix = prefix
-        this.setNotify(notify)
+// Dep used instead of define/Class to prevent cross-dependencies
+@Dep({isClass: true})
+export default class AbstractCursor<State> {
+    __notify: (path: string, isSynced: ?bool) => void = null
+    _prefix: PathType
+    // prefixKey needed for optimizations in container/notify
+    _prefixKey: string
+
+    constructor(
+        state: object,
+        prefix: ?PathType,
+        notify: ?(path: string, isSynced: ?bool) => void
+    ) {
+        this._state = state || {}
+        this._prefix = prefix || []
+        this._prefixKey = this._prefix.join('.')
+        this.setNotify(notify || pass)
 
         this.commit = ::this.commit
         this.get = ::this.get
@@ -16,24 +31,25 @@ export default class AbstractCursor<State> {
         this.assign = ::this.assign
     }
 
-    setNotify(notify) {
+    setNotify(notify: (path: string, isSynced: ?bool) => void) {
         this.__notify = notify
     }
 
     _update() {
-        this.__notify(this._prefix)
+        this.__notify(this._prefixKey)
     }
 
     commit() {
-        this.__notify(this._prefix, true)
+        this.__notify(this._prefixKey, true)
         return this
     }
 
     select(path: PathType = []): AbstractCursor<State> {
-        return new this.constructor(this._state, {
-            notify: this.__notify,
-            prefix: this._prefix.concat(path)
-        })
+        return new this.constructor(
+            this._state,
+            this._prefix.concat(path),
+            this.__notify
+        )
     }
 
     /* eslint-disable no-unused-vars */

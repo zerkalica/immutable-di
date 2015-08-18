@@ -4,12 +4,20 @@ export default class NativeCursor extends AbstractCursor {
     _selector = null
     _cnName = null
 
-    constructor(state = {}, {prefix, notify} = {prefix: [], notify: null}) {
-        super(state, {prefix, notify})
-        if (prefix.length) {
+    constructor(
+        state: object,
+        prefix: ?PathType,
+        notify: ?(path: string, isSynced: ?bool) => void
+    ) {
+        super(state, prefix, notify)
+        if (this._prefix.length) {
             this._cnName = prefix[prefix.length - 1]
             /* eslint-disable no-new-func */
-            this._selector = new Function('s', 'return ' + ['s'].concat(prefix).slice(0, -1).join('.'))
+            this._selector = new Function('s', 'return ' + ['s']
+                .concat(this._prefix)
+                .slice(0, -1)
+                .join('.')
+            )
             /* eslint-enable no-new-func */
         } else {
             this._cnName = '_state'

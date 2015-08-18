@@ -1,7 +1,7 @@
 import {createElement, Component, PropTypes as p} from 'react'
 import {Factory, Facet} from '../define'
 import Container from '../container'
-import getFunctionName from '../utils/get-function-name'
+import getFunctionName from '../utils/getFunctionName'
 
 export class StatefullComponent extends Component {
     static contextTypes = {

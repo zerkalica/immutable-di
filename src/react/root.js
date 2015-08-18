@@ -1,6 +1,6 @@
 import {Component, createElement, PropTypes as p} from 'react'
 import Container from '../container'
-import getFunctionName from '../utils/get-function-name'
+import getFunctionName from '../utils/getFunctionName'
 import NativeCursor from '../cursors/native'
 
 export class RootComponent extends Component {
