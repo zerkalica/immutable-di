@@ -1,20 +1,13 @@
-export type PathType = Array<string> | string
+export type PathType = Array<string>
 
 export default class AbstractCursor<State> {
     __notify: ?(paths: PathType) => void = null
-    _selector = null
-    _cnName = null
 
     constructor(state = {}, {prefix, notify} = {prefix: [], notify: null}) {
         this._state = state
         this._prefix = prefix
-        if (prefix.length) {
-            this._cnName = prefix[prefix.length - 1]
-            /* eslint-disable no-new-func */
-            this._selector = new Function('s', 'return ' + ['s'].concat(prefix).slice(0, -1).join('.'))
-            /* eslint-enable no-new-func */
-        }
         this.setNotify(notify)
+
         this.commit = ::this.commit
         this.get = ::this.get
         this.set = ::this.set
@@ -43,6 +36,7 @@ export default class AbstractCursor<State> {
         })
     }
 
+    /* eslint-disable no-unused-vars */
     get(): State {
         throw new Error('implement')
     }
@@ -58,4 +52,5 @@ export default class AbstractCursor<State> {
     assign(newState: State) {
         throw new Error('implement')
     }
+    /* eslint-enable no-unused-vars */
 }

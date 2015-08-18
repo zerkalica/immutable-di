@@ -1,7 +1,19 @@
 import AbstractCursor from './abstract'
 
-
 export default class NativeCursor extends AbstractCursor {
+    _selector = null
+    _cnName = null
+
+    constructor(state = {}, {prefix, notify} = {prefix: [], notify: null}) {
+        super(state, {prefix, notify})
+        if (prefix.length) {
+            this._cnName = prefix[prefix.length - 1]
+            /* eslint-disable no-new-func */
+            this._selector = new Function('s', 'return ' + ['s'].concat(prefix).slice(0, -1).join('.'))
+            /* eslint-enable no-new-func */
+        }
+    }
+
     get() {
         return this._selector(this._state)[this._cnName]
     }
@@ -13,6 +25,11 @@ export default class NativeCursor extends AbstractCursor {
             this._update()
         }
 
+        return this
+    }
+
+    apply(fn: (v: State) => State) {
+        this.set(fn(this.get()))
         return this
     }
 

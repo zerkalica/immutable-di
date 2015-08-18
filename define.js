@@ -42,37 +42,39 @@ function normalizeDeps(d) {
     return resultDeps;
 }
 
-function updateIdsMap(map, id, normalizedDeps) {
+function updateIdsMap(acc, normalizedDeps) {
     for (var i = 0, j = normalizedDeps.length; i < j; i++) {
         var dep = normalizedDeps[i];
         if (dep.definition === __Container) {
             break;
         }
-        var _path = dep.definition.__di.path;
+        var _dep$definition$__di = dep.definition.__di;
+        var _path = _dep$definition$__di.path;
+        var isSetter = _dep$definition$__di.isSetter;
+        var deps = _dep$definition$__di.deps;
+
+        if (isSetter) {
+            acc.isAction = true;
+        }
+
         if (_path && _path.length) {
-            if (id) {
+            if (acc.id) {
                 var parts = [];
                 for (var ii = 0, jj = _path.length; ii < jj; ii++) {
                     parts.push(_path[ii]);
                     var key = parts.toString();
-                    var ids = map[key];
+                    var ids = acc.map[key];
                     if (!ids) {
                         ids = [];
-                        map[key] = ids;
+                        acc.map[key] = ids;
                     }
-                    if (ids.indexOf(id) === -1) {
-                        ids.push(id);
+                    if (ids.indexOf(acc.id) === -1) {
+                        ids.push(acc.id);
                     }
                 }
             }
         } else {
-            if (!dep.definition) {
-                throw new Error('no definition in dep: ' + dep);
-            }
-            if (!dep.definition.__di) {
-                throw new Error('no definition in dep.definition: ' + dep.definition);
-            }
-            updateIdsMap(map, id, dep.definition.__di.deps);
+            updateIdsMap(acc, deps);
         }
     }
 }
@@ -81,65 +83,54 @@ var lastId = 1;
 var __pathToIdsMap = {};
 
 exports.__pathToIdsMap = __pathToIdsMap;
-function getDeps(id, deps) {
-    var normalizedDeps = normalizeDeps(deps);
-    updateIdsMap(__pathToIdsMap, id, normalizedDeps);
-    return normalizedDeps;
-}
-
-function DepProd(_ref) {
-    var deps = _ref.deps;
+function Dep(_ref) {
+    var id = _ref.id;
     var displayName = _ref.displayName;
+    var deps = _ref.deps;
     var isClass = _ref.isClass;
     var isCachedTemporary = _ref.isCachedTemporary;
+    var isSetter = _ref.isSetter;
+    var path = _ref.path;
 
-    return function depProd(Service) {
-        var id = Service.__di ? Service.__di.id : lastId++;
+    return function dep(Service) {
+        id = id || (Service.__di ? Service.__di.id : lastId++);
         var dn = displayName || Service.displayName || (0, _utilsGetFunctionName2['default'])(Service) || id;
+        var newDeps = normalizeDeps(deps);
+        var acc = {
+            map: __pathToIdsMap,
+            isAction: false,
+            id: isCachedTemporary ? null : id
+        };
+        updateIdsMap(acc, newDeps);
 
         Service.__di = {
-            id: id,
+            deps: newDeps,
             displayName: dn,
-            isClass: isClass,
-            isAction: false,
-            isCachedTemporary: isCachedTemporary,
+            id: id,
+            isAction: acc.isAction,
+            isSetter: !!isSetter,
+            isCachedTemporary: !!isCachedTemporary,
+            isClass: !!isClass,
             isOptions: !Array.isArray(deps),
-            deps: getDeps(isCachedTemporary ? null : id, deps)
+            path: path
         };
 
         return Service;
     };
 }
 
-function DepDebug(options) {
-    var definition = DepProd(options);
-
-    return function depDebug(Service) {
-        var originalService = definition(Service);
-        function wrappedService(container, depResult) {
-            return container.debugFactoryResult(originalService, depResult);
-        }
-        return Factory([__Container, originalService])(wrappedService);
-    };
-}
-
-var Dep = undefined === 'development' ? DepDebug : DepProd;
-
 function Class(deps, displayName) {
     return Dep({
         deps: deps,
         displayName: displayName,
-        isClass: true,
-        isCachedTemporary: false
+        isClass: true
     });
 }
 
 function Factory(deps, displayName) {
     return Dep({
         deps: deps,
-        displayName: displayName,
-        isClass: false,
-        isCachedTemporary: false
+        displayName: displayName
     });
 }
 
@@ -147,64 +138,77 @@ function Facet(deps, displayName) {
     return Dep({
         deps: deps,
         displayName: displayName,
-        isClass: false,
         isCachedTemporary: true
     });
 }
 
-function Getter(path, displayName) {
+function Getter(path) {
     var key = path.join('.');
+    var id = 'get#' + key;
     function getter(container) {
-        return container.select(path, key).get;
+        return container.select(path).get;
     }
-
-    var definition = Facet([__Container], displayName || 'get#' + key)(getter);
-    definition.__di.id = 'get#' + key;
-    return definition;
+    return Dep({
+        deps: [__Container],
+        displayName: id,
+        id: id
+    })(getter);
 }
 
 function Path(path) {
     var key = path.join('.');
-    function getter(container) {
-        return container.select(path, key).get();
+    var id = 'path#' + key;
+    function getData(get) {
+        return get();
     }
 
-    var definition = Facet([__Container], 'path#' + key)(getter);
-    definition.__di.id = 'path#' + key;
-    definition.__di.path = path;
-    return definition;
+    return Dep({
+        deps: [Getter(path)],
+        displayName: id,
+        id: id,
+        isCachedTemporary: true,
+        path: path
+    })(getData);
 }
 
 function Assign(path) {
     var key = path.join('.');
+    var id = 'assign#' + key;
     function assigner(container) {
-        return container.select(path, key).assign;
+        return container.select(path).assign;
     }
-
-    var definition = Facet([__Container], 'assign#' + key)(assigner);
-    definition.__di.id = 'assign#' + key;
-    definition.__di.isAction = true;
-    return definition;
+    return Dep({
+        deps: [__Container],
+        displayName: id,
+        id: id,
+        isSetter: true
+    })(assigner);
 }
 
 function Setter(path) {
     var key = path.join('.');
+    var id = 'setter#' + key;
     function setter(container) {
-        return container.select(path, key).set;
+        return container.select(path).set;
     }
 
-    var definition = Facet([__Container], 'set#' + key)(setter);
-    definition.__di.id = 'set#' + key;
-    definition.__di.isAction = true;
-    return definition;
+    return Dep({
+        deps: [__Container],
+        displayName: id,
+        id: id,
+        isSetter: true
+    })(setter);
 }
 
 function Def(data) {
+    var id = 'def#' + JSON.stringify(data);
     function def() {
         return data;
     }
-    var id = 'def_' + JSON.stringify(data);
 
-    return Facet([], id)(def);
+    return Dep({
+        displayName: id,
+        id: id
+    })(def);
 }
 //# sourceMappingURL=define.js.map
