@@ -46,7 +46,7 @@ export default class AbstractCursor<State> {
     }
 
     apply(fn: (v: State) => State) {
-        this.set(fn(this.get()))
+        throw new Error('implement')
     }
 
     assign(newState: State) {
