@@ -87,18 +87,21 @@ function getDeps(id, deps) {
     return normalizedDeps;
 }
 
-function Dep(_ref) {
+function DepProd(_ref) {
     var deps = _ref.deps;
     var displayName = _ref.displayName;
     var isClass = _ref.isClass;
     var isCachedTemporary = _ref.isCachedTemporary;
 
-    return function __Dep(Service) {
+    return function depProd(Service) {
         var id = Service.__di ? Service.__di.id : lastId++;
+        var dn = displayName || Service.displayName || (0, _utilsGetFunctionName2['default'])(Service) || id;
+
         Service.__di = {
             id: id,
-            displayName: displayName || Service.displayName || (0, _utilsGetFunctionName2['default'])(Service) || id,
+            displayName: dn,
             isClass: isClass,
+            isAction: false,
             isCachedTemporary: isCachedTemporary,
             isOptions: !Array.isArray(deps),
             deps: getDeps(isCachedTemporary ? null : id, deps)
@@ -107,6 +110,20 @@ function Dep(_ref) {
         return Service;
     };
 }
+
+function DepDebug(options) {
+    var definition = DepProd(options);
+
+    return function depDebug(Service) {
+        var originalService = definition(Service);
+        function wrappedService(container, depResult) {
+            return container.debugFactoryResult(originalService, depResult);
+        }
+        return Factory([__Container, originalService])(wrappedService);
+    };
+}
+
+var Dep = undefined === 'development' ? DepDebug : DepProd;
 
 function Class(deps, displayName) {
     return Dep({
@@ -164,8 +181,9 @@ function Assign(path) {
         return container.select(path, key).assign;
     }
 
-    var definition = Facet([__Container], 'set#' + key)(assigner);
+    var definition = Facet([__Container], 'assign#' + key)(assigner);
     definition.__di.id = 'assign#' + key;
+    definition.__di.isAction = true;
     return definition;
 }
 
@@ -177,6 +195,7 @@ function Setter(path) {
 
     var definition = Facet([__Container], 'set#' + key)(setter);
     definition.__di.id = 'set#' + key;
+    definition.__di.isAction = true;
     return definition;
 }
 

@@ -1,9 +1,7 @@
 export type PathType = Array<string> | string
 
 export default class AbstractCursor<State> {
-    _timerId: number = null
-    _affectedPaths: Array<PathType> = []
-    __notify: ?(paths: Array<PathType>) => void = null
+    __notify: ?(paths: PathType) => void = null
     _selector = null
     _cnName = null
 
@@ -30,19 +28,12 @@ export default class AbstractCursor<State> {
     }
 
     _update() {
-        this._affectedPaths = this._prefix
-        if (!this._timerId) {
-            this._timerId = setTimeout(this.commit, 0)
-        }
+        this.__notify(this._prefix)
     }
 
     commit() {
-        if (this._timerId) {
-            clearTimeout(this._timerId)
-            this._timerId = null
-        }
-        this.__notify([this._affectedPaths])
-        this._affectedPaths = []
+        this.__notify(this._prefix, true)
+        return this
     }
 
     select(path: PathType = []): AbstractCursor<State> {

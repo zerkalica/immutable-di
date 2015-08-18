@@ -29,37 +29,35 @@ function normalizeDeps(d) {
     return resultDeps
 }
 
-function updateIdsMap(map, id, normalizedDeps) {
+function updateIdsMap(acc, normalizedDeps) {
     for (let i = 0, j = normalizedDeps.length; i < j; i++) {
         const dep = normalizedDeps[i]
         if (dep.definition === __Container) {
             break
         }
-        const path = dep.definition.__di.path
+        const {path, isSetter, deps} = dep.definition.__di
+        if (isSetter) {
+            acc.isAction = true
+        }
+
         if (path && path.length) {
-            if (id) {
+            if (acc.id) {
                 const parts = []
                 for (let ii = 0, jj = path.length; ii < jj; ii++) {
                     parts.push(path[ii])
                     const key = parts.toString()
-                    let ids = map[key]
+                    let ids = acc.map[key]
                     if (!ids) {
                         ids = []
-                        map[key] = ids
+                        acc.map[key] = ids
                     }
-                    if (ids.indexOf(id) === -1) {
-                        ids.push(id)
+                    if (ids.indexOf(acc.id) === -1) {
+                        ids.push(acc.id)
                     }
                 }
             }
         } else {
-            if (!dep.definition) {
-                throw new Error('no definition in dep: ' + dep)
-            }
-            if (!dep.definition.__di) {
-                throw new Error('no definition in dep.definition: ' + dep.definition)
-            }
-            updateIdsMap(map, id, dep.definition.__di.deps)
+            updateIdsMap(acc, deps)
         }
     }
 }
@@ -67,22 +65,28 @@ function updateIdsMap(map, id, normalizedDeps) {
 let lastId = 1
 export const __pathToIdsMap = {}
 
-function getDeps(id, deps) {
-    const normalizedDeps = normalizeDeps(deps)
-    updateIdsMap(__pathToIdsMap, id, normalizedDeps)
-    return normalizedDeps
-}
+function Dep({id, displayName, deps, isClass, isCachedTemporary, isSetter, path}) {
+    return function dep(Service) {
+        id = id || (Service.__di ? Service.__di.id : lastId++)
+        const dn = displayName || Service.displayName || getFunctionName(Service) || id
+        const newDeps = normalizeDeps(deps)
+        const acc = {
+            map: __pathToIdsMap,
+            isAction: false,
+            id: isCachedTemporary ? null : id
+        }
+        updateIdsMap(acc, newDeps)
 
-function Dep({deps, displayName, isClass, isCachedTemporary}) {
-    return function __Dep(Service) {
-        const id = (Service.__di ? Service.__di.id : lastId++)
         Service.__di = {
+            deps: newDeps,
+            displayName: dn,
             id: id,
-            displayName: displayName || Service.displayName || getFunctionName(Service) || id,
-            isClass,
-            isCachedTemporary,
+            isAction: acc.isAction,
+            isSetter: !!isSetter,
+            isCachedTemporary: !!isCachedTemporary,
+            isClass: !!isClass,
             isOptions: !Array.isArray(deps),
-            deps: getDeps(isCachedTemporary ? null : id, deps)
+            path
         }
 
         return Service
@@ -93,17 +97,14 @@ export function Class(deps, displayName) {
     return Dep({
         deps,
         displayName,
-        isClass: true,
-        isCachedTemporary: false
+        isClass: true
     })
 }
 
 export function Factory(deps, displayName) {
     return Dep({
         deps,
-        displayName,
-        isClass: false,
-        isCachedTemporary: false
+        displayName
     })
 }
 
@@ -111,61 +112,76 @@ export function Facet(deps, displayName) {
     return Dep({
         deps,
         displayName,
-        isClass: false,
         isCachedTemporary: true
     })
 }
 
-export function Getter(path, displayName) {
+export function Getter(path) {
     const key = path.join('.')
+    const id = 'get#' + key
     function getter(container) {
-        return container.select(path, key).get
+        return container.select(path).get
     }
-
-    const definition = Facet([__Container], displayName || 'get#' + key)(getter)
-    definition.__di.id = 'get#' + key
-    return definition
+    return Dep({
+        deps: [__Container],
+        displayName: id,
+        id
+    })(getter)
 }
 
 export function Path(path) {
     const key = path.join('.')
-    function getter(container) {
-        return container.select(path, key).get()
+    const id = 'path#' + key
+    function getData(get) {
+        return get()
     }
 
-    const definition = Facet([__Container], 'path#' + key)(getter)
-    definition.__di.id = 'path#' + key
-    definition.__di.path = path
-    return definition
+    return Dep({
+        deps: [Getter(path)],
+        displayName: id,
+        id,
+        isCachedTemporary: true,
+        path
+    })(getData)
 }
 
 export function Assign(path) {
     const key = path.join('.')
+    const id = 'assign#' + key
     function assigner(container) {
-        return container.select(path, key).assign
+        return container.select(path).assign
     }
-
-    const definition = Facet([__Container], 'assign#' + key)(assigner)
-    definition.__di.id = 'assign#' + key
-    return definition
+    return Dep({
+        deps: [__Container],
+        displayName: id,
+        id,
+        isSetter: true
+    })(assigner)
 }
 
 export function Setter(path) {
     const key = path.join('.')
+    const id = 'setter#' + key
     function setter(container) {
-        return container.select(path, key).set
+        return container.select(path).set
     }
 
-    const definition = Facet([__Container], 'set#' + key)(setter)
-    definition.__di.id = 'set#' + key
-    return definition
+    return Dep({
+        deps: [__Container],
+        displayName: id,
+        id,
+        isSetter: true
+    })(setter)
 }
 
 export function Def(data) {
+    const id = 'def#' + JSON.stringify(data)
     function def() {
         return data
     }
-    const id = 'def_' + JSON.stringify(data)
 
-    return Facet([], id)(def)
+    return Dep({
+        displayName: id,
+        id
+    })(def)
 }
