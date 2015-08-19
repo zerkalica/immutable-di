@@ -1,5 +1,6 @@
 import AbstractCursor from './cursors/abstract'
 import Dep, {getId} from './utils/Dep'
+import MonitorFactory from './history/MonitorFactory'
 
 const ids = {}
 
@@ -9,6 +10,10 @@ function convertId(dn) {
     }
 
     return ids[dn]
+}
+
+export const settings = {
+    debug: false
 }
 
 export function Getter(path) {
@@ -91,14 +96,6 @@ export function Class(deps, displayName) {
     })
 }
 
-export function Factory(deps, displayName) {
-    return Dep({
-        deps,
-        displayName,
-        pathMapper: Path
-    })
-}
-
 export function Facet(deps, displayName) {
     return Dep({
         deps,
@@ -106,4 +103,14 @@ export function Facet(deps, displayName) {
         isCachedTemporary: true,
         pathMapper: Path
     })
+}
+
+export function Factory(deps, displayName) {
+    const origDep = Dep({
+        deps,
+        displayName,
+        pathMapper: Path
+    })
+
+    return settings.debug ? MonitorFactory(origDep) : origDep
 }

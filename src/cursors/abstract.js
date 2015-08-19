@@ -29,6 +29,9 @@ export default class AbstractCursor<State> {
         this.select = ::this.select
         this.apply = ::this.apply
         this.assign = ::this.assign
+        this.toJS = ::this.toJS
+        this.toString = ::this.toString
+        this.fromJS = ::this.fromJS
     }
 
     setNotify(notify: (path: string, isSynced: ?bool) => void) {
@@ -53,6 +56,18 @@ export default class AbstractCursor<State> {
     }
 
     /* eslint-disable no-unused-vars */
+    toString() {
+        throw new Error('implement')
+    }
+
+    toJS() {
+        throw new Error('implement')
+    }
+
+    fromJS(state: State) {
+        throw new Error('implement')
+    }
+
     get(): State {
         throw new Error('implement')
     }

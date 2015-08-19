@@ -3,7 +3,6 @@ import AbstractCursor from './abstract'
 export default class NativeCursor extends AbstractCursor {
     _selector = null
     _cnName = null
-
     constructor(
         state: object,
         prefix: ?PathType,
@@ -26,6 +25,19 @@ export default class NativeCursor extends AbstractCursor {
                 return this
             }
         }
+    }
+
+    toString() {
+        return JSON.stringify(this._state)
+    }
+
+    toJS() {
+        return JSON.parse(this.toString())
+    }
+
+    fromJS(state) {
+        this._state = state
+        this._update()
     }
 
     get() {

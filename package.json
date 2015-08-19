@@ -44,6 +44,7 @@
   "dependencies": {
     "babel-runtime": "^5.8.20",
     "debug": "^2.2.0",
+    "immutablediff": "^0.4.2",
     "react": "^0.13.3"
   },
   "devDependencies": {
