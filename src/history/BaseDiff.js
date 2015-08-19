@@ -4,10 +4,7 @@ import Dep from '../utils/Dep'
 @Dep({isClass: true})
 export default class BaseDiff {
     diff(from: object, to: object): object {
-        return {
-            from,
-            to
-        }
+        return {}
     }
 
     invert(patch: object): object {

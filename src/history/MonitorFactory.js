@@ -9,16 +9,16 @@ export default function MonitorFactory(origDep) {
 
         function monitorResult(depResult: any, stateMonitor: StateMonitor) {
             let result
-            if (typeof depResult === 'function' && isAction) {
+            if (isAction && typeof depResult === 'function') {
                 result = function depWrap(...args) {
-                    const resultData = dep(...args)
+                    const resultData = depResult(...args)
                     const stop = stateMonitor(def, args)
 
-                    Promise.resolve(resultData)
+                    return Promise.resolve(resultData)
                         .then(stop)
                         .catch(stop)
 
-                    return result
+                    // return resultData
                 }
             } else {
                 result = depResult

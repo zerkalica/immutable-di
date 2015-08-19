@@ -9,18 +9,19 @@ function StateMonitor(cursor: AbstractCursor, differ: BaseDiff) {
 
     return function stateMonitor({displayName, id}, args) {
         const prevState = toJS()
+
         return function stop() {
             const nextState = toJS()
             const diff = differ.diff(prevState, nextState)
 
-            historyCursor.apply(history =>
-                history.push({
+            historyCursor.apply(h => h.concat([
+                {
                     displayName,
                     id,
                     args,
                     diff
-                })
-            )
+                }
+            ]))
         }
     }
 }

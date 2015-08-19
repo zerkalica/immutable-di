@@ -8,7 +8,6 @@ function normalizeDeps(d, pathMapper) {
     const isArray = Array.isArray(deps)
     const names = isArray ? [] : Object.keys(deps)
     const len = isArray ? deps.length : names.length
-
     for (let i = 0; i < len; i++) {
         const name = names.length ? names[i] : undefined
         const dep = deps[name || i]
@@ -24,6 +23,9 @@ function normalizeDeps(d, pathMapper) {
 function updateIdsMap(acc, normalizedDeps) {
     for (let i = 0, j = normalizedDeps.length; i < j; i++) {
         const dep = normalizedDeps[i]
+        if (!dep.definition.__di) {
+            throw new Error('Not a definition: ' + i + ': ' + JSON.stringify(dep))
+        }
         const {path, isSetter, deps} = dep.definition.__di
         if (isSetter) {
             acc.isAction = true
@@ -77,8 +79,14 @@ export default function Dep({
             isAction: false,
             id: isCachedTemporary ? null : id
         }
-        updateIdsMap(acc, newDeps)
-
+        try {
+            updateIdsMap(acc, newDeps)
+        } catch (e) {
+            e.message = 'Definition ' + dn + ': ' + e.message
+            console.error(deps)
+            throw e
+        }
+        Service.displayName = displayName
         Service.__di = {
             deps: newDeps,
             displayName: dn,

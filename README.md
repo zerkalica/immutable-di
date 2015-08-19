@@ -1,20 +1,23 @@
-# immutable-di [![Build Status](https://secure.travis-ci.org/zerkalica/immutable-di.png)](http://travis-ci.org/zerkalica/immutable-di)
+immutable-di [![Build Status](https://secure.travis-ci.org/zerkalica/immutable-di.png)](http://travis-ci.org/zerkalica/immutable-di)
+====================================================================================================================================
 
 [![NPM](https://nodei.co/npm/immutable-di.png?downloads=true&stars=true)](https://nodei.co/npm/immutable-di/)
 
 Simple, dependency injection container with some state handling functions.
 
-## General
-* Install: `npm install --save immutable-di`
-* Tests: `npm test`
-* Examples: `npm run dev.examples`
+General
+-------
 
-##Why not \*-flux?
-Our main focus make Flux-like API as less and simple as possible. Which with less words you can express more. The ideas behind similar to the [redux](https://github.com/gaearon/redux), [baobab](https://github.com/Yomguithereal/baobab), [nuclear-js](https://github.com/optimizely/nuclear-js), but implementation based on dependency injection. And of course you can use dependency injection as standalone.
+-	Install: `npm install --save immutable-di`
+-	Tests: `npm test`
+-	Examples: `npm run dev.examples`
+
+##Why not \*-flux? Our main focus make Flux-like API as less and simple as possible. Which with less words you can express more. The ideas behind similar to the [redux](https://github.com/gaearon/redux), [baobab](https://github.com/Yomguithereal/baobab), [nuclear-js](https://github.com/optimizely/nuclear-js), but implementation based on dependency injection. And of course you can use dependency injection as standalone.
 
 ##Usecases
 
 ##React all-in example
+
 ```js
 import {default as React, Component} from 'react';
 import {Getter, Facet, Factory, Setter} from 'immutable-di/define'
@@ -51,7 +54,7 @@ var ChangeAction = Factory({
       var a = num + data.a;
       setA(a);
     })
-    
+
   }
 });
 
@@ -75,7 +78,9 @@ export default function () {
 }
 ```
 
-## Define dependency
+Define dependency
+-----------------
+
 ```js
 import {Facet, Factory, Class} from 'immutable-di/define'
 // A, B - functions or classes with di definitions
@@ -126,7 +131,9 @@ class C {
 }
 ```
 
-## Working with state
+Working with state
+------------------
+
 ```js
 import Container from 'immutable-di'
 import NativeCursor from 'immutable-di/cursors/native'
@@ -170,7 +177,9 @@ container.select(['config', 'mod2', 'opt1']).set('1')
 container.off(listener)
 ```
 
-## Di factory example
+Di factory example
+------------------
+
 ```js
 import Container from 'immutable-di'
 import {Factory, Class} from 'immutable-di/define'
@@ -222,7 +231,9 @@ Factory({
 container.get(App)('test') // outputs: val: testdep, opt: test1
 ```
 
-## Cache example
+Cache example
+-------------
+
 ```js
 import Container from 'immutable-di'
 import {Factory, Class} from 'immutable-di/define'
@@ -256,7 +267,8 @@ container.get(MyModule) // no outputs: return from cache
 container.get(MyModule)('test3') // outputs out test2, val test3
 ```
 
-## React example
+React example
+-------------
 
 ```js
 // my-faset.js
@@ -362,4 +374,67 @@ const container = new Container(new NativeCursor({
 
 const initialProps = container.select(['todoApp']).get()
 React.render(<TodoList ...initialProps container={container}/>, document.querySelector('body'))
+```
+
+Initial debug support
+---------------------
+
+```js
+import {settings, Setter} from 'immutable-di/define'
+import Container from 'immutable-di'
+import NativeCursor from 'immutable-di/cursors/native'
+
+settings.debug = true
+
+
+const showChanges = Factory([
+    ['__history']
+])(function ShowChanges(history) {
+    console.log(history)
+})
+
+
+const action = Factory([
+    Setter(['tis', 'a'])
+])(function MyAction(setA) {
+    return function myAction(value) {
+        setA(value)
+    }
+})
+
+const container = new Container(new NativeCursor({
+    tis: {
+        a: 1,
+        b: 2
+    }
+}))
+
+container.get(action)(123)
+// Will produce:
+/*
+[
+    { "displayName": "MyAction", "id": 11, "args": [ 123 ], "diff": {} }
+]
+*/
+
+```
+
+history/BaseDiff used for diff generation, this dummy, but can be extended:
+
+```js
+import BaseDiff from 'immutable-di/history/BaseDiff'
+import {Class} from 'immutable-di/define'
+
+@Class()
+class MyDiff extends BaseDiff {
+    diff(from: object, to: object): object {
+        return {}
+    }
+
+    invert(patch: object): object {
+        return patch
+    }
+}
+
+container.override(BaseDiff, MyDiff)
 ```
