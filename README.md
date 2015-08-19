@@ -12,11 +12,16 @@ General
 -	Tests: `npm test`
 -	Examples: `npm run dev.examples`
 
-##Why not \*-flux? Our main focus make Flux-like API as less and simple as possible. Which with less words you can express more. The ideas behind similar to the [redux](https://github.com/gaearon/redux), [baobab](https://github.com/Yomguithereal/baobab), [nuclear-js](https://github.com/optimizely/nuclear-js), but implementation based on dependency injection. And of course you can use dependency injection as standalone.
+Why not \*-flux?
+----------------
 
-##Usecases
+Our main focus make Flux-like API as less and simple as possible. Which with less words you can express more. The ideas behind similar to the [redux](https://github.com/gaearon/redux), [baobab](https://github.com/Yomguithereal/baobab), [nuclear-js](https://github.com/optimizely/nuclear-js), but implementation based on dependency injection. And of course you can use dependency injection as standalone.
 
-##React all-in example
+Usecases
+--------
+
+React all-in example
+--------------------
 
 ```js
 import {default as React, Component} from 'react';
