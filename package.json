@@ -39,6 +39,7 @@
     "cursors",
     "define",
     "react",
+    "history",
     "utils"
   ],
   "dependencies": {

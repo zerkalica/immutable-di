@@ -38,4 +38,5 @@ dist
 /define
 /react
 /utils
+/history
 /__tests__
