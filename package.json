@@ -1,6 +1,6 @@
 {
   "name": "immutable-di",
-  "version": "1.3.3",
+  "version": "1.3.4",
   "description": "Simple, promise-based dependency injection container with some state handling functions (for facebook flux-like state-management)",
   "publishConfig": {
     "registry": "https://registry.npmjs.org"
