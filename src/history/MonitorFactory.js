@@ -14,11 +14,11 @@ export default function MonitorFactory(origDep) {
                     const resultData = depResult(...args)
                     const stop = stateMonitor(def, args)
 
-                    return Promise.resolve(resultData)
+                    Promise.resolve(resultData)
                         .then(stop)
                         .catch(stop)
 
-                    // return resultData
+                    return resultData
                 }
             } else {
                 result = depResult
