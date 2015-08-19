@@ -29,8 +29,7 @@ export default function MonitorFactory(origDep) {
 
         return Dep({
             deps: [dep, StateMonitor],
-            displayName: 'action#' + displayName,
-            pathMapper: Path
+            displayName: 'action#' + displayName
         })(monitorResult)
     }
 }
