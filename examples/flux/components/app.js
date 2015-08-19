@@ -9,7 +9,8 @@ import TodoList from './todo-list'
     pageId: ['page', 'id']
 })
 export default class App extends React.Component {
-    render({pageId}) {
+    render() {
+        const {pageId} = this.props
         return (
             <div className="app">
                 pageId: {pageId}

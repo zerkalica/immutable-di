@@ -26,13 +26,14 @@ import statefull from 'immutable-di/react/statefull'
 import Container from 'immutable-di'
 import NativeCursor from 'immutable-di/cursors/native'
 
-
-const container = new Container(new NativeCursor({
+const cursor = new NativeCursor({
   tis: {
     a: 1,
     b: 2
   }
-}));
+})
+
+const container = new Container(cursor)
 
 var abbaFacet = Facet({
   a: ['tis', 'a']
@@ -138,8 +139,7 @@ Working with state
 import Container from 'immutable-di'
 import NativeCursor from 'immutable-di/cursors/native'
 
-// define di container with state:
-const container = new Container(new NativeCursor({
+const cursor = new NativeCursor({
     config: {
         logger: {
             opt1: 'test1'
@@ -148,7 +148,10 @@ const container = new Container(new NativeCursor({
             opt1: 'test2'
         }
     }
-}))
+})
+
+// define di container with state:
+const container = new Container(cursor)
 
 // dep 1:
 function MyFaset(state) {
@@ -168,10 +171,10 @@ const listener = container.on({
 }, myHandler)
 
 // trigger my hander
-container.select(['config', 'logger', 'opt1']).set('test')
+cursor.select(['config', 'logger', 'opt1']).set('test')
 
 // path config.logger not affected, myHandler is not triggered
-container.select(['config', 'mod2', 'opt1']).set('1')
+cursor.select(['config', 'mod2', 'opt1']).set('1')
 
 // unbind listener:
 container.off(listener)
@@ -184,13 +187,15 @@ Di factory example
 import Container from 'immutable-di'
 import {Factory, Class} from 'immutable-di/define'
 import NativeCursor from 'immutable-di/cursors/native'
-const container = new Container(new NativeCursor({
+
+const cursor = new NativeCursor({
     config: {
         logger: {
             opt1: 'test1'
         }
     }
-}))
+})
+const container = new Container(cursor)
 
 function ConsoleOutputDriver() {
     return function consoleOutputDriver(str) {
@@ -238,13 +243,15 @@ Cache example
 import Container from 'immutable-di'
 import {Factory, Class} from 'immutable-di/define'
 import NativeCursor from 'immutable-di/cursors/native'
-const container = new Container(new NativeCursor({
+
+const cursor = new NativeCursor({
     config: {
         myModule: {
             opt1: 'test1'
         }
     }
-}))
+})
+const container = new Container(cursor)
 
 function MyModule({opt1}) {
     console.log('init', opt1)
@@ -259,7 +266,7 @@ Factory([
 
 container.get(MyModule) // outputs init test1
 container.get(MyModule) // no outputs, return from cache
-const cursor = container.select(['config', 'myModule', 'opt1'])
+const cursor = cursor.select(['config', 'myModule', 'opt1'])
 
 cursor.set('test2') // outputs test2
 container.get(MyModule) // no outputs: return from cache
@@ -346,7 +353,7 @@ import {Class} from 'immutable-di/define'
 @Class([Container])
 export default class TodoActions {
     constructor(container) {
-        this._cursor = container.select(['todoApp'])
+        this._cursor = cursor.select(['todoApp'])
     }
 
     addTodo(todo) {
@@ -363,16 +370,17 @@ import NativeCursor from 'immutable-di/cursors/native'
 import TodoList from './todo-list'
 
 // define di container with state:
-const container = new Container(new NativeCursor({
+const cursor = new NativeCursor({
     todoApp: {
         todos: [],
         query: {
 
         }
     }
-}))
+})
+const container = new Container(cursor)
 
-const initialProps = container.select(['todoApp']).get()
+const initialProps = cursor.select(['todoApp']).get()
 React.render(<TodoList ...initialProps container={container}/>, document.querySelector('body'))
 ```
 
@@ -386,13 +394,9 @@ import NativeCursor from 'immutable-di/cursors/native'
 
 settings.debug = true
 
-
-const showChanges = Factory([
-    ['__history']
-])(function ShowChanges(history) {
+function showChanges(history) {
     console.log(history)
-})
-
+}
 
 const action = Factory([
     Setter(['tis', 'a'])
@@ -402,12 +406,16 @@ const action = Factory([
     }
 })
 
-const container = new Container(new NativeCursor({
+const cursor = new NativeCursor({
     tis: {
         a: 1,
         b: 2
     }
-}))
+})
+const container = new Container(cursor)
+const listener = container.on([
+    ['__history']
+], showChanges)
 
 container.get(action)(123)
 // Will produce:
@@ -416,7 +424,7 @@ container.get(action)(123)
     { "displayName": "MyAction", "id": 11, "args": [ 123 ], "diff": {} }
 ]
 */
-
+container.off(listener)
 ```
 
 history/BaseDiff used for diff generation, this dummy, but can be extended:

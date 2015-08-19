@@ -1,8 +1,6 @@
 import React, {PropTypes as p, Component} from 'react'
 import TodoActions from '../todo-actions'
-import di from 'immutable-di/react/di'
-import __debug from 'debug'
-const debug = __debug('immutable-di:flux:todo-item')
+import statefull from 'immutable-di/react/statefull'
 
 export const TodoItemType = p.shape({
     id: p.number.isRequired,
@@ -10,7 +8,7 @@ export const TodoItemType = p.shape({
     description: p.string
 })
 
-@di({
+@statefull({
     actions: TodoActions
 })
 export default class TodoItem extends Component {
@@ -20,22 +18,23 @@ export default class TodoItem extends Component {
         actions: p.instanceOf(TodoActions).isRequired
     }
 
-    render({todo, editMode, actions}) {
+    render() {
+        const {todo, editMode, actions} = this.props
         const {id, title, description} = todo
         return (
-            <div className='todo_item'>
+            <div className="todo_item">
                 {editMode ? (
-                    <div className ='todo_item-body'>
-                        <h3 className='todo_item-title'>
+                    <div className ="todo_item-body">
+                        <h3 className="todo_item-title">
                             {title}
                         </h3>
-                        <button className='todo_item-edit_button' onClick={() => actions.editTodo(id)}>
+                        <button className="todo_item-edit_button" onClick={() => actions.editTodo(id)}>
                             Edit
                         </button>
                     </div>
                  ) : (
-                    <div className ='todo_item-body-edit'>
-                        <input type='text' className='todo_item-title__edit' value={title}
+                    <div className ="todo_item-body-edit">
+                        <input type="text" className="todo_item-title__edit" value={title}
                             onChange={e => actions.setTodo(id, {
                                 title: e.currentTarget.value
                             })}
@@ -51,12 +50,12 @@ export default class TodoItem extends Component {
                     </div>
                 )}
 
-                <div className='todo_item-description'>
+                <div className="todo_item-description">
                     {description}
                 </div>
 
                 <button
-                    className='todo_item-del_button'
+                    className="todo_item-del_button"
                     onClick={() => actions.deleteTodo(id)}
                 >
                     Remove
@@ -65,4 +64,3 @@ export default class TodoItem extends Component {
         )
     }
 }
-

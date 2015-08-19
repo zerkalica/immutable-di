@@ -75,6 +75,21 @@ export function Setter(path) {
     })(setter)
 }
 
+export function Apply(path) {
+    const key = path.join('.')
+    const displayName = 'apply#' + key
+    function setter(cursor) {
+        return cursor.select(path).apply
+    }
+
+    return Dep({
+        deps: [AbstractCursor],
+        displayName,
+        id: convertId(displayName),
+        isSetter: true
+    })(setter)
+}
+
 export function Def(data) {
     const displayName = 'def#' + JSON.stringify(data)
     function def() {

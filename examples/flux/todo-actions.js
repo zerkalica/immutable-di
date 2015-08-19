@@ -1,43 +1,44 @@
-import {Class} from 'immutable-di/define'
-import Container from 'immutable-di'
-import type {AbstractCursor} from 'immutable-di/cursors/abstract'
+import {Class, Setter, Apply} from 'immutable-di/define'
 
-@Class([Container])
+@Class({
+    setTodos: Setter(['todoApp', 'todos']),
+    applyTodos: Apply(['todoApp', 'todos']),
+    setMeta: Setter(['todoApp', 'meta'])
+})
 export default class TodoActions {
     _cursor: AbstractCursor
 
-    constructor(container: Container) {
-        this._state = container
-        this._cursor = container.select(['todoApp'])
+    constructor(options) {
+        this._o = options
         this.__id = 3
     }
 
     setTodo(id, data) {
-        this._cursor.apply(['todos'], todos => todos.map(todo =>
+        this._o.applyTodos(todos => todos.map(todo =>
             todo.id === id ?
                 {...todo, ...data} :
                 todo
         ))
         // prevent cursor jump to end in input in async
-        this._cursor.commit()
+        .commit()
     }
 
     deleteTodo(id) {
-        this._cursor.set(['meta'], {
+        this._o.setMeta({
             error: false,
             loading: true
         })
 
         return Promise.resolve({status: 'ok', id})
             .then(data => {
-                this._cursor.apply(['todos'], todos => todos.filter(todo => todo.id !== data.id))
-                this._cursor.set(['meta'], {
+                this._o.applyTodos(todos => todos.filter(todo => todo.id !== data.id))
+                this._o.setMeta({
                     loading: false,
                     error: false
                 })
             })
             .catch(err =>
-                this._cursor.set(['meta'], {
+                this._o.setMeta({
                     error: err,
                     loading: false
                 })
@@ -49,7 +50,7 @@ export default class TodoActions {
     }
 
     addTodo(todo) {
-        return this._cursor.apply(['todos'], todos => todos.concat([{...todo, id: this._createId()}]))
+        return this._o.applyTodos(todos => todos.concat([{...todo, id: this._createId()}]))
     }
 
     loadTodos() {
@@ -59,7 +60,7 @@ export default class TodoActions {
         ])
 
         return dataPromise.then(data =>
-            this._cursor.set(['todos'], data)
+            this._o.setTodos(data)
         )
     }
 }

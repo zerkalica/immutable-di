@@ -17,6 +17,5 @@ container.once(App.stateMap, state =>
     React.render(<App container={container} />, el)
 )
 
-//dispatcher.dispatch('reset', )
 //todoActions.addTodo({name: 'todo-new', id: 333})
 container.get(TodoActions).loadTodos()

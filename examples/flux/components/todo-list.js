@@ -1,4 +1,4 @@
-import React, {PropTypes as p, Component} from 'react'
+import React, {PropTypes as p} from 'react'
 
 import __debug from 'debug'
 const debug = __debug('immutable-di:flux:TodoList')
@@ -29,15 +29,16 @@ export default class TodoList extends React.Component {
         actions: p.instanceOf(TodoActions)
     }
 
-    render({todos, editId, loading, query, actions, mapped}) {
+    render() {
+        const {todos, editId, loading, actions, mapped} = this.props
         debug('len: %s, loading: %s', todos.length, loading)
 
         return (
-            <div className='todos'>
-                <h1 className='todos-title'>Todos</h1>
+            <div className="todos">
+                <h1 className="todos-title">Todos</h1>
 
                 <button
-                    className='todos-add_button'
+                    className="todos-add_button"
                     onClick={() => actions.addTodo({
                         title: 'example todo',
                         id: todos.length + 11,
@@ -48,7 +49,7 @@ export default class TodoList extends React.Component {
                 </button>
                 {mapped.toString()}
 
-                <ul className='todos-list'>
+                <ul className="todos-list">
                     {todos.map(todo => (
                         <TodoListItem
                             key={todo.id}
