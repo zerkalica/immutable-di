@@ -52,7 +52,7 @@ function updateIdsMap(acc, normalizedDeps) {
 }
 
 let lastId = 1
-function getId() {
+export function getId() {
     return lastId++
 }
 
