@@ -40,3 +40,4 @@ dist
 /utils
 /history
 /__tests__
+*.sh

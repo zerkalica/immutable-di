@@ -1,6 +1,21 @@
 import AbstractCursor from '../cursors/abstract'
 import Dep from '../utils/Dep'
 
+function filterArgs(args) {
+    let result = args
+    try {
+        JSON.stringify(args)
+    } catch(e) {
+        result = args.map(arg =>
+            (typeof arg === 'function' || typeof arg === 'object')
+                ? '[circular]'
+                : arg
+        )
+    }
+
+    return result
+}
+
 function StateMonitor(cursor: AbstractCursor) {
     const historyCursor = cursor.select(['__history'])
     historyCursor.set([])
@@ -15,7 +30,7 @@ function StateMonitor(cursor: AbstractCursor) {
                 {
                     displayName,
                     id,
-                    args,
+                    args: filterArgs(args),
                     diff
                 }
             ]))

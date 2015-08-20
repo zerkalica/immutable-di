@@ -17,7 +17,7 @@
     "release-major": "npm run pull && npm version major && npm run push",
     "clean": "rm -rf cursors history react utils __tests__ *.js *.map build",
     "build": "npm run clean && babel src --source-maps --out-dir .",
-    "deploy": "npm run clean && babel src --source-maps --out-dir $PROJECTS/qiwi-checkout-client/node_modules/immutable-di",
+    "deploy": "npm run clean && babel src --source-maps --watch",
     "prod": "npm run build -- --production",
     "dev": "npm run build -- --watch",
     "lint": "exit 0 && eslint src",
