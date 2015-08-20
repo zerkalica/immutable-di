@@ -393,11 +393,12 @@ Initial debug support
 ---------------------
 
 ```js
-import {settings, Setter} from 'immutable-di/define'
+import {Factory, Setter} from 'immutable-di/define'
 import Container from 'immutable-di'
 import NativeCursor from 'immutable-di/cursors/native'
+import MonitorFactory from 'immutable-di/history/MonitorFactory'
 
-settings.debug = true
+Factory.extend = MonitorFactory
 
 function showChanges(history) {
     console.log(history)
@@ -432,4 +433,4 @@ container.get(action)(123)
 container.off(listener)
 ```
 
-cursor/native:diff used for diff generation, this dummy, but NativeCursor can be extended.
+NativeCursor:diff used for diff generation, this dummy, but NativeCursor can be extended.

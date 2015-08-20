@@ -1,8 +1,11 @@
 import AbstractCursor from './cursors/abstract'
 import Dep, {getId} from './utils/Dep'
-import MonitorFactory from './history/MonitorFactory'
 
 const ids = {}
+
+function pass(p) {
+    return p
+}
 
 function convertId(dn) {
     if (!ids[dn]) {
@@ -12,22 +15,19 @@ function convertId(dn) {
     return ids[dn]
 }
 
-export const settings = {
-    debug: false
-}
-
 export function Getter(path) {
     const key = path.join('.')
     const displayName = 'get_' + key
     function getter(cursor) {
         return cursor.select(path).get
     }
-    return Dep({
+    return Getter.extend(Dep({
         deps: [AbstractCursor],
         displayName,
         id: convertId(displayName)
-    })(getter)
+    }))(getter)
 }
+Getter.extend = pass
 
 export function Path(path) {
     const key = path.join('.')
@@ -36,14 +36,15 @@ export function Path(path) {
         return get()
     }
 
-    return Dep({
+    return Path.extend(Dep({
         deps: [Getter(path)],
         displayName,
         id: convertId(displayName),
         isCachedTemporary: true,
         path
-    })(getData)
+    }))(getData)
 }
+Path.extend = pass
 
 export function Assign(path) {
     const key = path.join('.')
@@ -52,13 +53,14 @@ export function Assign(path) {
         return cursor.select(path).assign
     }
 
-    return Dep({
+    return Assign.extend(Dep({
         deps: [AbstractCursor],
         displayName,
         id: convertId(displayName),
         isSetter: true
-    })(assigner)
+    }))(assigner)
 }
+Assign.extend = pass
 
 export function Setter(path) {
     const key = path.join('.')
@@ -67,13 +69,14 @@ export function Setter(path) {
         return cursor.select(path).set
     }
 
-    return Dep({
+    return Setter.extend(Dep({
         deps: [AbstractCursor],
         displayName,
         id: convertId(displayName),
         isSetter: true
-    })(setter)
+    }))(setter)
 }
+Setter.extend = pass
 
 export function Apply(path) {
     const key = path.join('.')
@@ -82,13 +85,14 @@ export function Apply(path) {
         return cursor.select(path).apply
     }
 
-    return Dep({
+    return Apply.extend(Dep({
         deps: [AbstractCursor],
         displayName,
         id: convertId(displayName),
         isSetter: true
-    })(setter)
+    }))(setter)
 }
+Apply.extend = pass
 
 export function Def(data) {
     const displayName = 'def_' + JSON.stringify(data)
@@ -96,38 +100,38 @@ export function Def(data) {
         return data
     }
 
-    return Dep({
+    return Def.extend(Dep({
         displayName,
         id: convertId(displayName)
-    })(def)
+    }))(def)
 }
+Def.extend = pass
 
 export function Class(deps, displayName) {
-    return Dep({
+    return Class.extend(Dep({
         deps,
         displayName,
         isClass: true,
         pathMapper: Path
-    })
+    }))
 }
+Class.extend = pass
 
 export function Facet(deps, displayName) {
-    const origDep = Dep({
+    return Facet.extend(Dep({
         deps,
         displayName,
         isCachedTemporary: true,
         pathMapper: Path
-    })
-
-    return settings.debug ? MonitorFactory(origDep) : origDep
+    }))
 }
+Facet.extend = pass
 
 export function Factory(deps, displayName) {
-    const origDep = Dep({
+    return Factory.extend(Dep({
         deps,
         displayName,
         pathMapper: Path
-    })
-
-    return settings.debug ? MonitorFactory(origDep) : origDep
+    }))
 }
+Factory.extend = pass
