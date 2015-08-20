@@ -39,7 +39,7 @@ export default function statefull(stateMap = {}) {
         const dn = BaseComponent.displayName || getFunctionName(BaseComponent)
 
         return class StatefullComponentWrapper extends StatefullComponent {
-            static displayName = dn + '#statefull'
+            static displayName = dn + '_statefull'
             static stateMap = stateMap
 
             render() {

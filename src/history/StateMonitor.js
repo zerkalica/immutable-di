@@ -1,18 +1,15 @@
 import AbstractCursor from '../cursors/abstract'
-import BaseDiff from './BaseDiff'
 import Dep from '../utils/Dep'
 
-function StateMonitor(cursor: AbstractCursor, differ: BaseDiff) {
-    const toJS = cursor.toJS
+function StateMonitor(cursor: AbstractCursor) {
     const historyCursor = cursor.select(['__history'])
     historyCursor.set([])
 
     return function stateMonitor({displayName, id}, args) {
-        const prevState = toJS()
+        const prevState = cursor.toJS()
 
         return function stop() {
-            const nextState = toJS()
-            const diff = differ.diff(prevState, nextState)
+            const diff = cursor.diff(prevState)
 
             historyCursor.apply(h => h.concat([
                 {
@@ -27,5 +24,5 @@ function StateMonitor(cursor: AbstractCursor, differ: BaseDiff) {
 }
 
 export default Dep({
-    deps: [AbstractCursor, BaseDiff]
+    deps: [AbstractCursor]
 })(StateMonitor)

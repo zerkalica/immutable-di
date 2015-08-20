@@ -23,7 +23,7 @@ export class RootComponent extends Component {
 export default function root(BaseComponent) {
     const dn = BaseComponent.displayName || getFunctionName(BaseComponent)
     return class RootComponentWrapper extends RootComponent {
-        static displayName = dn + '#root'
+        static displayName = dn + '_root'
 
         render() {
             return createElement(BaseComponent, this.props)

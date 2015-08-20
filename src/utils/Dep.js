@@ -83,7 +83,6 @@ export default function Dep({
             updateIdsMap(acc, newDeps)
         } catch (e) {
             e.message = 'Definition ' + dn + ': ' + e.message
-            console.error(deps)
             throw e
         }
         Service.displayName = displayName

@@ -9,6 +9,7 @@ exports.Getter = Getter;
 exports.Path = Path;
 exports.Assign = Assign;
 exports.Setter = Setter;
+exports.Apply = Apply;
 exports.Def = Def;
 exports.Class = Class;
 exports.Facet = Facet;
@@ -91,6 +92,21 @@ function Setter(path) {
     var displayName = 'setter#' + key;
     function setter(cursor) {
         return cursor.select(path).set;
+    }
+
+    return (0, _utilsDep2['default'])({
+        deps: [_cursorsAbstract2['default']],
+        displayName: displayName,
+        id: convertId(displayName),
+        isSetter: true
+    })(setter);
+}
+
+function Apply(path) {
+    var key = path.join('.');
+    var displayName = 'apply#' + key;
+    function setter(cursor) {
+        return cursor.select(path).apply;
     }
 
     return (0, _utilsDep2['default'])({

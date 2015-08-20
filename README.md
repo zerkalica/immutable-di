@@ -432,22 +432,4 @@ container.get(action)(123)
 container.off(listener)
 ```
 
-history/BaseDiff used for diff generation, this dummy, but can be extended:
-
-```js
-import BaseDiff from 'immutable-di/history/BaseDiff'
-import {Class} from 'immutable-di/define'
-
-@Class()
-class MyDiff extends BaseDiff {
-    diff(from: object, to: object): object {
-        return {}
-    }
-
-    invert(patch: object): object {
-        return patch
-    }
-}
-
-container.override(BaseDiff, MyDiff)
-```
+cursor/native:diff used for diff generation, this dummy, but NativeCursor can be extended.

@@ -5,7 +5,7 @@ export default function MonitorFactory(origDep) {
     return function monitorFactory(fn) {
         const dep = origDep(fn)
         const def = dep.__di
-        const {isAction, displayName} = def
+        const {isAction, displayName, isCachedTemporary} = def
 
         function monitorResult(depResult: any, stateMonitor: StateMonitor) {
             let result
@@ -29,7 +29,8 @@ export default function MonitorFactory(origDep) {
 
         return Dep({
             deps: [dep, StateMonitor],
-            displayName: 'action#' + displayName
+            displayName: displayName + '_monitor',
+            isCachedTemporary
         })(monitorResult)
     }
 }

@@ -18,7 +18,7 @@ export const settings = {
 
 export function Getter(path) {
     const key = path.join('.')
-    const displayName = 'get#' + key
+    const displayName = 'get_' + key
     function getter(cursor) {
         return cursor.select(path).get
     }
@@ -31,7 +31,7 @@ export function Getter(path) {
 
 export function Path(path) {
     const key = path.join('.')
-    const displayName = 'path#' + key
+    const displayName = 'path_' + key
     function getData(get) {
         return get()
     }
@@ -47,7 +47,7 @@ export function Path(path) {
 
 export function Assign(path) {
     const key = path.join('.')
-    const displayName = 'assign#' + key
+    const displayName = 'assign_' + key
     function assigner(cursor) {
         return cursor.select(path).assign
     }
@@ -62,7 +62,7 @@ export function Assign(path) {
 
 export function Setter(path) {
     const key = path.join('.')
-    const displayName = 'setter#' + key
+    const displayName = 'setter_' + key
     function setter(cursor) {
         return cursor.select(path).set
     }
@@ -77,7 +77,7 @@ export function Setter(path) {
 
 export function Apply(path) {
     const key = path.join('.')
-    const displayName = 'apply#' + key
+    const displayName = 'apply_' + key
     function setter(cursor) {
         return cursor.select(path).apply
     }
@@ -91,7 +91,7 @@ export function Apply(path) {
 }
 
 export function Def(data) {
-    const displayName = 'def#' + JSON.stringify(data)
+    const displayName = 'def_' + JSON.stringify(data)
     function def() {
         return data
     }
@@ -112,12 +112,14 @@ export function Class(deps, displayName) {
 }
 
 export function Facet(deps, displayName) {
-    return Dep({
+    const origDep = Dep({
         deps,
         displayName,
         isCachedTemporary: true,
         pathMapper: Path
     })
+
+    return settings.debug ? MonitorFactory(origDep) : origDep
 }
 
 export function Factory(deps, displayName) {

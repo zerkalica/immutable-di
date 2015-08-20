@@ -27,17 +27,16 @@ export default class NativeCursor extends AbstractCursor {
         }
     }
 
-    toString() {
+    toJSON() {
         return JSON.stringify(this._state)
     }
 
-    toJS() {
-        return JSON.parse(this.toString())
+    diff(prevState: object): object {
+        return {}
     }
 
-    fromJS(state) {
-        this._state = state
-        this._update()
+    patch(patches: Array<object>) {
+        throw new Error('implement')
     }
 
     get() {
