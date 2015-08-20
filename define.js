@@ -23,11 +23,11 @@ var _utilsDep = require('./utils/Dep');
 
 var _utilsDep2 = _interopRequireDefault(_utilsDep);
 
-var _historyMonitorFactory = require('./history/MonitorFactory');
-
-var _historyMonitorFactory2 = _interopRequireDefault(_historyMonitorFactory);
-
 var ids = {};
+
+function pass(p) {
+    return p;
+}
 
 function convertId(dn) {
     if (!ids[dn]) {
@@ -37,123 +37,133 @@ function convertId(dn) {
     return ids[dn];
 }
 
-var settings = {
-    debug: false
-};
-
-exports.settings = settings;
-
 function Getter(path) {
     var key = path.join('.');
-    var displayName = 'get#' + key;
+    var displayName = 'get_' + key;
     function getter(cursor) {
         return cursor.select(path).get;
     }
-    return (0, _utilsDep2['default'])({
+    return Getter.extend((0, _utilsDep2['default'])({
         deps: [_cursorsAbstract2['default']],
         displayName: displayName,
         id: convertId(displayName)
-    })(getter);
+    }))(getter);
 }
+
+Getter.extend = pass;
 
 function Path(path) {
     var key = path.join('.');
-    var displayName = 'path#' + key;
+    var displayName = 'path_' + key;
     function getData(get) {
         return get();
     }
 
-    return (0, _utilsDep2['default'])({
+    return Path.extend((0, _utilsDep2['default'])({
         deps: [Getter(path)],
         displayName: displayName,
         id: convertId(displayName),
         isCachedTemporary: true,
         path: path
-    })(getData);
+    }))(getData);
 }
+
+Path.extend = pass;
 
 function Assign(path) {
     var key = path.join('.');
-    var displayName = 'assign#' + key;
+    var displayName = 'assign_' + key;
     function assigner(cursor) {
         return cursor.select(path).assign;
     }
 
-    return (0, _utilsDep2['default'])({
+    return Assign.extend((0, _utilsDep2['default'])({
         deps: [_cursorsAbstract2['default']],
         displayName: displayName,
         id: convertId(displayName),
         isSetter: true
-    })(assigner);
+    }))(assigner);
 }
+
+Assign.extend = pass;
 
 function Setter(path) {
     var key = path.join('.');
-    var displayName = 'setter#' + key;
+    var displayName = 'setter_' + key;
     function setter(cursor) {
         return cursor.select(path).set;
     }
 
-    return (0, _utilsDep2['default'])({
+    return Setter.extend((0, _utilsDep2['default'])({
         deps: [_cursorsAbstract2['default']],
         displayName: displayName,
         id: convertId(displayName),
         isSetter: true
-    })(setter);
+    }))(setter);
 }
+
+Setter.extend = pass;
 
 function Apply(path) {
     var key = path.join('.');
-    var displayName = 'apply#' + key;
+    var displayName = 'apply_' + key;
     function setter(cursor) {
         return cursor.select(path).apply;
     }
 
-    return (0, _utilsDep2['default'])({
+    return Apply.extend((0, _utilsDep2['default'])({
         deps: [_cursorsAbstract2['default']],
         displayName: displayName,
         id: convertId(displayName),
         isSetter: true
-    })(setter);
+    }))(setter);
 }
 
+Apply.extend = pass;
+
 function Def(data) {
-    var displayName = 'def#' + JSON.stringify(data);
+    var displayName = 'def_' + JSON.stringify(data);
     function def() {
         return data;
     }
 
-    return (0, _utilsDep2['default'])({
+    return Def.extend((0, _utilsDep2['default'])({
         displayName: displayName,
         id: convertId(displayName)
-    })(def);
+    }))(def);
 }
 
+Def.extend = pass;
+
 function Class(deps, displayName) {
-    return (0, _utilsDep2['default'])({
+    return Class.extend((0, _utilsDep2['default'])({
         deps: deps,
         displayName: displayName,
         isClass: true,
         pathMapper: Path
-    });
+    }));
 }
 
+Class.extend = pass;
+
 function Facet(deps, displayName) {
-    return (0, _utilsDep2['default'])({
+    return Facet.extend((0, _utilsDep2['default'])({
         deps: deps,
         displayName: displayName,
         isCachedTemporary: true,
         pathMapper: Path
-    });
+    }));
 }
 
+Facet.extend = pass;
+
 function Factory(deps, displayName) {
-    var origDep = (0, _utilsDep2['default'])({
+    return Factory.extend((0, _utilsDep2['default'])({
         deps: deps,
         displayName: displayName,
         pathMapper: Path
-    });
-
-    return settings.debug ? (0, _historyMonitorFactory2['default'])(origDep) : origDep;
+    }));
 }
+
+Factory.extend = pass;
 //# sourceMappingURL=define.js.map

@@ -56,7 +56,11 @@ export default class AbstractCursor<State> {
     }
 
     /* eslint-disable no-unused-vars */
-    toJSON() {
+    toJSON(): string {
+        throw new Error('implement')
+    }
+
+    snap(): object {
         throw new Error('implement')
     }
 

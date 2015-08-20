@@ -6,7 +6,7 @@ function StateMonitor(cursor: AbstractCursor) {
     historyCursor.set([])
 
     return function stateMonitor({displayName, id}, args) {
-        const prevState = cursor.toJS()
+        const prevState = cursor.snap()
 
         return function stop() {
             const diff = cursor.diff(prevState)

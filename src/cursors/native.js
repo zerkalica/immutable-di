@@ -27,8 +27,12 @@ export default class NativeCursor extends AbstractCursor {
         }
     }
 
-    toJSON() {
+    toJSON(): string {
         return JSON.stringify(this._state)
+    }
+
+    snap(): object {
+        return JSON.parse(JSON.stringify(this._state))
     }
 
     diff(prevState: object): object {
