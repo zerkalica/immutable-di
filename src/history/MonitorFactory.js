@@ -1,5 +1,6 @@
 import Dep from '../utils/Dep'
 import StateMonitor from './StateMonitor'
+import getFunctionName from '../utils/getFunctionName'
 
 export default function MonitorFactory(origDep) {
     return function monitorFactory(fn) {
@@ -20,6 +21,7 @@ export default function MonitorFactory(origDep) {
 
                     return resultData
                 }
+                result.displayName = (depResult.displayName || getFunctionName(depResult) || displayName) + '_monitorResult'
             } else {
                 result = depResult
             }
