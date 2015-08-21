@@ -10,7 +10,7 @@
     "prepublish": "npm run lint && npm run test && npm run build",
     "pre-commit": "npm run lint",
     "update": "ncu -ua && npm install",
-    "pull": "git checkout master && git pull origin master",
+    "pull": "git checkout master && git pull origin master,"
     "push": "git push origin master --tags && npm publish",
     "release-patch": "npm run pull && npm version patch && npm run push",
     "release-minor": "npm run pull && npm version minor && npm run push",
@@ -31,6 +31,20 @@
   "repository": {
     "type": "git",
     "url": "http://github.com/zerkalica/immutable-di.git"
+  },
+  "keywords": {
+    "immutable-di",
+    "dependency injection",
+    "di",
+    "modular",
+    "state",
+    "functional",
+    "immutable",
+    "hot",
+    "live",
+    "replay",
+    "flux",
+    "elm"
   },
   "files": [
     "*.map",
