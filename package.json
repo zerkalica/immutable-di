@@ -32,7 +32,7 @@
     "type": "git",
     "url": "http://github.com/zerkalica/immutable-di.git"
   },
-  "keywords": {
+  "keywords": [
     "immutable-di",
     "dependency injection",
     "di",
@@ -45,7 +45,7 @@
     "replay",
     "flux",
     "elm"
-  },
+  ],
   "files": [
     "*.map",
     "*.js",
