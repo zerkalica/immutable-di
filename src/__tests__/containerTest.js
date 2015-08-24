@@ -22,7 +22,7 @@ describe('container', () => {
 
     describe('basics', () => {
         it('should throws exception if incorrect data passed to constructor', () => {
-            assert.throws(() => new Container(), /undefined/)
+            assert.throws(() => new Container(), /instance/)
         })
     })
 

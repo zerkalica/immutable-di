@@ -1,5 +1,6 @@
 import AbstractCursor from './cursors/abstract'
 import Dep, {getId} from './utils/Dep'
+import {IPath} from './asserts'
 
 const ids = {}
 
@@ -16,6 +17,7 @@ function convertId(dn) {
 }
 
 export function Getter(path) {
+    IPath(path)
     const key = path.join('.')
     const displayName = 'get_' + key
     function getter(cursor) {
@@ -30,6 +32,7 @@ export function Getter(path) {
 Getter.extend = pass
 
 export function Path(path) {
+    IPath(path)
     const key = path.join('.')
     const displayName = 'path_' + key
     function getData(get) {
@@ -47,6 +50,7 @@ export function Path(path) {
 Path.extend = pass
 
 export function Assign(path) {
+    IPath(path)
     const key = path.join('.')
     const displayName = 'assign_' + key
     function assigner(cursor) {
@@ -63,6 +67,7 @@ export function Assign(path) {
 Assign.extend = pass
 
 export function Setter(path) {
+    IPath(path)
     const key = path.join('.')
     const displayName = 'setter_' + key
     function setter(cursor) {
@@ -79,6 +84,7 @@ export function Setter(path) {
 Setter.extend = pass
 
 export function Apply(path) {
+    IPath(path)
     const key = path.join('.')
     const displayName = 'apply_' + key
     function setter(cursor) {

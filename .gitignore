@@ -32,12 +32,12 @@ build
 dist
 .tags*
 *.map
-/index.js
-/container.js
+/*.js
+/*.sh
+/__tests__
+
 /cursors
 /define
 /react
 /utils
 /history
-/__tests__
-*.sh

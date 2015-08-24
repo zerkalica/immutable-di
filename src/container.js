@@ -1,5 +1,6 @@
 import {__pathToIdsMap} from './utils/Dep'
 import {Facet} from './define'
+import {IDep} from './asserts'
 import AbstractCursor from './cursors/abstract'
 import getFunctionName from './utils/getFunctionName'
 import type {IDependency} from './utils/Dep'
@@ -12,6 +13,9 @@ export default class Container {
     _definitionMap = {}
 
     constructor(state: AbstractCursor) {
+        if (!(state instanceof AbstractCursor)) {
+            throw new TypeError('state is not an instance of AbstractCursor: ' + state)
+        }
         this.get = ::this.get
         this.once = ::this.once
         this.mount = ::this.mount
@@ -24,6 +28,8 @@ export default class Container {
     }
 
     override(fromDefinition: IDependency, toDefinition: IDependency) {
+        IDep(fromDefinition)
+        IDep(toDefinition)
         this._definitionMap[fromDefinition.__di.id] = toDefinition
     }
 
@@ -60,12 +66,14 @@ export default class Container {
     }
 
     mount(definition: IDependency) {
+        IDep(definition)
         // do not call listener on another state change
         this._cache[definition.__di.id] = null
         this._listeners.push(definition)
     }
 
     unmount(listenerDef: IDependency) {
+        IDep(listenerDef)
         this._listeners = this._listeners.filter(d => listenerDef !== d)
     }
 
@@ -117,6 +125,7 @@ export default class Container {
     }
 
     get(definition: IDependency): any {
+        IDep(definition)
         return this._get(definition, {}, [])
     }
 }

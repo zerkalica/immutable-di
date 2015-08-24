@@ -1,10 +1,10 @@
 import getFunctionName from './getFunctionName'
+import {IDeps} from '../asserts'
 
 export type IDependency = (v: any) => any
 
-function normalizeDeps(d, pathMapper) {
+function normalizeDeps(deps, pathMapper) {
     const resultDeps = []
-    const deps = d || []
     const isArray = Array.isArray(deps)
     const names = isArray ? [] : Object.keys(deps)
     const len = isArray ? deps.length : names.length
@@ -70,10 +70,12 @@ export default function Dep({
     path,
     pathMapper
 }) {
+    const _deps = deps || []
+    IDeps(_deps)
     return function dep(Service) {
         id = id || (Service.__di ? Service.__di.id : getId())
         const dn = displayName || Service.displayName || getFunctionName(Service) || id
-        const newDeps = normalizeDeps(deps, pathMapper)
+        const newDeps = normalizeDeps(_deps, pathMapper)
         const acc = {
             map: __pathToIdsMap,
             isAction: false,
