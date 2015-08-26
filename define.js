@@ -23,6 +23,8 @@ var _utilsDep = require('./utils/Dep');
 
 var _utilsDep2 = _interopRequireDefault(_utilsDep);
 
+var _asserts = require('./asserts');
+
 var ids = {};
 
 function pass(p) {
@@ -38,6 +40,7 @@ function convertId(dn) {
 }
 
 function Getter(path) {
+    (0, _asserts.IPath)(path);
     var key = path.join('.');
     var displayName = 'get_' + key;
     function getter(cursor) {
@@ -53,6 +56,7 @@ function Getter(path) {
 Getter.extend = pass;
 
 function Path(path) {
+    (0, _asserts.IPath)(path);
     var key = path.join('.');
     var displayName = 'path_' + key;
     function getData(get) {
@@ -71,6 +75,7 @@ function Path(path) {
 Path.extend = pass;
 
 function Assign(path) {
+    (0, _asserts.IPath)(path);
     var key = path.join('.');
     var displayName = 'assign_' + key;
     function assigner(cursor) {
@@ -88,6 +93,7 @@ function Assign(path) {
 Assign.extend = pass;
 
 function Setter(path) {
+    (0, _asserts.IPath)(path);
     var key = path.join('.');
     var displayName = 'setter_' + key;
     function setter(cursor) {
@@ -105,6 +111,7 @@ function Setter(path) {
 Setter.extend = pass;
 
 function Apply(path) {
+    (0, _asserts.IPath)(path);
     var key = path.join('.');
     var displayName = 'apply_' + key;
     function setter(cursor) {

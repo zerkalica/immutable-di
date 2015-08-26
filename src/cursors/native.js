@@ -23,6 +23,7 @@ export default class NativeCursor extends AbstractCursor {
                 }
             } catch(e) {
                 e.message = e.message + ', path: ' + this._prefix.join('.')
+                throw e
             }
             /* eslint-enable no-new-func */
         } else {
