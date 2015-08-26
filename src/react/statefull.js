@@ -26,10 +26,10 @@ class StatefullComponent extends Component {
 
     __setState(state) {
         if (!this.__isMounted) {
-            throw new Error('setState invoked, but component is not mounted: ' + this.constructor.displayName)
+            console.warn('setState invoked, but component is not mounted: %s', this.constructor.displayName)
+        } else {
+            this.setState(state)
         }
-
-        return this.setState(state)
     }
 
     componentWillReceiveProps(props) {
