@@ -74,6 +74,7 @@ export default class Container {
 
     unmount(listenerDef: IDependency) {
         IDep(listenerDef)
+        this._cache[listenerDef.__di.id] = null
         this._listeners = this._listeners.filter(d => listenerDef !== d)
     }
 
