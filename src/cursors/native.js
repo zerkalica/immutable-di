@@ -17,6 +17,13 @@ export default class NativeCursor extends AbstractCursor {
                 .slice(0, -1)
                 .join('.')
             )
+            try {
+                if (this._selector(this._state) === undefined) {
+                    throw new Error('undefined value')
+                }
+            } catch(e) {
+                e.message = e.message + ', path: ' + this._prefix.join('.')
+            }
             /* eslint-enable no-new-func */
         } else {
             this._cnName = '_state'
