@@ -16,21 +16,33 @@ class StatefullComponent extends Component {
         function pass(state) {
             return state
         }
+        this.__setState = ::this.__setState
         const {stateMap, displayName} = this.constructor
         const Getter = Facet(stateMap, displayName)(pass)
-        this.__listener = Factory(stateMap, displayName)(::this.setState)
+        this.__listener = Factory(stateMap, displayName)(this.__setState)
         this.state = {...props, ...context.container.get(Getter)}
+        this.__isMounted = false
+    }
+
+    __setState(state) {
+        if (!this.__isMounted) {
+            throw new Error('setState invoked, but component is not mounted: ' + this.constructor.displayName)
+        }
+
+        return this.setState(state)
     }
 
     componentWillReceiveProps(props) {
-        this.setState(props)
+        this.__setState(props)
     }
 
     componentDidMount() {
+        this.__isMounted = true
         this.context.container.mount(this.__listener)
     }
 
     componentWillUnmount() {
+        this.__isMounted = false
         this.context.container.unmount(this.__listener)
     }
 }

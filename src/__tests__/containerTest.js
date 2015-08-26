@@ -127,7 +127,7 @@ describe('container', () => {
         })
 
         it('should throw error if node does not exists in the middle of path', () => {
-            assert.throws(() => cursor.select(['todo', 'id2', 'id']).get(), /read.*undefined/)
+            assert.throws(() => cursor.select(['todo', 'id2', 'id']).get(), /path/)
         })
 
         it('should track parent changes', () => {

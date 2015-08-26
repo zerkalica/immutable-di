@@ -19,7 +19,7 @@ export default class NativeCursor extends AbstractCursor {
             )
             try {
                 if (this._selector(this._state) === undefined) {
-                    throw new Error('undefined value')
+                    throw new Error('undefined value ' + this._prefix[this.prefix.length - 1])
                 }
             } catch(e) {
                 e.message = e.message + ', path: ' + this._prefix.join('.')
