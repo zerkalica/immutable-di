@@ -21,6 +21,7 @@ class StatefullComponent extends Component {
         const Getter = Facet(stateMap, displayName)(pass)
         this.__listener = Factory(stateMap, displayName)(this.__setState)
         this.state = {...props, ...context.container.get(Getter)}
+        delete this.state.__loadState
         this.__isMounted = false
     }
 
@@ -39,6 +40,9 @@ class StatefullComponent extends Component {
     componentDidMount() {
         this.__isMounted = true
         this.context.container.mount(this.__listener)
+        if (this.props.__loadState) {
+            this.props.__loadState(this.props)
+        }
     }
 
     componentWillUnmount() {
