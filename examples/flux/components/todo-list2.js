@@ -10,9 +10,62 @@ import mapIds from '../state/map-ids'
 import {TodoItemType} from './todo-item'
 import TodoListItem from './todo-list-item'
 
+function mapArrayToObject(arr, keys) {
+    const result = {}
+    for (let i = 0; i < keys.length; i++) {
+        result[keys[i]] = arr[i]
+    }
+
+    return result
+}
+
+function PromiseSpread(obj) {
+    const keys = Object.keys(obj)
+    function map(values) {
+        return mapArrayToObject(values, keys)
+    }
+
+    return Promise.all(keys.map(k => obj[k])).then(map)
+}
+
+function PromiseAssign(cb) {
+    return function resolveAssign(obj) {
+        return {
+            ...obj,
+            ...cb(obj)
+        }
+    }
+}
+
+function LoadAll({user, profile, todos}) {
+    const {userId} = params
+    return PromiseSpread({
+        query,
+        user: user(userId),
+        profile: profile(userId)
+    })
+    .then(PromiseAssign(d => ({
+        todos: todos(d.profile.todoGroupIds[0])
+    })))
+}
+Factory({
+    user: userLoader,
+    profile: profileLoader,
+    todos: todoLoader
+})(LoadAll)
+
 @statefull({
-    todos: ['todoApp', 'todos'],
-    query: ['todoApp', 'query'],
+    query: Query(schema),
+    user: ['user'],
+    profile: ['profile'],
+    todos: ['todos'],
+    mapped: mapIds,
+    actions: TodoActions
+}, LoadAll)
+
+@statefull({
+    todos: Loader(['todoApp', 'todos']),
+    query: Query(schema),
     mapped: mapIds,
     actions: TodoActions
 })

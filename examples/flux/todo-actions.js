@@ -53,14 +53,25 @@ export default class TodoActions {
         return this._o.applyTodos(todos => todos.concat([{...todo, id: this._createId()}]))
     }
 
-    loadTodos() {
-        const dataPromise = Promise.resolve([
-            {title: 'todo-1', id: 1, description: '123'},
-            {title: 'todo-2', id: 2, description: '231'}
+    loadUserTodos(todoId) {
+        return Promise.resolve([
+            {title: 'todo-1', id: 1, todoId, description: '123'},
+            {title: 'todo-2', id: 2, todoId, description: '231'}
         ])
+    }
 
-        return dataPromise.then(data =>
-            this._o.setTodos(data)
-        )
+    loadUserProfile(userId) {
+        return Promise.resolve({
+            profileId: 1,
+            userId,
+            todoGroupIds: [0, 1]
+        })
+    }
+
+    loadUser(userId) {
+        return Promise.resolve({
+            userId,
+            name: 'test test'
+        })
     }
 }

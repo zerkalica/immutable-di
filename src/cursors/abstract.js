@@ -21,7 +21,7 @@ export default class AbstractCursor<State> {
         this._state = state || {}
         this._prefix = prefix || []
         this._prefixKey = this._prefix.join('.')
-        this.setNotify(notify || pass)
+        this.setNotify(notify)
 
         this.commit = ::this.commit
         this.get = ::this.get
