@@ -1,6 +1,6 @@
 {
   "name": "immutable-di",
-  "version": "1.3.16",
+  "version": "1.3.17",
   "description": "Simple, promise-based dependency injection container with some state handling functions (for facebook flux-like state-management)",
   "publishConfig": {
     "registry": "https://registry.npmjs.org"
@@ -15,7 +15,7 @@
     "release-patch": "npm run pull && npm version patch && npm run push",
     "release-minor": "npm run pull && npm version minor && npm run push",
     "release-major": "npm run pull && npm version major && npm run push",
-    "clean": "rm -rf cursors history react utils __tests__ *.js *.map build",
+    "clean": "rm -rf cursors react utils __tests__ *.js *.map build",
     "build": "npm run clean && babel src --source-maps --out-dir .",
     "deploy": "npm run clean && babel src --source-maps --watch",
     "prod": "npm run build -- --production",
@@ -54,7 +54,6 @@
     "cursors",
     "define",
     "react",
-    "history",
     "utils"
   ],
   "dependencies": {
