@@ -1,4 +1,4 @@
-import {promiseValidate, ParamsError} from 'tcomb-validator-plus/helpers'
+import {promiseValidate, ParamsError} from 'tcomb-validator-plus/promiseValidate'
 import {ifError} from '../utils/Promised'
 
 export default function createAction({
