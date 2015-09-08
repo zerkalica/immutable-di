@@ -46,3 +46,9 @@ export function chain(...reducers) {
         return promise
     }
 }
+
+export function ignore(data) {
+    return function _ignore() {
+        return data
+    }
+}
