@@ -1,15 +1,14 @@
-import {createElement, Component, PropTypes as p} from 'react'
+import {createElement, Component} from 'react'
 import {Factory, Facet} from '../define'
 import {IDeps} from '../asserts'
-import Container from '../container'
 import getFunctionName from '../utils/getFunctionName'
+import Container from '../container'
+import NativeCursor from '../cursors/native'
 
-class StatefullComponent extends Component {
-    static contextTypes = {
-        container: p.instanceOf(Container).isRequired
-    }
-
+class LocalStateComponent extends Component {
     static stateMap = {}
+
+    static getDefaultState = null
 
     constructor(props, context) {
         super(props, context)
@@ -20,7 +19,10 @@ class StatefullComponent extends Component {
         const {stateMap, displayName} = this.constructor
         const Getter = Facet(stateMap, displayName)(pass)
         this.__listener = Factory(stateMap, displayName)(this.__setState)
-        this.state = {...props, ...context.container.get(Getter)}
+
+        this.__container = new Container(new NativeCursor(getDefaultState(props)))
+
+        this.state = {...props, ...this.__container.get(Getter)}
         this.__isMounted = false
     }
 
@@ -38,23 +40,28 @@ class StatefullComponent extends Component {
 
     componentDidMount() {
         this.__isMounted = true
-        this.context.container.mount(this.__listener)
+        this.__container.mount(this.__listener)
     }
 
     componentWillUnmount() {
         this.__isMounted = false
-        this.context.container.unmount(this.__listener)
+        this.__container.unmount(this.__listener)
     }
 }
 
-export default function statefull(stateMap = {}) {
+function passState() {
+    return {}
+}
+
+export default function localstate(stateMap = {}, getDefaultState) {
     IDeps(stateMap)
     return function wrapComponent(BaseComponent) {
         const dn = BaseComponent.displayName || getFunctionName(BaseComponent)
 
-        return class StatefullComponentWrapper extends StatefullComponent {
-            static displayName = dn + '_statefull'
+        return class LocalStateComponentWrapper extends LocalStateComponent {
+            static displayName = dn + '_localstate'
             static stateMap = stateMap
+            static getDefaultState = getDefaultState || passState
 
             render() {
                 return createElement(BaseComponent, this.state)
