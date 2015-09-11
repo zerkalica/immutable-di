@@ -119,6 +119,23 @@ describe('container', () => {
             assert(TestFake.firstCall.calledWith(0))
             assert(TestFake.secondCall.calledWith(321))
         })
+
+        it.skip('should handle state changes #2', () => {
+            const MyDep = Factory([
+                ['todo']
+            ])(function _MyDep(todo) {
+                return todo
+            })
+
+            @Class([MyDep])
+            class Test {}
+            const TestFake = sinon.spy(Test)
+            container.get(TestFake)
+            cursor.select(['todo', 'id']).set(321).commit()
+            container.get(TestFake)
+            container.get(TestFake)
+            assert(TestFake.calledTwice)
+        })
     })
 
     describe('selection', () => {

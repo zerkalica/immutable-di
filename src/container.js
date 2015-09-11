@@ -1,9 +1,9 @@
-import {__pathToIdsMap} from './utils/Dep'
 import {Facet} from './define'
 import {IDep} from './asserts'
 import AbstractCursor from './cursors/abstract'
 import getFunctionName from './utils/getFunctionName'
 import type {IDependency} from './utils/Dep'
+import updateIdsMap from './utils/updateIdsMap'
 
 export default class Container {
     _cache: Map<any> = {}
@@ -11,6 +11,9 @@ export default class Container {
     _affectedPaths = []
     _timerId = null
     _definitionMap = {}
+
+    __pathToIdsMap = {}
+    __affectedIds = {}
 
     constructor(state: AbstractCursor) {
         if (!(state instanceof AbstractCursor)) {
@@ -33,8 +36,26 @@ export default class Container {
         this._definitionMap[fromDefinition.__di.id] = toDefinition
     }
 
+    _updatePathMap(definition) {
+        const id = definition.__di.id
+        if (!this.__affectedIds[id]) {
+            const acc = {
+                affectedIds: this.__affectedIds,
+                parentIds: [],
+                map: this.__pathToIdsMap
+            }
+
+            try {
+                updateIdsMap(acc, definition)
+            } catch (e) {
+                e.message = 'Definition ' + definition.__di.displayName + ': ' + e.message
+                throw e
+            }
+        }
+    }
+
     _clear(path: string) {
-        const idsMap = __pathToIdsMap[path] || []
+        const idsMap = this.__pathToIdsMap[path] || []
         for (let i = 0, j = idsMap.length; i < j; i++) {
             delete this._cache[idsMap[i]]
         }
@@ -90,6 +111,7 @@ export default class Container {
         if (!definition || !definition.__di) {
             throw new Error('Property .__id not exist in ' + debugCtx)
         }
+        this._updatePathMap(definition)
         const {id, isCachedTemporary} = definition.__di
         const cache = isCachedTemporary ? tempCache : this._cache
         let result = cache[id]
