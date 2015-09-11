@@ -1,6 +1,6 @@
 export default function updateIdsMap(acc: {ids: string[], map: object, isAction: bool}, definition) {
     const normalizedDeps = definition.__di.deps
-    const id = definition.__di.id
+    const {id, isCachedTemporary} = definition.__di
     if (acc.affectedIds[id]) {
         return
     }
@@ -12,7 +12,7 @@ export default function updateIdsMap(acc: {ids: string[], map: object, isAction:
         if (!dep.definition.__di) {
             throw new Error('Not a definition: ' + i + ': ' + JSON.stringify(dep))
         }
-        const {path, isSetter, isCachedTemporary} = dep.definition.__di
+        const {path, isSetter} = dep.definition.__di
         if (isSetter) {
             acc.isAction = true
         }

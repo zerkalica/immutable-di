@@ -90,6 +90,7 @@ export default class Container {
         IDep(definition)
         // do not call listener on another state change
         this._cache[definition.__di.id] = null
+        this._updatePathMap(definition)
         this._listeners.push(definition)
     }
 
