@@ -100,42 +100,6 @@ describe('container', () => {
             container.get(TestFake)
             assert(TestFake.calledWith({fac: 123}))
         })
-
-        it('should handle state changes', () => {
-            const MyDep = Factory([
-                ['todo', 'id']
-            ])(function _MyDep(id) {
-                return id
-            })
-
-            @Class([MyDep])
-            class Test {}
-            const TestFake = sinon.spy(Test)
-            container.get(TestFake)
-            cursor.select(['todo', 'id']).set(321).commit()
-            container.get(TestFake)
-            container.get(TestFake)
-            assert(TestFake.calledTwice)
-            assert(TestFake.firstCall.calledWith(0))
-            assert(TestFake.secondCall.calledWith(321))
-        })
-
-        it.skip('should handle state changes #2', () => {
-            const MyDep = Factory([
-                ['todo']
-            ])(function _MyDep(todo) {
-                return todo
-            })
-
-            @Class([MyDep])
-            class Test {}
-            const TestFake = sinon.spy(Test)
-            container.get(TestFake)
-            cursor.select(['todo', 'id']).set(321).commit()
-            container.get(TestFake)
-            container.get(TestFake)
-            assert(TestFake.calledTwice)
-        })
     })
 
     describe('selection', () => {
@@ -145,40 +109,6 @@ describe('container', () => {
 
         it('should throw error if node does not exists in the middle of path', () => {
             assert.throws(() => cursor.select(['todo', 'id2', 'id']).get(), /path/)
-        })
-
-        it('should track parent changes', () => {
-            const MyDep = sinon.spy(Factory([
-                ['todo', 'id']
-            ])(function _MyDep(id) {
-                return id
-            }))
-
-            container.get(MyDep)
-            assert(container.get(MyDep) === 0)
-            cursor.select(['todo', 'id']).set(321).commit()
-            assert(container.get(MyDep) === 321)
-            cursor.select(['todo']).set({id: 456, todos: []}).commit()
-            assert(container.get(MyDep) === 456)
-        })
-
-        it('should update state on next timer tick', (done) => {
-            const MyDep = sinon.spy(Factory([
-                ['todo', 'id']
-            ])(function _MyDep(id) {
-                return id
-            }))
-
-            container.get(MyDep)
-            assert(container.get(MyDep) === 0)
-            cursor.select(['todo', 'id']).set(321)
-            assert(container.get(MyDep) === 0)
-            setTimeout(() => {
-                assert(container.get(MyDep) === 321)
-                assert(MyDep.calledTwice)
-                assert(MyDep.secondCall.calledWith(321))
-                done()
-            }, 1)
         })
     })
 
@@ -205,57 +135,6 @@ describe('container', () => {
             assert(cursor.select(['todo', 'id']).get() === 0)
             container.get(MyDep)(321)
             assert(cursor.select(['todo', 'id']).get() === 321)
-        })
-    })
-
-    describe('events', () => {
-        it('should update mounted listener', done => {
-            const MyDep = sinon.spy(Factory([
-                ['todo', 'id']
-            ])(function _MyDep(id) {
-                assert(id === 321)
-                done()
-                return id
-            }))
-
-            container.mount(MyDep)
-            cursor.select(['todo', 'id']).set(321)
-        })
-
-        it('should not update listener with another path', () => {
-            const MyDep = sinon.spy(Factory([
-                ['todo', 'id']
-            ])(function _MyDep(id) {
-                return id
-            }))
-
-            container.mount(MyDep)
-            cursor.select(['todo', 'id2']).set(321).commit()
-            assert(MyDep.notCalled)
-        })
-
-        it('should update listener once', () => {
-            const MyDep = sinon.spy()
-
-            container.once([['todo', 'id']], MyDep)
-            cursor.select(['todo', 'id']).set(321).commit()
-            cursor.select(['todo', 'id']).set(432).commit()
-            assert(MyDep.calledOnce)
-            assert(MyDep.calledWith(321))
-        })
-
-        it('should not update unmounted listener', () => {
-            const MyDep = sinon.spy(Factory([
-                ['todo', 'id']
-            ])(function _MyDep(id) {
-                assert(id === 321)
-                return id
-            }))
-
-            container.mount(MyDep)
-            container.unmount(MyDep)
-            cursor.select(['todo', 'id']).set(321).commit()
-            assert(MyDep.notCalled)
         })
     })
 })
