@@ -2,7 +2,7 @@
 import assert from 'power-assert'
 import Container from '../container'
 import NativeCursor from '../cursors/native'
-import {Factory, Class, Getter, Setter} from '../define'
+import {Factory, Class} from '../define'
 import sinon from 'sinon'
 
 describe('container', () => {
