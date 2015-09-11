@@ -111,30 +111,4 @@ describe('container', () => {
             assert.throws(() => cursor.select(['todo', 'id2', 'id']).get(), /path/)
         })
     })
-
-    describe('setters/getters', () => {
-        it('should get state in run-time', () => {
-            const MyDep = sinon.spy(Factory([
-                Getter(['todo', 'id'])
-            ])(function _MyDep(getId) {
-                return getId
-            }))
-
-            container.get(MyDep)
-            assert(container.get(MyDep)() === 0)
-            cursor.select(['todo', 'id']).set(321).commit()
-            assert(container.get(MyDep)() === 321)
-        })
-
-        it('should set state in run-time', () => {
-            const MyDep = sinon.spy(Factory([
-                Setter(['todo', 'id'])
-            ])(function _MyDep(setId) {
-                return (id) => setId(id).commit()
-            }))
-            assert(cursor.select(['todo', 'id']).get() === 0)
-            container.get(MyDep)(321)
-            assert(cursor.select(['todo', 'id']).get() === 321)
-        })
-    })
 })
