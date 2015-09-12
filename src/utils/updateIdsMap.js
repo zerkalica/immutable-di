@@ -1,38 +1,78 @@
-export default function updateIdsMap(acc: {ids: string[], map: object, isAction: bool}, definition) {
-    const normalizedDeps = definition.__di.deps
-    const {id, isCachedTemporary} = definition.__di
-    if (acc.affectedIds[id]) {
-        return
+type IPathToIdsMap = {[path: string]: Array<string>}
+type IIdToPathsMap = {[id: string]: Array<string>}
+
+class PathMapUpdater {
+    _pathsSets: {[id: string]: {[path: string]: bool}} = {}
+    _ids: Array<string> = []
+
+    constructor(pathToIdsMap: IPathToIdsMap, idToPathsMap: IIdToPathsMap) {
+        this._pathToIdsMap = pathToIdsMap
+        this._idToPathsMap = idToPathsMap
     }
-    acc.affectedIds[id] = true
-    acc.parentIds.push(id)
 
-    for (let i = 0, j = normalizedDeps.length; i < j; i++) {
-        const dep = normalizedDeps[i]
-        if (!dep.definition.__di) {
-            throw new Error('Not a definition: ' + i + ': ' + JSON.stringify(dep))
-        }
-        const {path, isSetter} = dep.definition.__di
-        if (isSetter) {
-            acc.isAction = true
-        }
-
-        if (path && path.length) {
-            if (!isCachedTemporary) {
-                const parts = []
-                for (let ii = 0, jj = path.length; ii < jj; ii++) {
-                    parts.push(path[ii])
-                    const key = parts.join('.')
-                    let ids = acc.map[key]
-                    if (!ids) {
-                        ids = []
-                    }
-
-                    acc.map[key] = ids.concat(acc.parentIds)
-                }
+    isAffected(id: string) {
+        const pth: ?Array<string> = this._idToPathsMap[id]
+        if (pth) {
+            for (let i = 0; i < pth.length; i++) {
+                this.addPath(pth[i])
             }
-        } else {
-            updateIdsMap(acc, dep.definition)
+            return true
+        }
+
+        return false
+    }
+
+    begin(id: string) {
+        this._ids.push(id)
+        this._pathsSets[id] = {}
+    }
+
+    addPath(pathKey: string) {
+        const ids = this._ids
+        const pathsSets = this._pathsSets
+        for (let i = 0; i < ids.length; i++) {
+            pathsSets[ids[i]][pathKey] = true
         }
     }
+
+    end(id: string) {
+        const paths = Object.keys(this._pathsSets[id])
+        const pathToIdsMap = this._pathToIdsMap
+        this._idToPathsMap[id] = paths
+        for (let i = 0; i < paths.length; i++) {
+            const k = paths[i]
+            if (!pathToIdsMap[k]) {
+                pathToIdsMap[k] = []
+            }
+            pathToIdsMap[k].push(id)
+        }
+    }
+}
+
+function dependencyScanner(definition, acc: PathMapUpdater) {
+    const {id, deps} = definition.__di
+    if (!acc.isAffected(id)) {
+        acc.begin(id)
+        for (let i = 0; i < deps.length; i++) {
+            const dep = deps[i].definition
+            const {path} = dep.__di
+            if (path) {
+                for (let j = 0; j < path.length; j++) {
+                    const key = path.slice(0, j + 1).join('.')
+                    acc.addPath(key)
+                }
+            } else {
+                dependencyScanner(dep, acc)
+            }
+        }
+        acc.end(id)
+    }
+}
+
+export default function updateIdsMap(
+    definition,
+    pathToIdsMap: IPathToIdsMap,
+    idToPathsMap: IIdToPathsMap
+) {
+    dependencyScanner(definition, new PathMapUpdater(pathToIdsMap, idToPathsMap))
 }

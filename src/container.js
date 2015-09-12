@@ -13,7 +13,7 @@ export default class Container {
     _definitionMap = {}
 
     __pathToIdsMap = {}
-    __affectedIds = {}
+    __idToPathsMap = {}
 
     constructor(state: AbstractCursor) {
         if (!(state instanceof AbstractCursor)) {
@@ -37,20 +37,8 @@ export default class Container {
     }
 
     _updatePathMap(definition) {
-        const id = definition.__di.id
-        if (!this.__affectedIds[id]) {
-            const acc = {
-                affectedIds: this.__affectedIds,
-                parentIds: [],
-                map: this.__pathToIdsMap
-            }
-
-            try {
-                updateIdsMap(acc, definition)
-            } catch (e) {
-                e.message = 'Definition ' + definition.__di.displayName + ': ' + e.message
-                throw e
-            }
+        if (!this.__idToPathsMap[definition.__di.id]) {
+            updateIdsMap(definition, this.__pathToIdsMap, this.__idToPathsMap)
         }
     }
 

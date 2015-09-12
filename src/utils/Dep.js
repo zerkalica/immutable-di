@@ -23,7 +23,8 @@ function normalizeDeps(deps, pathMapper) {
 
 let lastId = 1
 export function getId() {
-    return lastId++
+    // http://jsperf.com/number-vs-string-object-keys-access
+    return 'p' + lastId++
 }
 
 export default function Dep({
