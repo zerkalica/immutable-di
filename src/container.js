@@ -1,3 +1,4 @@
+import {cancelAnimationFrame, requestAnimationFrame} from './utils/animationFrame'
 import {Facet} from './define'
 import {IDep} from './asserts'
 import AbstractCursor from './cursors/abstract'
@@ -59,8 +60,7 @@ export default class Container {
         for (let i = 0, j = listeners.length; i < j; i++) {
             this.get(listeners[i])
         }
-
-        clearTimeout(this._timerId)
+        cancelAnimationFrame(this._timerId)
         this._affectedPaths = []
         this._timerId = null
     }
@@ -70,7 +70,7 @@ export default class Container {
         if (isSynced) {
             this.__notify()
         } else if (!this._timerId) {
-            this._timerId = setTimeout(this.__notify, 0)
+            this._timerId = requestAnimationFrame(this.__notify)
         }
     }
 
@@ -100,12 +100,12 @@ export default class Container {
         if (!definition || !definition.__di) {
             throw new Error('Property .__id not exist in ' + debugCtx)
         }
-        this._updatePathMap(definition)
         const {id, isCachedTemporary} = definition.__di
         const cache = isCachedTemporary ? tempCache : this._cache
         let result = cache[id]
         if (result === undefined) {
             const fn = this._definitionMap[id] || definition
+            this._updatePathMap(fn)
             const {displayName, deps, isClass, isOptions} = fn.__di
             const args = {}
             const defArgs = isOptions ? [args] : []
