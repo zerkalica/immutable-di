@@ -6,20 +6,6 @@ import {Factory, Class} from '../define'
 import sinon from 'sinon'
 
 describe('container', () => {
-    let container
-    let cursor
-    const initialState = {
-        todo: {
-            id: 0,
-            todos: []
-        }
-    }
-
-    beforeEach(() => {
-        cursor = new NativeCursor({todo: {...initialState.todo}})
-        container = new Container(cursor)
-    })
-
     describe('basics', () => {
         it('should throws exception if incorrect data passed to constructor', () => {
             assert.throws(() => new Container(), /instance/)
@@ -28,12 +14,15 @@ describe('container', () => {
 
     describe('get', () => {
         it('should throws exception if no arguments passed', () => {
+            const cursor = new NativeCursor({})
+            const container = new Container(cursor)
             assert.throws(() => container.get())
         })
 
         it('should throws exception if no decorated function passed', () => {
+            const cursor = new NativeCursor({})
+            const container = new Container(cursor)
             function WrongDep() {
-
             }
 
             assert.throws(() => container.get(WrongDep))
@@ -41,6 +30,8 @@ describe('container', () => {
 
         /* eslint-disable padded-blocks */
         it('should return class instance', () => {
+            const cursor = new NativeCursor({})
+            const container = new Container(cursor)
             @Class()
             class Test {
             }
@@ -51,6 +42,8 @@ describe('container', () => {
 
         /* eslint-disable padded-blocks */
         it('should cache class instance', () => {
+            const cursor = new NativeCursor({})
+            const container = new Container(cursor)
             @Class()
             class TestBase {
 
@@ -67,6 +60,8 @@ describe('container', () => {
         /* eslint-enable padded-blocks */
 
         it('should cache factory return value', () => {
+            const cursor = new NativeCursor({})
+            const container = new Container(cursor)
             const MyDep = Factory()(function _MyDep() {
                 return 123
             })
@@ -76,6 +71,8 @@ describe('container', () => {
         })
 
         it('should handle simple deps from array definition', () => {
+            const cursor = new NativeCursor({})
+            const container = new Container(cursor)
             const MyDep = Factory()(function _MyDep() {
                 return 123
             })
@@ -89,6 +86,8 @@ describe('container', () => {
         })
 
         it('should handle simple deps from object definition', () => {
+            const cursor = new NativeCursor({})
+            const container = new Container(cursor)
             const MyDep = Factory()(function _MyDep() {
                 return 123
             })
@@ -99,16 +98,6 @@ describe('container', () => {
             const TestFake = sinon.spy(Test)
             container.get(TestFake)
             assert(TestFake.calledWith({fac: 123}))
-        })
-    })
-
-    describe('selection', () => {
-        it('select should return instance of Cursor', () => {
-            assert(cursor.select(['todo', 'id']) instanceof NativeCursor)
-        })
-
-        it('should throw error if node does not exists in the middle of path', () => {
-            assert.throws(() => cursor.select(['todo', 'id2', 'id']).get(), /path/)
         })
     })
 })
