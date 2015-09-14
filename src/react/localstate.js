@@ -16,11 +16,11 @@ class LocalStateComponent extends Component {
             return state
         }
         this.__setState = ::this.__setState
-        const {stateMap, displayName} = this.constructor
+        const {stateMap, displayName, getDefaultState} = this.constructor
         const Getter = Facet(stateMap, displayName)(pass)
         this.__listener = Factory(stateMap, displayName)(this.__setState)
 
-        this.__container = new Container(new NativeCursor(getDefaultState(props)))
+        this.__container = new Container(new NativeCursor(getDefaultState(props)), {isSynced: true})
 
         this.state = {...props, ...this.__container.get(Getter)}
         this.__isMounted = false

@@ -15,8 +15,9 @@ export default class Container {
 
     __pathToIdsMap = {}
     __idToPathsMap = {}
+    _isSynced = false
 
-    constructor(state: AbstractCursor) {
+    constructor(state: AbstractCursor, options: ?{isSynced: bool}) {
         if (!(state instanceof AbstractCursor)) {
             throw new TypeError('state is not an instance of AbstractCursor: ' + state)
         }
@@ -29,6 +30,9 @@ export default class Container {
         // Store instance of AbstractCursor, our decorators uses them for Setter/Getter factories
         this._cache[AbstractCursor.__di.id] = state
         state.setNotify(this.notify)
+        if (options) {
+            this._isSynced = options.isSynced
+        }
     }
 
     override(fromDefinition: IDependency, toDefinition: IDependency) {
@@ -67,7 +71,7 @@ export default class Container {
 
     notify(path: string, isSynced: ?bool) {
         this._affectedPaths.push(path)
-        if (isSynced) {
+        if (isSynced === undefined ? this._isSynced : isSynced) {
             this.__notify()
         } else if (!this._timerId) {
             this._timerId = requestAnimationFrame(this.__notify)
