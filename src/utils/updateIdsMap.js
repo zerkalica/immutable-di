@@ -46,6 +46,8 @@ class PathMapUpdater {
             }
             pathToIdsMap[k].push(id)
         }
+        delete this._pathsSets[id]
+        this._ids.pop()
     }
 }
 
