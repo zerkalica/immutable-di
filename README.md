@@ -8,7 +8,7 @@ Simple, dependency injection container with some state handling functions.
 General
 -------
 
--	Install: `npm install --save immutable-di`
+-	Install: `npm install --save immutable-di immutable-di-react`
 -	Tests: `npm test`
 -	Examples: `npm run dev.examples`
 
@@ -26,8 +26,8 @@ React all-in example
 ```js
 import {default as React, Component} from 'react';
 import {Getter, Facet, Factory, Setter} from 'immutable-di/define'
-import root from 'immutable-di/react/root'
-import statefull from 'immutable-di/react/statefull'
+import root from 'immutable-di-react/root'
+import statefull from 'immutable-di-react/statefull'
 import Container from 'immutable-di'
 import NativeCursor from 'immutable-di/cursors/native'
 
@@ -295,8 +295,8 @@ export default Factory([
 
 ```js
 // todo-list.js
-import statefull from 'immutable-di/react/statefull'
-import root from 'immutable-di/react/root'
+import statefull from 'immutable-di-react/statefull'
+import root from 'immutable-di-react/root'
 import TodoListItem from './todo-list-item'
 import myFaset from './my-faset'
 import TodoActions from './todo-actions'
@@ -333,8 +333,8 @@ export default class TodoList extends React.Component {
 ```js
 // todo-list-item.js
 import React from 'react'
-import widget from 'immutable-di/react/widget'
-import di from 'immutable-di/react/di'
+import widget from 'immutable-di-react/widget'
+import di from 'immutable-di-react/di'
 import TodoActions from './todo-actions'
 
 function TodoListItem({todo, editMode, actions}) {

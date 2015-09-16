@@ -35,9 +35,5 @@ dist
 /*.js
 /*.sh
 /__tests__
-
 /cursors
-/define
-/react
 /utils
-/history

@@ -15,7 +15,7 @@
     "release-patch": "npm run pull && npm version patch && npm run push",
     "release-minor": "npm run pull && npm version minor && npm run push",
     "release-major": "npm run pull && npm version major && npm run push",
-    "clean": "rm -rf cursors react utils __tests__ *.js *.map build",
+    "clean": "rm -rf cursors utils __tests__ *.js *.map build",
     "build": "npm run clean && babel src --source-maps --out-dir .",
     "deploy": "npm run clean && babel src --source-maps --watch",
     "prod": "npm run build -- --production",
@@ -23,8 +23,7 @@
     "lint": "exit 0 && eslint src",
     "test": "mocha",
     "test.dev": "npm run test -- --growl --watch",
-    "test.cov": "babel-istanbul cover --report text --report html node_modules/mocha/bin/_mocha",
-    "dev.examples": "webpack-dev-server --config conf/webpack.config.js --hot --inline"
+    "test.cov": "babel-istanbul cover --report text --report html node_modules/mocha/bin/_mocha"
   },
   "author": "Stefan Zerkalica <zerkalica@gmail.com>",
   "license": "MIT",
@@ -57,31 +56,23 @@
     "utils"
   ],
   "dependencies": {
-    "babel-runtime": "^5.8.20",
+    "babel-runtime": "^5.8.24",
     "debug": "^2.2.0",
     "react": "^0.13.3"
   },
   "devDependencies": {
     "babel": "^5.8.23",
     "babel-core": "^5.8.24",
-    "babel-eslint": "^4.1.1",
-    "babel-loader": "^5.3.2",
+    "babel-eslint": "^4.1.2",
     "babel-plugin-espower": "^1.0.0",
-    "deepmerge": "^0.2.10",
-    "eslint": "^1.3.1",
+    "eslint": "^1.4.3",
     "eslint-config-airbnb": "0.0.8",
     "eslint-config-airplus": "^1.0.4",
     "eslint-plugin-react": "^3.3.2",
     "glob": "^5.0.14",
-    "html-webpack-plugin": "^1.6.1",
-    "minimist": "^1.2.0",
     "mocha": "^2.3.2",
-    "npm-check-updates": "^2.2.2",
-    "power-assert": "^1.0.0",
+    "power-assert": "^1.0.1",
     "proxyquire": "^1.7.2",
-    "sinon": "^1.16.1",
-    "source-map-support": "^0.3.2",
-    "webpack": "^1.12.1",
-    "webpack-dev-server": "^1.10.1"
+    "sinon": "^1.16.1"
   }
 }
