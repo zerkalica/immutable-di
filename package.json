@@ -56,9 +56,7 @@
     "utils"
   ],
   "dependencies": {
-    "babel-runtime": "^5.8.24",
-    "debug": "^2.2.0",
-    "react": "^0.13.3"
+    "babel-runtime": "^5.8.24"
   },
   "devDependencies": {
     "babel": "^5.8.23",
@@ -72,7 +70,6 @@
     "glob": "^5.0.14",
     "mocha": "^2.3.2",
     "power-assert": "^1.0.1",
-    "proxyquire": "^1.7.2",
     "sinon": "^1.16.1"
   }
 }
