@@ -64,7 +64,7 @@ var ChangeAction = Factory({
   }
 });
 
-@root
+@root()
 @statefull({
     abba: abbaFacet,
     changeAction: ChangeAction
@@ -302,7 +302,7 @@ import myFaset from './my-faset'
 import TodoActions from './todo-actions'
 
 // set container from props to context:
-@root
+@root()
 // bind to setState:
 @statefull({
     todos: ['todoApp', 'todos'], // state path
