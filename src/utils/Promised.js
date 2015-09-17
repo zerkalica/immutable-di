@@ -53,10 +53,11 @@ export function semaphore(map) {
             const result = {}
             for (let i = 0; i < keys.length; i++) {
                 const k = keys[i]
+                const data = d[i]
                 const set = map[k][2]
-                result[k] = d[i]
-                if (set) {
-                    set(d[i])
+                result[k] = data
+                if (set && data) {
+                    set(data)
                 }
                 delete locks[k]
             }
