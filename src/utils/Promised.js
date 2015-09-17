@@ -36,15 +36,34 @@ export function ifError(Err, cb) {
     }
 }
 
-export function chain(...reducers) {
-    return function startChain(params) {
-        let promise = spread(params)
-        for (let i = 0; i < reducers.length; i++) {
-            promise = promise.then(assign(reducers[i]))
-        }
+const locks = {}
 
-        return promise
+export function semaphore(map) {
+    const promises = []
+    const keys = Object.keys(map)
+    for (let i = 0; i < keys.length; i++) {
+        const k = keys[i]
+        const [needLoad, cb] = map[k]
+        promises.push((locks[k] || !needLoad) ? undefined : cb())
+        locks[k] = true
     }
+
+    return Promise.all(promises)
+        .then(d => {
+            const result = {}
+            for (let i = 0; i < keys.length; i++) {
+                const k = keys[i]
+                result[k] = d[i]
+                delete locks[k]
+            }
+            return result
+        })
+        .catch(err => {
+            for (let i = 0; i < keys.length; i++) {
+                delete locks[keys[i]]
+            }
+            throw err
+        })
 }
 
 export function ignore(data) {
