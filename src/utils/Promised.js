@@ -36,39 +36,41 @@ export function ifError(Err, cb) {
     }
 }
 
-const locks = {}
+export function Semaphore() {
+    const locks = {}
 
-export function semaphore(map) {
-    const promises = []
-    const keys = Object.keys(map)
-    for (let i = 0; i < keys.length; i++) {
-        const k = keys[i]
-        const [needLoad, cb] = map[k]
-        promises.push((locks[k] || !needLoad) ? undefined : cb())
-        locks[k] = true
-    }
+    return function semaphore(map) {
+        const promises = []
+        const keys = Object.keys(map)
+        for (let i = 0; i < keys.length; i++) {
+            const k = keys[i]
+            const [needLoad, cb] = map[k]
+            promises.push((locks[k] || !needLoad) ? undefined : cb())
+            locks[k] = true
+        }
 
-    return Promise.all(promises)
-        .then(d => {
-            const result = {}
-            for (let i = 0; i < keys.length; i++) {
-                const k = keys[i]
-                const data = d[i]
-                const set = map[k][2]
-                result[k] = data
-                if (set && data) {
-                    set(data)
+        return Promise.all(promises)
+            .then(d => {
+                const result = {}
+                for (let i = 0; i < keys.length; i++) {
+                    const k = keys[i]
+                    const data = d[i]
+                    const set = map[k][2]
+                    result[k] = data
+                    if (set && data) {
+                        set(data)
+                    }
+                    delete locks[k]
                 }
-                delete locks[k]
-            }
-            return result
-        })
-        .catch(err => {
-            for (let i = 0; i < keys.length; i++) {
-                delete locks[keys[i]]
-            }
-            throw err
-        })
+                return result
+            })
+            .catch(err => {
+                for (let i = 0; i < keys.length; i++) {
+                    delete locks[keys[i]]
+                }
+                throw err
+            })
+    }
 }
 
 export function ignore(data) {
