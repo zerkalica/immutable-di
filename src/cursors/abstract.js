@@ -10,8 +10,6 @@ function pass() {
 export default class AbstractCursor<State> {
     __notify: (path: string, isSynced: ?bool) => void = null
     _prefix: PathType
-    // prefixKey needed for optimizations in container/notify
-    _prefixKey: string
 
     constructor(
         state: object,
@@ -20,7 +18,6 @@ export default class AbstractCursor<State> {
     ) {
         this._state = state || {}
         this._prefix = prefix || []
-        this._prefixKey = this._prefix.join('.')
         this.setNotify(notify)
 
         this.commit = ::this.commit
@@ -38,12 +35,12 @@ export default class AbstractCursor<State> {
         this.__notify = notify
     }
 
-    _update() {
-        this.__notify(this._prefixKey)
+    _update(isSynced) {
+        this.__notify(this._prefix, isSynced)
     }
 
     commit() {
-        this.__notify(this._prefixKey, true)
+        this._update(true)
         return this
     }
 

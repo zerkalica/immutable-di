@@ -17,7 +17,10 @@ describe('updateIdsMap', () => {
         DepB.__di.id = 'B'
 
         updateIdsMap(DepB, pathToIdsMap, idToPathsMap)
-        assert(cmpArr(pathToIdsMap.a, ['A', 'B']))
+        assert.deepEqual(pathToIdsMap, {
+            '.a': [ 'A', 'B' ],
+            '.a.*': [ 'A', 'B' ]
+        })
     })
 
     it('A->C, A->B, B->C, C->a, B->b to a: [A, B, C], b: [A, B]', () => {
@@ -31,8 +34,12 @@ describe('updateIdsMap', () => {
         DepC.__di.id = 'C'
 
         updateIdsMap(DepA, pathToIdsMap, idToPathsMap)
-        assert(cmpArr(pathToIdsMap.a, ['A', 'B', 'C']))
-        assert(cmpArr(pathToIdsMap.b, ['A', 'B']))
+        assert.deepEqual(pathToIdsMap, {
+            '.a': [ 'C', 'B', 'A' ],
+            '.a.*': [ 'C', 'B', 'A' ],
+            '.b': [ 'B', 'A' ],
+            '.b.*': [ 'B', 'A' ]
+        })
     })
 
     it('A->C, A->B, B->C, C->a, B->b, then add D->B to a: [A, B, C, D], b: [A, B, D]', () => {
@@ -49,8 +56,13 @@ describe('updateIdsMap', () => {
 
         updateIdsMap(DepA, pathToIdsMap, idToPathsMap)
         updateIdsMap(DepD, pathToIdsMap, idToPathsMap)
-        assert(cmpArr(pathToIdsMap.a, ['A', 'B', 'C', 'D']))
-        assert(cmpArr(pathToIdsMap.b, ['A', 'B', 'D']))
+
+        assert.deepEqual(pathToIdsMap, {
+            '.a': [ 'C', 'B', 'A', 'D' ],
+            '.a.*': [ 'C', 'B', 'A', 'D' ],
+            '.b': [ 'B', 'A', 'D' ],
+            '.b.*': [ 'B', 'A', 'D' ]
+        })
     })
 
     it('B->A, C->A, A->a to a: [A, B, C]', () => {
@@ -65,7 +77,11 @@ describe('updateIdsMap', () => {
 
         updateIdsMap(DepB, pathToIdsMap, idToPathsMap)
         updateIdsMap(DepC, pathToIdsMap, idToPathsMap)
-        assert(cmpArr(pathToIdsMap.a, ['A', 'B', 'C']))
+
+        assert.deepEqual(pathToIdsMap, {
+            '.a': [ 'A', 'B', 'C' ],
+            '.a.*': [ 'A', 'B', 'C' ]
+        })
     })
 
     it('B->A, C->B, A->a to a: [A, B, C]', () => {
@@ -80,7 +96,11 @@ describe('updateIdsMap', () => {
 
         updateIdsMap(DepB, pathToIdsMap, idToPathsMap)
         updateIdsMap(DepC, pathToIdsMap, idToPathsMap)
-        assert(cmpArr(pathToIdsMap.a, ['A', 'B', 'C']))
+
+        assert.deepEqual(pathToIdsMap, {
+            '.a': [ 'A', 'B', 'C' ],
+            '.a.*': [ 'A', 'B', 'C' ]
+        })
     })
 
     it('B->A, A->a.b, B->a to a: [A, B], a.b: [A, B]', () => {
@@ -92,8 +112,13 @@ describe('updateIdsMap', () => {
         DepB.__di.id = 'B'
 
         updateIdsMap(DepB, pathToIdsMap, idToPathsMap)
-        assert(cmpArr(pathToIdsMap.a, ['A', 'B']))
-        assert(cmpArr(pathToIdsMap['a.b'], ['A', 'B']))
+
+        assert.deepEqual(pathToIdsMap, {
+            '.a': [ 'A', 'B' ],
+            '.a.b': [ 'A', 'B' ],
+            '.a.b.*': [ 'A', 'B' ],
+            '.a.*': [ 'B' ]
+        })
     })
 
     it('B->A, A->a, B->b to a: [A, B], b: [B]', () => {
@@ -105,7 +130,21 @@ describe('updateIdsMap', () => {
         DepB.__di.id = 'B'
 
         updateIdsMap(DepB, pathToIdsMap, idToPathsMap)
-        assert(cmpArr(pathToIdsMap.a, ['A', 'B']))
-        assert(cmpArr(pathToIdsMap.b, ['B']))
+        assert.deepEqual(pathToIdsMap, {
+            '.a': [ 'A', 'B' ],
+            '.a.*': [ 'A', 'B' ],
+            '.b': [ 'B' ],
+            '.b.*': [ 'B' ]
+        })
     })
 })
+/*
+A - a.b.c, B - a, C - a.b.d, D - a.b
+
+a -> ABCD
+a.b -> ABCD
+a.b.c -> ABD
+a.b.d -> BCD
+
+
+*/

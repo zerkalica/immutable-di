@@ -47,10 +47,15 @@ export default class Container {
         }
     }
 
-    _clear(path: string) {
-        const idsMap = this.__pathToIdsMap[path] || []
-        for (let i = 0, j = idsMap.length; i < j; i++) {
-            delete this._cache[idsMap[i]]
+    _clear(path: string[]) {
+        let key = ''
+        for (let j = 0, l = path.length - 1; j <= l; j++) {
+            key = key + '.' + path[j]
+            const k =  key + (j === l ? '' : '.*')
+            const idsMap = this.__pathToIdsMap[k] || []
+            for (let i = 0, m = idsMap.length; i < m; i++) {
+                delete this._cache[idsMap[i]]
+            }
         }
     }
 
@@ -69,7 +74,7 @@ export default class Container {
         this._timerId = null
     }
 
-    notify(path: string, isSynced: ?bool) {
+    notify(path: string[], isSynced: ?bool) {
         this._affectedPaths.push(path)
         if (isSynced === undefined ? this._isSynced : isSynced) {
             this.__notify()

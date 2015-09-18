@@ -59,8 +59,10 @@ function dependencyScanner(definition, acc: PathMapUpdater) {
             const dep = deps[i].definition
             const {path} = dep.__di
             if (path) {
-                for (let j = 0; j < path.length; j++) {
-                    const key = path.slice(0, j + 1).join('.')
+                let key = ''
+                const p = path.concat('*')
+                for (let j = 0, l = p.length; j < l; j++) {
+                    key = key + '.' + p[j]
                     acc.addPath(key)
                 }
             } else {
