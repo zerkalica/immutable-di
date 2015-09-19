@@ -49,10 +49,11 @@ export default class Container {
 
     _clear(path: string[]) {
         let key = ''
+        const pathToIdsMap = this.__pathToIdsMap
         for (let j = 0, l = path.length - 1; j <= l; j++) {
             key = key + '.' + path[j]
             const k =  key + (j === l ? '' : '.*')
-            const idsMap = this.__pathToIdsMap[k] || []
+            const idsMap = pathToIdsMap[k] || []
             for (let i = 0, m = idsMap.length; i < m; i++) {
                 delete this._cache[idsMap[i]]
             }
