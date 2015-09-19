@@ -121,6 +121,29 @@ describe('updateIdsMap', () => {
         })
     })
 
+    it('B->a, A->a.b, C->a.c to a: [A, B, C], a.b: [A], a.c: [C]', () => {
+        const pathToIdsMap = {}
+        const idToPathsMap = {}
+        const DepA = Factory([['a', 'b']])(v => v)
+        const DepB = Factory([['a']])(v => v)
+        const DepC = Factory([['a', 'c']])(v => v)
+        DepA.__di.id = 'A'
+        DepB.__di.id = 'B'
+        DepC.__di.id = 'C'
+
+        updateIdsMap(DepB, pathToIdsMap, idToPathsMap)
+        updateIdsMap(DepA, pathToIdsMap, idToPathsMap)
+        updateIdsMap(DepC, pathToIdsMap, idToPathsMap)
+        assert.deepEqual(pathToIdsMap, {
+            '.a': [ 'B', 'A', 'C' ],
+            '.a.*': [ 'B' ],
+            '.a.b': [ 'A' ],
+            '.a.b.*': [ 'A' ],
+            '.a.c': [ 'C' ],
+            '.a.c.*': [ 'C' ]
+        })
+    })
+
     it('B->A, A->a, B->b to a: [A, B], b: [B]', () => {
         const pathToIdsMap = {}
         const idToPathsMap = {}
