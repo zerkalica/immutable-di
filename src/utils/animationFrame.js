@@ -22,7 +22,7 @@ function getBrowserFn(names) {
         result = filteredNames.length ? window[filteredNames[0]] : undefined
     }
 
-    return result
+    return result ? result.bind(window) : undefined
 }
 
 function fallbackRequestAnimationFrame(cb) {
