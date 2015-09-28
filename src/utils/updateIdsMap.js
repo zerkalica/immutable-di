@@ -57,6 +57,9 @@ function dependencyScanner(definition, acc: PathMapUpdater) {
         acc.begin(id)
         for (let i = 0; i < deps.length; i++) {
             const dep = deps[i].definition
+            if (!dep) {
+                throw new Error('dep[' + i + '] is undefined in ' + JSON.stringify(definition.__di))
+            }
             const {path} = dep.__di
             if (path) {
                 let key = ''

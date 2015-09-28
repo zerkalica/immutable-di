@@ -16,6 +16,21 @@ function convertId(dn) {
     return ids[dn]
 }
 
+export function Cursor(path) {
+    IPath(path)
+    const key = path.join('.')
+    const displayName = 'cursor_' + key
+    function _cursor(cursor) {
+        return cursor.select(path)
+    }
+    return Cursor.extend(Dep({
+        deps: [AbstractCursor],
+        displayName,
+        id: convertId(displayName)
+    }))(_cursor)
+}
+Cursor.extend = pass
+
 export function Getter(path) {
     IPath(path)
     const key = path.join('.')

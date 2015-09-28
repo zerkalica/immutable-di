@@ -10,12 +10,15 @@ function pass() {
 export default class AbstractCursor<State> {
     __notify: (path: string, isSynced: ?bool) => void = null
     _prefix: PathType
+    _pathMap
 
     constructor(
         state: object,
+        pathMap: {[pathId: string]: string},
         prefix: ?PathType,
-        notify: ?(path: string, isSynced: ?bool) => void
+        notify: ?(path: string, isSynced: ?bool) => void,
     ) {
+        this._pathMap = pathMap || {}
         this._state = state || {}
         this._prefix = prefix || []
         this.setNotify(notify)
@@ -45,9 +48,13 @@ export default class AbstractCursor<State> {
     }
 
     select(path: PathType = []): AbstractCursor<State> {
+        const mappedId = this._pathMap[path[0]] || path[0]
+        const newPath = [mappedId].concat(path.slice(1))
+
         return new this.constructor(
             this._state,
-            this._prefix.concat(path),
+            this._pathMap,
+            this._prefix.concat(newPath),
             this.__notify
         )
     }
