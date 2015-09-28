@@ -52,7 +52,7 @@ const ITest1TcombConvertedModel = {
 }
 */
 
-const lastId = 1
+let lastId = 1
 function getId() {
     return lastId++
 }
@@ -169,7 +169,7 @@ describe('model', () => {
 
         const test1Model = fromTcomb(ITest1TcombModel)
 
-        function fn(query) {
+        function fn(query, queryCursor) {
             return query
         }
 

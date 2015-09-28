@@ -14,14 +14,12 @@ export default class AbstractCursor<State> {
 
     constructor(
         state: object,
-        pathMap: {[pathId: string]: string},
         prefix: ?PathType,
-        notify: ?(path: string, isSynced: ?bool) => void,
+        pathMap: {[pathId: string]: string}
     ) {
         this._pathMap = pathMap || {}
         this._state = state || {}
         this._prefix = prefix || []
-        this.setNotify(notify)
 
         this.commit = ::this.commit
         this.get = ::this.get
@@ -32,6 +30,7 @@ export default class AbstractCursor<State> {
         this.toJSON = ::this.toJSON
         this.diff = ::this.diff
         this.patch = ::this.patch
+        this._update = ::this._update
     }
 
     setNotify(notify: (path: string, isSynced: ?bool) => void) {
@@ -48,15 +47,19 @@ export default class AbstractCursor<State> {
     }
 
     select(path: PathType = []): AbstractCursor<State> {
-        const mappedId = this._pathMap[path[0]] || path[0]
-        const newPath = [mappedId].concat(path.slice(1))
+        const mappedId = this._pathMap[path[0]]
+        const newPath = mappedId
+            ? [mappedId].concat(path.slice(1))
+            : path
 
-        return new this.constructor(
+        const cursor = new this.constructor(
             this._state,
-            this._pathMap,
             this._prefix.concat(newPath),
-            this.__notify
+            this._pathMap
         )
+        cursor.setNotify(this.__notify)
+
+        return cursor
     }
 
     /* eslint-disable no-unused-vars */

@@ -27,10 +27,14 @@ describe('cache', () => {
             }
         })
         const container = new Container(cursor)
-        const fn = sinon.spy(v => v)
+        const fn = sinon.spy(v => {
+            console.log('aaa', v)
+            return v
+        })
         const MyDep = Factory([['a', 'b']])(fn)
         container.get(MyDep)
-        cursor.select(['a', 'b']).set(321).commit()
+        const c = cursor.select(['a', 'b'])
+        c.set(321).commit()
         container.get(MyDep)
         assert(fn.calledTwice)
         assert(fn.firstCall.calledWith(123))

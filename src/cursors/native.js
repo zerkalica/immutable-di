@@ -5,10 +5,9 @@ export default class NativeCursor extends AbstractCursor {
     _cnName = null
     constructor(
         state: object,
-        prefix: ?PathType,
-        notify: ?(path: string, isSynced: ?bool) => void
+        prefix: ?PathType
     ) {
-        super(state, prefix, notify)
+        super(state, prefix)
         if (this._prefix.length) {
             this._cnName = prefix[prefix.length - 1]
             /* eslint-disable no-new-func */
