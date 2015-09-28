@@ -54,13 +54,16 @@ const ITest1TcombConvertedModel = {
 
 let lastId = 1
 function getId() {
-    return lastId++
+    return 'p' + lastId++
 }
 
 function fromTcomb(rawSpec, path) {
     let value
     let result
     let spec
+    if (!path) {
+        path = [getId()]
+    }
     if (!Array.isArray(path)) {
         throw new Error('path is not an array')
     }
@@ -84,7 +87,7 @@ function fromTcomb(rawSpec, path) {
             value[k] = rec.__di.value
             props[k] = rec
         }
-        result = Path(path, struct(specs, 'I' + path.join('.')), value, getId())
+        result = Path(path, struct(specs, 'I' + path.join('.')), value)
         for (let i = 0; i < keys.length; i++) {
             const k = keys[i]
             result[k] = props[k]
@@ -113,7 +116,7 @@ function Selector(path, spec) {
     return selector
 }
 
-function Path(path, spec, value, pathId) {
+function Path(path, spec, value) {
     const displayName = 'path@' + path.join('.')
     const cur = Selector(path, spec)
     function _path(cursor) {
@@ -123,8 +126,7 @@ function Path(path, spec, value, pathId) {
     _path.displayName = displayName
     _path.__di = {
         displayName,
-        pathId,
-        id: (displayName),
+        id: displayName,
         deps: [
             {
                 definition: cur
@@ -139,9 +141,9 @@ function Path(path, spec, value, pathId) {
 
 function buildState(stateSpec) {
     function reducer(acc, key) {
-        const {value, pathId} = stateSpec[key].__di
+        const {value, path} = stateSpec[key].__di
         acc.state[key] = value
-        acc.pathMap[key] = pathId
+        acc.pathMap[path[0]] = key
         return acc
     }
     return Object.keys(stateSpec).reduce(reducer, {
@@ -159,15 +161,14 @@ describe('model', () => {
             }
         }
 
+        const test1Model = fromTcomb(ITest1TcombModel)
         const IStateModel = {
-            route: ITest1TcombModel
+            route: test1Model
         }
 
         const {state, pathMap} = buildState(IStateModel)
-        const cursor = new NativeCursor(state, pathMap)
+        const cursor = new NativeCursor(state, [], pathMap)
         const container = new Container(cursor, {synced: true})
-
-        const test1Model = fromTcomb(ITest1TcombModel)
 
         function fn(query, queryCursor) {
             return query
@@ -178,6 +179,6 @@ describe('model', () => {
             test1Model.query.$cursor
         ])(fn)
 
-        assert.deepEqual(container.get(dep), state.route.query)
+        assert.deepEqual(container.get(dep), {a: 'aaa', b: undefined})
     })
 })

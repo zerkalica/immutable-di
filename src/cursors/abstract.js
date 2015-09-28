@@ -10,7 +10,7 @@ function pass() {
 export default class AbstractCursor<State> {
     __notify: (path: string, isSynced: ?bool) => void = null
     _prefix: PathType
-    _pathMap
+    _pathMap: Map<string, string>
 
     constructor(
         state: object,

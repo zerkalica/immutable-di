@@ -5,9 +5,10 @@ export default class NativeCursor extends AbstractCursor {
     _cnName = null
     constructor(
         state: object,
-        prefix: ?PathType
+        prefix: ?PathType,
+        pathMap
     ) {
-        super(state, prefix)
+        super(state, prefix, pathMap)
         if (this._prefix.length) {
             this._cnName = prefix[prefix.length - 1]
             /* eslint-disable no-new-func */
@@ -18,7 +19,7 @@ export default class NativeCursor extends AbstractCursor {
             )
             try {
                 if (this._selector(this._state) === undefined) {
-                    throw new Error('undefined value ' + this._prefix[this.prefix.length - 1])
+                    throw new Error('Undefined value ' + this._prefix[this._prefix.length - 1])
                 }
             } catch(e) {
                 e.message = e.message + ', path: ' + this._prefix.join('.')

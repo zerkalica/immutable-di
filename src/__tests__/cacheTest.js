@@ -28,7 +28,6 @@ describe('cache', () => {
         })
         const container = new Container(cursor)
         const fn = sinon.spy(v => {
-            console.log('aaa', v)
             return v
         })
         const MyDep = Factory([['a', 'b']])(fn)
