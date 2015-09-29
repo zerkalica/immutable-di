@@ -1,6 +1,7 @@
 import AbstractCursor from './cursors/abstract'
 import Dep, {getId} from './utils/Dep'
 import {IPath} from './asserts'
+import getFunctionName from './utils/getFunctionName'
 
 const ids = {}
 
@@ -16,102 +17,65 @@ function convertId(dn) {
     return ids[dn]
 }
 
-export function Cursor(path) {
+function getName(prefix, path) {
+    return prefix + '@' + path.join('.')
+}
+
+function makeDef(fn, path, dep) {
     IPath(path)
-    const key = path.join('.')
-    const displayName = 'cursor_' + key
-    function _cursor(cursor) {
-        return cursor.select(path)
-    }
-    return Cursor.extend(Dep({
-        deps: [AbstractCursor],
+    const displayName = getName(getFunctionName(fn), path)
+    fn.displayName = displayName
+    fn.__di = {
         displayName,
-        id: convertId(displayName)
-    }))(_cursor)
+        id: convertId(displayName),
+        deps: [{definition: dep}]
+    }
+
+    return fn
+}
+
+export function Cursor(path) {
+    return Cursor.extend(makeDef(function cursor(state) {
+        return state.select(path)
+    }, path, AbstractCursor))
 }
 Cursor.extend = pass
 
-export function Getter(path) {
-    IPath(path)
-    const key = path.join('.')
-    const displayName = 'get_' + key
-    function getter(cursor) {
-        return cursor.select(path).get
-    }
-    return Getter.extend(Dep({
-        deps: [AbstractCursor],
-        displayName,
-        id: convertId(displayName)
-    }))(getter)
-}
-Getter.extend = pass
-
-export function Path(path) {
-    IPath(path)
-    const key = path.join('.')
-    const displayName = 'path_' + key
-    function getData(get) {
-        return get()
-    }
-
-    return Path.extend(Dep({
-        deps: [Getter(path)],
-        displayName,
-        id: convertId(displayName),
-        isCachedTemporary: true,
-        path
-    }))(getData)
+export function Path(pth) {
+    const p = makeDef(function path(cursor) {
+        return cursor.get()
+    }, pth, Cursor(pth))
+    p.__di.isCachedTemporary = true
+    p.__di.path = pth
+    return Path.extend(p)
 }
 Path.extend = pass
 
-export function Assign(path) {
-    IPath(path)
-    const key = path.join('.')
-    const displayName = 'assign_' + key
-    function assigner(cursor) {
-        return cursor.select(path).assign
-    }
+export function Getter(path) {
+    return Getter.extend(makeDef(function getter(cursor) {
+        return cursor.get
+    }, path, Cursor(path)))
+}
+Getter.extend = pass
 
-    return Assign.extend(Dep({
-        deps: [AbstractCursor],
-        displayName,
-        id: convertId(displayName),
-        isSetter: true
-    }))(assigner)
+export function Assign(path) {
+    return Assign.extend(makeDef(function assign(cursor) {
+        return cursor.assign
+    }, path, Cursor(path)))
 }
 Assign.extend = pass
 
 export function Setter(path) {
-    IPath(path)
-    const key = path.join('.')
-    const displayName = 'setter_' + key
-    function setter(cursor) {
-        return cursor.select(path).set
-    }
-
-    return Setter.extend(Dep({
-        deps: [AbstractCursor],
-        displayName,
-        id: convertId(displayName),
-        isSetter: true
-    }))(setter)
+    return Setter.extend(makeDef(function setter(cursor) {
+        return cursor.set
+    }, path, Cursor(path)))
 }
 Setter.extend = pass
 
 export function Apply(path) {
-    IPath(path)
-    const key = path.join('.')
-    const displayName = 'apply_' + key
-    function setter(cursor) {
-        return cursor.select(path).apply
-    }
-
-    return Apply.extend(Dep({
-        deps: [AbstractCursor],
-        displayName,
-        id: convertId(displayName),
-        isSetter: true
-    }))(setter)
+    return Apply.extend(makeDef(function apply(cursor) {
+        return cursor.apply
+    }, path, Cursor(path)))
 }
 Apply.extend = pass
 
@@ -120,7 +84,6 @@ export function Def(data) {
     function def() {
         return data
     }
-
     return Def.extend(Dep({
         displayName,
         id: convertId(displayName)

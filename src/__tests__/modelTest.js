@@ -1,5 +1,5 @@
 /* eslint-env mocha */
-import {Factory} from '../define'
+import {Factory, Cursor} from '../define'
 import assert from 'power-assert'
 import Container from '../container'
 import NativeCursor from '../cursors/native'
@@ -98,27 +98,10 @@ function fromTcomb(rawSpec, path) {
     return result
 }
 
-function Selector(path, spec) {
-    const displayName = 'cursor@' + path.join('.')
-    function selector(cursor) {
-        return cursor.select(path)
-    }
-    selector.displayName = displayName
-    selector.__di = {
-        displayName,
-        id: (displayName),
-        deps: [
-            {
-                definition: AbstractCursor
-            }
-        ]
-    }
-    return selector
-}
 
 function Path(path, spec, value) {
     const displayName = 'path@' + path.join('.')
-    const cur = Selector(path, spec)
+    const cur = Cursor(path, spec)
     function _path(cursor) {
         return cursor.get()
     }
