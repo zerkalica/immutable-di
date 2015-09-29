@@ -1,5 +1,5 @@
 /* eslint-env mocha */
-import {Factory, Cursor} from '../define'
+import {Factory, Path, Cursor} from '../define'
 import assert from 'power-assert'
 import Container from '../container'
 import NativeCursor from '../cursors/native'
@@ -57,6 +57,13 @@ function getId() {
     return 'p' + lastId++
 }
 
+function ModPath(path, spec, value) {
+    const _path = Path(path)
+    _path.__di.value = value
+    _path.__di.spec = spec
+    return _path
+}
+
 function fromTcomb(rawSpec, path) {
     let value
     let result
@@ -87,39 +94,15 @@ function fromTcomb(rawSpec, path) {
             value[k] = rec.__di.value
             props[k] = rec
         }
-        result = Path(path, struct(specs, 'I' + path.join('.')), value)
+        result = ModPath(path, struct(specs, 'I' + path.join('.')), value)
         for (let i = 0; i < keys.length; i++) {
             const k = keys[i]
             result[k] = props[k]
         }
     } else {
-        result = Path(path, spec, value)
+        result = ModPath(path, spec, value)
     }
     return result
-}
-
-
-function Path(path, spec, value) {
-    const displayName = 'path@' + path.join('.')
-    const cur = Cursor(path, spec)
-    function _path(cursor) {
-        return cursor.get()
-    }
-    _path.$cursor = cur
-    _path.displayName = displayName
-    _path.__di = {
-        displayName,
-        id: displayName,
-        deps: [
-            {
-                definition: cur
-            }
-        ],
-        path,
-        value,
-        spec
-    }
-    return _path
 }
 
 function buildState(stateSpec) {
@@ -159,7 +142,7 @@ describe('model', () => {
 
         const dep = Factory([
             test1Model.query,
-            test1Model.query.$cursor
+            test1Model.query.$
         ])(fn)
 
         assert.deepEqual(container.get(dep), {a: 'aaa', b: undefined})

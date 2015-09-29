@@ -42,11 +42,14 @@ export function Cursor(path) {
 Cursor.extend = pass
 
 export function Path(pth) {
+    const cur = Cursor(pth)
     const p = makeDef(function path(cursor) {
         return cursor.get()
-    }, pth, Cursor(pth))
+    }, pth, cur)
     p.__di.isCachedTemporary = true
     p.__di.path = pth
+    p.$ = cur
+
     return Path.extend(p)
 }
 Path.extend = pass
