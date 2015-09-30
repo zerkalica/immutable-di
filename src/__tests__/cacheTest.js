@@ -5,7 +5,7 @@ import NativeCursor from '../cursors/native'
 import {Factory} from '../define'
 import sinon from 'sinon'
 
-describe('cache', () => {
+describe('cacheTest', () => {
     it('should hit, if no changes', () => {
         const cursor = new NativeCursor({
             a: {

@@ -47,10 +47,13 @@ class PathMapUpdater {
 }
 
 export default class MetaLoader {
+    pathToIdsMap = {}
+    _idToDef = {}
+    _driver
+
     constructor(driver) {
-        this.pathToIdsMap = {}
-        this._idToDef = {}
         this._driver = driver
+        this.getMeta = ::this.getMeta
     }
 
     getMeta(definition) {
@@ -66,32 +69,34 @@ export default class MetaLoader {
     _scan(definition, acc: PathMapUpdater) {
         const id = this._driver.getId(definition)
         if (this._idToDef[id]) {
-            acc.updateParents(this._idToDef[id].paths)
+            return acc.updateParents(this._idToDef[id].paths)
+        }
+
+        const meta = this._driver.getMeta(definition)
+        const {path, deps} = meta
+        let paths = []
+        if (path) {
+            let key = ''
+            const p = path.concat('*')
+            for (let j = 0, l = p.length; j < l; j++) {
+                key = key + '.' + p[j]
+                acc.addPath(key)
+            }
         } else {
             acc.begin(id)
-            const meta = this._driver.getMeta(definition)
-            for (let i = 0; i < meta.deps.length; i++) {
-                const dep = meta.deps[i].definition
+            for (let i = 0; i < deps.length; i++) {
+                const dep = deps[i].definition
                 if (!dep) {
-                    throw new Error('dep[' + i + '] is undefined in ' + JSON.stringify(meta))
+                    throw new Error(meta.displayName + '.deps[' + i + '].definition is undefined')
                 }
-                const {path} = meta
-                if (path) {
-                    let key = ''
-                    const p = path.concat('*')
-                    for (let j = 0, l = p.length; j < l; j++) {
-                        key = key + '.' + p[j]
-                        acc.addPath(key)
-                    }
-                } else {
-                    this._scan(dep, acc)
-                }
+                this._scan(dep, acc)
             }
-            const paths = acc.end(id)
-            this._idToDef[id] = {
-                ...meta,
-                paths
-            }
+            paths = acc.end(id)
+        }
+
+        this._idToDef[id] = {
+            ...meta,
+            paths
         }
     }
 }

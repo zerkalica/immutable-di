@@ -1,12 +1,5 @@
-import Dep from '../utils/Dep'
-
 export type PathType = Array<string>
 
-function pass() {
-}
-
-// Dep used instead of define/Class to prevent cross-dependencies
-@Dep({isClass: true})
 export default class AbstractCursor<State> {
     __notify: (path: string, isSynced: ?bool) => void = null
     _prefix: PathType

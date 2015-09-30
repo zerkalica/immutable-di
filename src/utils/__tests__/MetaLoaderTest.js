@@ -1,31 +1,33 @@
 /* eslint-env mocha */
 import assert from 'power-assert'
-import {Factory} from '../../define'
-import updateIdsMap from '../updateIdsMap'
+import {Factory, Path} from '../../define'
+import MetaLoader from '../MetaLoader'
+import DefinitionDriver from '../DefinitionDriver'
 
 function cmpArr(a1, a2) {
     return JSON.stringify(a1.sort()) === JSON.stringify(a2.sort())
 }
 
-describe('updateIdsMap', () => {
+function getLoader() {
+    return new MetaLoader(new DefinitionDriver(Path))
+}
+
+describe('MetaLoaderTest', () => {
     it('B->a, A->a, B->A: to a: [A, B]', () => {
-        const pathToIdsMap = {}
-        const idToPathsMap = {}
         const DepA = Factory([['a']])(v => v)
         const DepB = Factory([DepA, ['a']])(v => v)
         DepA.__di.id = 'A'
         DepB.__di.id = 'B'
 
-        updateIdsMap(DepB, pathToIdsMap, idToPathsMap)
-        assert.deepEqual(pathToIdsMap, {
+        const loader = getLoader()
+        loader.getMeta(DepB)
+        assert.deepEqual(loader.pathToIdsMap, {
             '.a': [ 'A', 'B' ],
             '.a.*': [ 'A', 'B' ]
         })
     })
 
     it('A->C, A->B, B->C, C->a, B->b to a: [A, B, C], b: [A, B]', () => {
-        const pathToIdsMap = {}
-        const idToPathsMap = {}
         const DepC = Factory([['a']])(v => v)
         const DepB = Factory([DepC, ['b']])(v => v)
         const DepA = Factory([DepC, DepB])(v => v)
@@ -33,8 +35,9 @@ describe('updateIdsMap', () => {
         DepB.__di.id = 'B'
         DepC.__di.id = 'C'
 
-        updateIdsMap(DepA, pathToIdsMap, idToPathsMap)
-        assert.deepEqual(pathToIdsMap, {
+        const loader = getLoader()
+        loader.getMeta(DepA)
+        assert.deepEqual(loader.pathToIdsMap, {
             '.a': [ 'C', 'B', 'A' ],
             '.a.*': [ 'C', 'B', 'A' ],
             '.b': [ 'B', 'A' ],
@@ -43,8 +46,6 @@ describe('updateIdsMap', () => {
     })
 
     it('A->C, A->B, B->C, C->a, B->b, then add D->B to a: [A, B, C, D], b: [A, B, D]', () => {
-        const pathToIdsMap = {}
-        const idToPathsMap = {}
         const DepC = Factory([['a']])(v => v)
         const DepB = Factory([DepC, ['b']])(v => v)
         const DepA = Factory([DepC, DepB])(v => v)
@@ -54,10 +55,11 @@ describe('updateIdsMap', () => {
         DepC.__di.id = 'C'
         DepD.__di.id = 'D'
 
-        updateIdsMap(DepA, pathToIdsMap, idToPathsMap)
-        updateIdsMap(DepD, pathToIdsMap, idToPathsMap)
+        const loader = getLoader()
+        loader.getMeta(DepA)
+        loader.getMeta(DepD)
 
-        assert.deepEqual(pathToIdsMap, {
+        assert.deepEqual(loader.pathToIdsMap, {
             '.a': [ 'C', 'B', 'A', 'D' ],
             '.a.*': [ 'C', 'B', 'A', 'D' ],
             '.b': [ 'B', 'A', 'D' ],
@@ -66,8 +68,6 @@ describe('updateIdsMap', () => {
     })
 
     it('B->A, C->A, A->a to a: [A, B, C]', () => {
-        const pathToIdsMap = {}
-        const idToPathsMap = {}
         const DepA = Factory([['a']])(v => v)
         const DepB = Factory([DepA])(v => v)
         const DepC = Factory([DepA])(v => v)
@@ -75,18 +75,17 @@ describe('updateIdsMap', () => {
         DepB.__di.id = 'B'
         DepC.__di.id = 'C'
 
-        updateIdsMap(DepB, pathToIdsMap, idToPathsMap)
-        updateIdsMap(DepC, pathToIdsMap, idToPathsMap)
+        const loader = getLoader()
+        loader.getMeta(DepB)
+        loader.getMeta(DepC)
 
-        assert.deepEqual(pathToIdsMap, {
+        assert.deepEqual(loader.pathToIdsMap, {
             '.a': [ 'A', 'B', 'C' ],
             '.a.*': [ 'A', 'B', 'C' ]
         })
     })
 
     it('B->A, C->B, A->a to a: [A, B, C]', () => {
-        const pathToIdsMap = {}
-        const idToPathsMap = {}
         const DepA = Factory([['a']])(v => v)
         const DepB = Factory([DepA])(v => v)
         const DepC = Factory([DepB])(v => v)
@@ -94,26 +93,25 @@ describe('updateIdsMap', () => {
         DepB.__di.id = 'B'
         DepC.__di.id = 'C'
 
-        updateIdsMap(DepB, pathToIdsMap, idToPathsMap)
-        updateIdsMap(DepC, pathToIdsMap, idToPathsMap)
+        const loader = getLoader()
+        loader.getMeta(DepB)
+        loader.getMeta(DepC)
 
-        assert.deepEqual(pathToIdsMap, {
+        assert.deepEqual(loader.pathToIdsMap, {
             '.a': [ 'A', 'B', 'C' ],
             '.a.*': [ 'A', 'B', 'C' ]
         })
     })
 
     it('B->A, A->a.b, B->a to a: [A, B], a.b: [A, B]', () => {
-        const pathToIdsMap = {}
-        const idToPathsMap = {}
         const DepA = Factory([['a', 'b']])(v => v)
         const DepB = Factory([DepA, ['a']])(v => v)
         DepA.__di.id = 'A'
         DepB.__di.id = 'B'
 
-        updateIdsMap(DepB, pathToIdsMap, idToPathsMap)
-
-        assert.deepEqual(pathToIdsMap, {
+        const loader = getLoader()
+        loader.getMeta(DepB)
+        assert.deepEqual(loader.pathToIdsMap, {
             '.a': [ 'A', 'B' ],
             '.a.b': [ 'A', 'B' ],
             '.a.b.*': [ 'A', 'B' ],
@@ -122,8 +120,6 @@ describe('updateIdsMap', () => {
     })
 
     it('B->a, A->a.b, C->a.c to a: [A, B, C], a.b: [A], a.c: [C]', () => {
-        const pathToIdsMap = {}
-        const idToPathsMap = {}
         const DepA = Factory([['a', 'b']])(v => v)
         const DepB = Factory([['a']])(v => v)
         const DepC = Factory([['a', 'c']])(v => v)
@@ -131,10 +127,12 @@ describe('updateIdsMap', () => {
         DepB.__di.id = 'B'
         DepC.__di.id = 'C'
 
-        updateIdsMap(DepB, pathToIdsMap, idToPathsMap)
-        updateIdsMap(DepA, pathToIdsMap, idToPathsMap)
-        updateIdsMap(DepC, pathToIdsMap, idToPathsMap)
-        assert.deepEqual(pathToIdsMap, {
+        const loader = getLoader()
+        loader.getMeta(DepB)
+        loader.getMeta(DepA)
+        loader.getMeta(DepC)
+
+        assert.deepEqual(loader.pathToIdsMap, {
             '.a': [ 'B', 'A', 'C' ],
             '.a.*': [ 'B' ],
             '.a.b': [ 'A' ],
@@ -145,15 +143,14 @@ describe('updateIdsMap', () => {
     })
 
     it('B->A, A->a, B->b to a: [A, B], b: [B]', () => {
-        const pathToIdsMap = {}
-        const idToPathsMap = {}
         const DepA = Factory([['a']])(v => v)
         const DepB = Factory([DepA, ['b']])(v => v)
         DepA.__di.id = 'A'
         DepB.__di.id = 'B'
 
-        updateIdsMap(DepB, pathToIdsMap, idToPathsMap)
-        assert.deepEqual(pathToIdsMap, {
+        const loader = getLoader()
+        loader.getMeta(DepB)
+        assert.deepEqual(loader.pathToIdsMap, {
             '.a': [ 'A', 'B' ],
             '.a.*': [ 'A', 'B' ],
             '.b': [ 'B' ],

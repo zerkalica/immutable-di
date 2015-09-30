@@ -5,7 +5,7 @@ import NativeCursor from '../cursors/native'
 import {Factory} from '../define'
 import sinon from 'sinon'
 
-describe('state changes', () => {
+describe('stateChangesTest', () => {
     it('should handle a.b, if a changed', () => {
         const cursor = new NativeCursor({
             a: {

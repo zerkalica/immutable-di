@@ -1,3 +1,5 @@
+import getFunctionName from './getFunctionName'
+
 function normalizeDeps(deps, pathMapper) {
     const resultDeps = []
     const isArray = Array.isArray(deps)
@@ -15,23 +17,59 @@ function normalizeDeps(deps, pathMapper) {
     return resultDeps
 }
 
+let _lastId = 1
+const _ids = {}
+function _createId() {
+    return _lastId++
+}
+
+function _idFromString(dn) {
+    if (!_ids[dn]) {
+        _ids[dn] = _createId()
+    }
+
+    return _ids[dn]
+}
+
 export default class DefinitionDriver {
     constructor(pathMapper) {
         this._pathMapper = pathMapper
     }
 
-    getId(definition) {
-        return definition.__di.id
+    static add(fn, definition) {
+        if (!fn.__di) {
+            let id = definition.id
+            if (!id) {
+                id = _createId()
+            } else if (typeof id === 'string') {
+                id = _idFromString(id)
+            }
+
+            const displayName = definition.displayName || fn.displayName || getFunctionName(fn) || 'id@' + id
+            fn.__di = {...definition, id, displayName}
+            fn.displayName = displayName
+        }
+        return fn
     }
 
-    getDef(definition) {
-        if (!definition || !definition.__di) {
-            throw new Error('Property .__id not exist in ' + debugCtx)
+    getId(fn, debugCtx) {
+        if (!fn || !fn.__di) {
+            throw new Error('Property .__id not exist in ', debugCtx)
         }
 
+        return fn.__di.id
+    }
+
+    getMeta(fn, debugCtx) {
+        const id = this.getId(fn, debugCtx)
+        const def = fn.__di
+        const deps = def.deps || []
         return {
-            ...definition.__di,
-            deps: normalizeDeps(definition.__di.deps, this._pathMapper)
+            ...def,
+            fn,
+            id,
+            isOptions: !Array.isArray(deps),
+            deps: normalizeDeps(deps, this._pathMapper)
         }
     }
 }

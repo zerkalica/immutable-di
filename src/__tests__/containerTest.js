@@ -5,7 +5,7 @@ import NativeCursor from '../cursors/native'
 import {Factory, Class} from '../define'
 import sinon from 'sinon'
 
-describe('container', () => {
+describe('containerTest', () => {
     describe('basics', () => {
         it('should throws exception if incorrect data passed to constructor', () => {
             assert.throws(() => new Container(), /instance/)

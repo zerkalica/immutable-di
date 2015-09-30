@@ -5,7 +5,7 @@ import Container from '../container'
 import NativeCursor from '../cursors/native'
 import sinon from 'sinon'
 
-describe('events', () => {
+describe('eventsTest', () => {
     it('should update mounted listener', () => {
         const cursor = new NativeCursor({
             a: {

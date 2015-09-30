@@ -117,7 +117,7 @@ function buildState(stateSpec) {
         pathMap: {}
     })
 }
-describe('model', () => {
+describe.skip('modelTest', () => {
     it('should get whole model data', () => {
         const ITest1TcombModel = {
             path: [Str, ''],

@@ -1,7 +1,7 @@
 import getFunctionName from '../getFunctionName'
 import assert from 'power-assert'
 
-describe('getFunctionName', () => {
+describe('getFunctionNameTest', () => {
     it('should return valid function name', () => {
         function test() {
         }
