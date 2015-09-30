@@ -126,7 +126,7 @@ class ITest1TcombModel {
             b: maybe(Str)
         })
     })
-    static $ = makeCursorsFromTcomb(ITest1TcombModel.$schema)
+    // static $ = makeCursorsFromTcomb(ITest1TcombModel.$schema)
 
     static $default = {
         path: 'test',
@@ -156,7 +156,7 @@ class ITest1TcombModel {
 
 describe.skip('modelTest', () => {
     it('should get whole model data', () => {
-        const ITest1TcombModel =
+        const ITest1TcombModel = ''
 
         const test1Model = fromTcomb(ITest1TcombModel)
         const IStateModel = {
