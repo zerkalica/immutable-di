@@ -3,23 +3,6 @@ import {IDeps} from '../asserts'
 
 export type IDependency = (v: any) => any
 
-function normalizeDeps(deps, pathMapper) {
-    const resultDeps = []
-    const isArray = Array.isArray(deps)
-    const names = isArray ? [] : Object.keys(deps)
-    const len = isArray ? deps.length : names.length
-    for (let i = 0; i < len; i++) {
-        const name = names.length ? names[i] : undefined
-        const dep = deps[name || i]
-        resultDeps.push({
-            name,
-            definition: Array.isArray(dep) ? pathMapper(dep) : dep
-        })
-    }
-
-    return resultDeps
-}
-
 
 let lastId = 1
 export function getId() {

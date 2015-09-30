@@ -1,10 +1,12 @@
 import {cancelAnimationFrame, requestAnimationFrame} from './utils/animationFrame'
-import {Facet} from './define'
+import {Facet, Path} from './define'
 import {IDep} from './asserts'
 import AbstractCursor from './cursors/abstract'
 import getFunctionName from './utils/getFunctionName'
 import type {IDependency} from './utils/Dep'
 import updateIdsMap from './utils/updateIdsMap'
+import DefinitionDriver from './utils/DefDefinitionDriver'
+import MetaLoader from './utils/MetaLoader'
 
 export default class Container {
     _cache: Map<any> = {}
@@ -14,13 +16,13 @@ export default class Container {
     _definitionMap = {}
 
     __pathToIdsMap = {}
-    __idToPathsMap = {}
     _isSynced = false
 
     constructor(state: AbstractCursor, options: ?{isSynced: bool}) {
         if (!(state instanceof AbstractCursor)) {
             throw new TypeError('state is not an instance of AbstractCursor: ' + state)
         }
+        this._loader = new MetaLoader(new DefinitionDriver(Path))
         this.get = ::this.get
         this.once = ::this.once
         this.mount = ::this.mount
@@ -38,18 +40,12 @@ export default class Container {
     override(fromDefinition: IDependency, toDefinition: IDependency) {
         IDep(fromDefinition)
         IDep(toDefinition)
-        this._definitionMap[fromDefinition.__di.id] = toDefinition
-    }
-
-    _updatePathMap(definition) {
-        if (!this.__idToPathsMap[definition.__di.id]) {
-            updateIdsMap(definition, this.__pathToIdsMap, this.__idToPathsMap)
-        }
+        this._definitionMap[this._loader.getMeta(fromDefinition).id] = this._loader.getMeta(toDefinition)
     }
 
     _clear(path: string[]) {
         let key = ''
-        const pathToIdsMap = this.__pathToIdsMap
+        const pathToIdsMap = this._loader.pathToIdsMap
         for (let j = 0, l = path.length - 1; j <= l; j++) {
             key = key + '.' + path[j]
             const k =  key + (j === l ? '' : '.*')
@@ -87,14 +83,13 @@ export default class Container {
     mount(definition: IDependency) {
         IDep(definition)
         // do not call listener on another state change
-        this._cache[definition.__di.id] = null
-        this._updatePathMap(definition)
+        this._cache[this._loader.getMeta(definition).id] = null
         this._listeners.push(definition)
     }
 
     unmount(listenerDef: IDependency) {
         IDep(listenerDef)
-        this._cache[listenerDef.__di.id] = null
+        this._cache[this._loader.getMeta(listenerDef).id] = null
         this._listeners = this._listeners.filter(d => listenerDef !== d)
     }
 
@@ -107,16 +102,13 @@ export default class Container {
     }
 
     _get(definition: IDependency, tempCache: object, debugCtx: Array<string>): any {
-        if (!definition || !definition.__di) {
-            throw new Error('Property .__id not exist in ' + debugCtx)
-        }
-        const {id, isCachedTemporary} = definition.__di
+        const def = this._loader.getMeta(definition)
+        const {id, isCachedTemporary} = def
         const cache = isCachedTemporary ? tempCache : this._cache
         let result = cache[id]
         if (result === undefined) {
-            const fn = this._definitionMap[id] || definition
-            this._updatePathMap(fn)
-            const {displayName, deps, isClass, isOptions} = fn.__di
+            const mappedDef = this._definitionMap[id] || def
+            const {displayName, deps, isClass, isOptions, fn} = mappedDef
             const args = {}
             const defArgs = isOptions ? [args] : []
             for (let i = 0, j = deps.length; i < j; i++) {
