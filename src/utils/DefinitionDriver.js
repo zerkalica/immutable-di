@@ -46,7 +46,11 @@ export default class DefinitionDriver {
             }
 
             const displayName = definition.displayName || fn.displayName || getFunctionName(fn) || 'id@' + id
-            fn.__di = {...definition, id, displayName}
+            fn.__di = {
+                ...definition,
+                id,
+                displayName
+            }
             fn.displayName = displayName
         }
         return fn

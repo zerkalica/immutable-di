@@ -117,15 +117,46 @@ function buildState(stateSpec) {
         pathMap: {}
     })
 }
+
+class ITest1TcombModel {
+    static $schema = struct({
+        path: Str,
+        query: struct({
+            a: Str,
+            b: maybe(Str)
+        })
+    })
+    static $ = makeCursorsFromTcomb(ITest1TcombModel.$schema)
+
+    static $default = {
+        path: 'test',
+        query: {
+            a: 'aaa',
+            b: ''
+        }
+    }
+
+    path: string
+    query: {
+        a: string,
+        b: ?string
+    }
+}
+
+/*
+  Facet([ITest1TcombModel.$])((v: ITest1TcombModel) => {
+    // v
+  })
+
+  Facet([ITest1TcombModel.$.query])((v: ITest1TcombModel.$schema.query.a) => {
+    // v
+  })
+*/
+
+
 describe.skip('modelTest', () => {
     it('should get whole model data', () => {
-        const ITest1TcombModel = {
-            path: [Str, ''],
-            query: {
-                a: [Str, 'aaa'],
-                b: maybe(Str)
-            }
-        }
+        const ITest1TcombModel =
 
         const test1Model = fromTcomb(ITest1TcombModel)
         const IStateModel = {
