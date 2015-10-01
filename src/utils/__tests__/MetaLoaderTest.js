@@ -1,6 +1,6 @@
 /* eslint-env mocha */
 import assert from 'power-assert'
-import {Factory, Path} from '../../define'
+import Annotations, {Factory, Path} from '../../define'
 import MetaLoader from '../MetaLoader'
 import DefinitionDriver from '../DefinitionDriver'
 
@@ -9,7 +9,7 @@ function cmpArr(a1, a2) {
 }
 
 function getLoader() {
-    return new MetaLoader(new DefinitionDriver(Path))
+    return new MetaLoader(new DefinitionDriver(Annotations))
 }
 
 describe('MetaLoaderTest', () => {

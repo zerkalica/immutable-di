@@ -7,115 +7,80 @@ import AbstractCursor from '../cursors/abstract'
 import {struct, maybe, Str} from 'tcomb'
 import sinon from 'sinon'
 
-/*
-const ITest1TcombConvertedModel = {
-    __di: {
-        path: ['route'],
-        spec: struct({
-            path: Str,
-            query: struct({
-                a: Str,
-                b: maybe(Str)
-            })
-        }),
-    },
-    path: {
-        __di: {
-            value: '',
-            path: ['route', 'path'],
-            spec: Str
+function makeFlatTcombSchema(schema, flattenSchema, path) {
+    const props = schema.meta.props
+    if (props) {
+        const keys = Object.keys(props)
+        for (let i = 0; i < props.length; i++) {
+            const key = keys[i]
+            makeFlatTcombSchema(props[key], flattenSchema, path.concat(key))
         }
-    },
-    query: {
-        __di : {
-            path: ['route', 'query'],
-            spec: struct({
-                a: Str,
-                b: maybe(Str)
-            })
-        },
-        a: {
-            __di: {
-                value: 'aaa',
-                path: ['route', 'query', 'a'],
-                spec: Str
-            }
-        },
-        b: {
-            __di: {
-                value: '',
-                path: ['route', 'query', 'b'],
-                spec: maybe(Str)
-            }
+    }
+    flattenSchema[path.join('.')] = schema
+}
+
+function createStateValidatorFromTcomb(schema) {
+    const flattenSchema = {}
+    makeFlatTcombSchema(schema, flattenSchema, [])
+    return function createValidator(path) {
+        const schemaPart = flattenSchema[path.join('.')]
+        return function _validate(data) {
+            return validate(schemaPart, data)
         }
     }
 }
-*/
 
-let lastId = 1
-function getId() {
-    return 'p' + lastId++
-}
 
-function ModPath(path, spec, value) {
-    const _path = Path(path)
-    _path.__di.value = value
-    _path.__di.spec = spec
-    return _path
-}
-
-function fromTcomb(rawSpec, path) {
-    let value
-    let result
-    let spec
-    if (!path) {
-        path = [getId()]
-    }
-    if (!Array.isArray(path)) {
-        throw new Error('path is not an array')
+function makeCursorsFromTcomb(schema, path) {
+    if (!schema || !schema.meta) {
+        throw new TypeError('schema is not tcomb type')
     }
 
-    if (Array.isArray(rawSpec)) {
-        value = rawSpec[1]
-        spec = rawSpec[0]
-    } else {
-        spec = rawSpec
-    }
+    const {props, name, kind} = schema.meta
+    const acc = {}
 
-    if (spec !== null && typeof spec === 'object') {
-        const keys = Object.keys(spec)
-        const specs = {}
-        const props = {}
-        value = {}
+    if (kind === 'struct') {
+        if (!name) {
+            throw new Error('need struct name')
+        }
+        const objPath = (path || []).concat(name)
+        const keys = Object.keys(props)
         for (let i = 0; i < keys.length; i++) {
-            const k = keys[i]
-            const rec = fromTcomb(spec[k], path.concat(k))
-            specs[k] = rec.__di.spec
-            value[k] = rec.__di.value
-            props[k] = rec
+            const key = keys[i]
+            acc[key] = makeCursorsFromTcomb(props[key], objPath.concat(key))
         }
-        result = ModPath(path, struct(specs, 'I' + path.join('.')), value)
-        for (let i = 0; i < keys.length; i++) {
-            const k = keys[i]
-            result[k] = props[k]
-        }
+        acc.$ = {$path: objPath}
     } else {
-        result = ModPath(path, spec, value)
+        acc.$ = {$path: path}
     }
-    return result
+
+    return acc
 }
 
 function buildState(stateSpec) {
     function reducer(acc, key) {
-        const {value, path} = stateSpec[key].__di
-        acc.state[key] = value
-        acc.pathMap[path[0]] = key
+        const {$schema, $default} = stateSpec[key]
+        acc.state[key] = $default
+        acc.schema[key] = $schema
+        if (!$schema.meta.name) {
+            throw new Error('Empty name in tcomb type: ' + key)
+        }
+        acc.pathMap[$schema.meta.name] = key
         return acc
     }
-    return Object.keys(stateSpec).reduce(reducer, {
+    const {state, pathMap, schema} = Object.keys(stateSpec).reduce(reducer, {
         state: {},
-        pathMap: {}
+        pathMap: {},
+        schema: {}
     })
+
+    const validator = createStateValidatorFromTcomb(struct(schema))
+
+    return {
+        state,
+        pathMap,
+        validator
+    }
 }
 
 class ITest1TcombModel {
@@ -125,8 +90,8 @@ class ITest1TcombModel {
             a: Str,
             b: maybe(Str)
         })
-    })
-    // static $ = makeCursorsFromTcomb(ITest1TcombModel.$schema)
+    }, 'ITest1TcombModel')
+    static $ = makeCursorsFromTcomb(ITest1TcombModel.$schema)
 
     static $default = {
         path: 'test',
@@ -136,7 +101,7 @@ class ITest1TcombModel {
         }
     }
 
-    path: string
+    path: string;
     query: {
         a: string,
         b: ?string
