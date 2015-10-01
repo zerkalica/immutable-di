@@ -7,6 +7,69 @@ import AbstractCursor from '../cursors/abstract'
 import {struct, maybe, Str} from 'tcomb'
 import sinon from 'sinon'
 
+function createStateFakeValidator() {
+    return function createFakeValidator() {
+        return function _validate() {
+        }
+    }
+}
+
+function buildState(stateSpec) {
+    const state = {}
+    const pathMap = {}
+    const schema = {}
+
+    const keys = Object.keys(stateSpec)
+    let hasSchema = false
+    for (let i = 0; i < keys.length; i++) {
+        const key = keys[i]
+        const {displayName, $schema, $default} = stateSpec[key]
+        state[key] = $default
+        if ($schema) {
+            schema[key] = $schema
+            hasSchema = true
+        }
+        pathMap[displayName] = key
+    }
+
+    return {
+        state,
+        pathMap,
+        schema: hasSchema ? schema : undefined
+    }
+}
+
+function getName(fn) {
+    return fn.displayName || getFunctionName(fn)
+}
+
+function createCursors(props, path) {
+    const acc = {}
+    if (props !== null && typeof props === 'object') {
+        const keys = Object.keys(props)
+        for (let i = 0; i < keys.length; i++) {
+            const key = keys[i]
+            acc[key] = createCursors(props[key], path.concat(key))
+        }
+    }
+    acc.$ = {$path: path}
+    return acc
+}
+
+
+function defaults(defs) {
+    return function wrapClass(Class) {
+        const displayName = getName(Class)
+        if (!Class.displayName) {
+            Class.displayName = displayName
+        }
+        Class.$default = defs
+        Class.$ = createCursors(defs, [displayName])
+
+        return Class
+    }
+}
+
 function makeFlatTcombSchema(schema, flattenSchema, path) {
     const props = schema.meta.props
     if (props) {
@@ -19,7 +82,7 @@ function makeFlatTcombSchema(schema, flattenSchema, path) {
     flattenSchema[path.join('.')] = schema
 }
 
-function createStateValidatorFromTcomb(schema) {
+function createStateTcombValidator(schema) {
     const flattenSchema = {}
     makeFlatTcombSchema(schema, flattenSchema, [])
     return function createValidator(path) {
@@ -30,77 +93,51 @@ function createStateValidatorFromTcomb(schema) {
     }
 }
 
-
-function makeCursorsFromTcomb(schema, path) {
-    if (!schema || !schema.meta) {
-        throw new TypeError('schema is not tcomb type')
-    }
-
-    const {props, name, kind} = schema.meta
-    const acc = {}
-
-    if (kind === 'struct') {
-        if (!name) {
-            throw new Error('need struct name')
-        }
-        const objPath = (path || []).concat(name)
-        const keys = Object.keys(props)
-        for (let i = 0; i < keys.length; i++) {
-            const key = keys[i]
-            acc[key] = makeCursorsFromTcomb(props[key], objPath.concat(key))
-        }
-        acc.$ = {$path: objPath}
-    } else {
-        acc.$ = {$path: path}
-    }
-
-    return acc
+function createStateValidator(schema) {
+    return schema
+        ? createStateTcombValidator(struct(schema, 'IAppState'))
+        : createStateFakeValidator()
 }
 
-function buildState(stateSpec) {
-    function reducer(acc, key) {
-        const {$schema, $default} = stateSpec[key]
-        acc.state[key] = $default
-        acc.schema[key] = $schema
-        if (!$schema.meta.name) {
-            throw new Error('Empty name in tcomb type: ' + key)
-        }
-        acc.pathMap[$schema.meta.name] = key
-        return acc
+function typecheck(schema) {
+    return function wrapClass(Class) {
+        Class.$schema = struct(schema, getName(Class))
+
+        return Class
     }
-    const {state, pathMap, schema} = Object.keys(stateSpec).reduce(reducer, {
-        state: {},
-        pathMap: {},
-        schema: {}
+}
+
+type ICursor = {$path: Array<string>}
+
+@defaults({
+    path: 'test',
+    query: {
+        a: 'aaa',
+        b: ''
+    }
+})
+@typecheck({
+    path: Str,
+    query: struct({
+        a: Str,
+        b: maybe(Str)
     })
-
-    const validator = createStateValidatorFromTcomb(struct(schema))
-
-    return {
-        state,
-        pathMap,
-        validator
-    }
-}
-
+})
 class ITest1TcombModel {
-    static $schema = struct({
-        path: Str,
-        query: struct({
-            a: Str,
-            b: maybe(Str)
-        })
-    }, 'ITest1TcombModel')
-    static $ = makeCursorsFromTcomb(ITest1TcombModel.$schema)
-
-    static $default = {
-        path: 'test',
+    static $: {
+        path: {
+            $: ICursor
+        },
         query: {
-            a: 'aaa',
-            b: ''
+            $: ICursor,
+            a: {
+                $: ICursor
+            },
+            b: {
+                $: ICursor
+            }
         }
     }
-
     path: string;
     query: {
         a: string,
