@@ -57,7 +57,9 @@
     "utils"
   ],
   "dependencies": {
-    "babel-runtime": "^5.8.24"
+    "babel-runtime": "^5.8.24",
+    "tcomb": "^2.5.0",
+    "tcomb-validation": "^2.2.0"
   },
   "devDependencies": {
     "babel": "^5.8.23",

@@ -7,12 +7,12 @@ export default class AbstractCursor<State> {
 
     constructor(
         state: object,
-        prefix: ?PathType,
-        pathMap: {[pathId: string]: string}
+        options
     ) {
-        this._pathMap = pathMap || {}
+        const opts = options || {}
+        this._pathMap = opts.pathMap || {}
+        this._prefix = opts.prefix || []
         this._state = state || {}
-        this._prefix = prefix || []
 
         this.commit = ::this.commit
         this.get = ::this.get
@@ -44,11 +44,12 @@ export default class AbstractCursor<State> {
         const newPath = mappedId
             ? [mappedId].concat(path.slice(1))
             : path
-
         const cursor = new this.constructor(
             this._state,
-            this._prefix.concat(newPath),
-            this._pathMap
+            {
+                prefix: this._prefix.concat(newPath),
+                pathMap: this._pathMap
+            }
         )
         cursor.setNotify(this.__notify)
 

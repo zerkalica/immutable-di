@@ -1,4 +1,3 @@
-import DefinitionDriver from './utils/DefinitionDriver'
-import Annotations from './utils/Annotations'
+import DefaultDefinitionDriver from './drivers/DefaultDefinitionDriver'
 
-export default new Annotations(DefinitionDriver.add)
+export default DefaultDefinitionDriver.annotations

@@ -1,15 +1,15 @@
 /* eslint-env mocha */
 import assert from 'power-assert'
-import Annotations, {Factory, Path} from '../../define'
 import MetaLoader from '../MetaLoader'
-import DefinitionDriver from '../DefinitionDriver'
+import DefaultDefinitionDriver from '../../drivers/DefaultDefinitionDriver'
+const {Factory, Path} = DefaultDefinitionDriver.annotations
 
 function cmpArr(a1, a2) {
     return JSON.stringify(a1.sort()) === JSON.stringify(a2.sort())
 }
 
 function getLoader() {
-    return new MetaLoader(new DefinitionDriver(Annotations))
+    return new MetaLoader(new DefaultDefinitionDriver())
 }
 
 describe('MetaLoaderTest', () => {

@@ -1,10 +1,9 @@
 import {cancelAnimationFrame, requestAnimationFrame} from './utils/animationFrame'
-import {Facet, Class, Path} from './define'
 import {IDep} from './asserts'
 import AbstractCursor from './cursors/abstract'
 import getFunctionName from './utils/getFunctionName'
 import type {IDependency} from './utils/Dep'
-import DefinitionDriver from './utils/DefinitionDriver'
+import DefaultDefinitionDriver from './drivers/DefaultDefinitionDriver'
 import MetaLoader from './utils/MetaLoader'
 
 export default class Container {
@@ -20,7 +19,10 @@ export default class Container {
         if (!(state instanceof AbstractCursor)) {
             throw new TypeError('state is not an instance of AbstractCursor: ' + state)
         }
-        this._loader = (new MetaLoader(new DefinitionDriver(Path)))
+
+        const driver = new DefaultDefinitionDriver()
+        this._annotations = DefaultDefinitionDriver.annotations
+        this._loader = new MetaLoader(driver)
 
         this.get = ::this.get
         this.once = ::this.once
@@ -29,7 +31,7 @@ export default class Container {
         this.notify = ::this.notify
         this.__notify = ::this.__notify
         // Store instance of AbstractCursor, our decorators uses them for Setter/Getter factories
-        this._cache[this._getMeta(Class()(AbstractCursor)).id] = state
+        this._cache[this._getMeta(this._annotations.Class()(AbstractCursor)).id] = state
         state.setNotify(this.notify)
         if (options) {
             this._isSynced = options.isSynced
@@ -106,7 +108,7 @@ export default class Container {
         }
 
         listenerWrapper.displayName = 'listenerOnce@' + getFunctionName(listener)
-        definition = Facet(stateMap)(listenerWrapper)
+        definition = this._annotations.Facet(stateMap)(listenerWrapper)
 
         this.mount(definition)
     }

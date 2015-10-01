@@ -1,4 +1,5 @@
-import getFunctionName from './getFunctionName'
+import getFunctionName from '../utils/getFunctionName'
+import Annotations from '../utils/Annotations'
 
 let _lastId = 1
 const _ids = {}
@@ -14,30 +15,31 @@ function _idFromString(dn) {
     return _ids[dn]
 }
 
-export default class DefinitionDriver {
-    constructor(Annotations) {
-        this._Annotations = Annotations
-    }
 
-    static add(fn, definition) {
-        if (!fn.__di) {
-            let id = definition.id
-            if (!id) {
-                id = _createId()
-            } else if (typeof id === 'string') {
-                id = _idFromString(id)
-            }
-
-            const displayName = definition.displayName || fn.displayName || getFunctionName(fn) || 'id@' + id
-            fn.__di = {
-                ...definition,
-                id,
-                displayName
-            }
-            fn.displayName = displayName
+function addDefinition(fn, definition) {
+    if (!fn.__di) {
+        let id = definition.id
+        if (!id) {
+            id = _createId()
+        } else if (typeof id === 'string') {
+            id = _idFromString(id)
         }
-        return fn
+
+        const displayName = definition.displayName || fn.displayName || getFunctionName(fn) || 'id@' + id
+        fn.__di = {
+            ...definition,
+            id,
+            displayName
+        }
+        fn.displayName = displayName
     }
+    return fn
+}
+
+const annotations: Annotations = new Annotations(addDefinition)
+
+export default class DefaultDefinitionDriver {
+    static annotations = annotations
 
     getId(fn, debugCtx) {
         if (!fn || !fn.__di) {
@@ -52,7 +54,7 @@ export default class DefinitionDriver {
         const isArray = Array.isArray(deps)
         const names = isArray ? [] : Object.keys(deps)
         const len = isArray ? deps.length : names.length
-        const {Cursor, Path} = this._Anntoations
+        const {Cursor, Path} = annotations
         for (let i = 0; i < len; i++) {
             const name = names.length ? names[i] : undefined
             const dep = deps[name || i]
