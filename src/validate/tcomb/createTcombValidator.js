@@ -18,7 +18,8 @@ export default function createTcombValidator(schema) {
     makeFlatTcombSchema(struct(schema, 'IAppState'), flattenSchema, [])
 
     return function createValidator(path) {
-        const schemaPart = flattenSchema[path.join('.')]
+        const key = path.length ? path.join('.') : 'IAppState'
+        const schemaPart = flattenSchema[key]
         return function _validate(data) {
             return schemaPart ? validate(schemaPart, data) : null
         }

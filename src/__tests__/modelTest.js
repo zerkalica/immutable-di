@@ -54,7 +54,7 @@ describe('modelTest', () => {
         }
 
         const {state, pathMap, validate} = buildState(stateSpec, createTcombValidator)
-        const cursor = new NativeCursor(state, {pathMap})
+        const cursor = new NativeCursor(state, {pathMap, validate})
         const container = new Container(cursor, {synced: true})
 
         function fn(query, queryCursor) {

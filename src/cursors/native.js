@@ -59,6 +59,7 @@ export default class NativeCursor extends AbstractCursor {
     set(newState) {
         const node = this._selector(this._state)
         if (newState !== node[this._cnName]) {
+            this._assert(newState)
             node[this._cnName] = newState
             this._update()
         }
@@ -67,7 +68,9 @@ export default class NativeCursor extends AbstractCursor {
     }
 
     apply(fn: (v: State) => State) {
-        this.set(fn(this.get()))
+        const newValue = fn(this.get())
+        this._assert(newValue)
+        this.set(newValue)
         return this
     }
 
@@ -78,6 +81,7 @@ export default class NativeCursor extends AbstractCursor {
         for (let i = 0, j = keys.length; i < j; i++) {
             const k = keys[i]
             if (node[k] !== newState[k]) {
+                this._assert(newState[k], k)
                 node[k] = newState[k]
                 isUpdated = true
             }
