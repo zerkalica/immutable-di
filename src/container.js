@@ -1,10 +1,16 @@
 import {cancelAnimationFrame, requestAnimationFrame} from './utils/animationFrame'
 import {IDep} from './asserts'
-import AbstractCursor from './cursors/abstract'
+import BaseAnnotations from './model/BaseAnnotations'
 import getFunctionName from './utils/getFunctionName'
-import type {IDependency} from './utils/Dep'
-import DefaultDefinitionDriver from './drivers/DefaultDefinitionDriver'
 import MetaLoader from './utils/MetaLoader'
+import Selector from './model/Selector'
+import type {IDependency} from './utils/Dep'
+import defaultAnnotations from './define'
+
+import type {
+    IStateSpec,
+    IValidatorCreate
+} from './model/Selector'
 
 export default class Container {
     _cache: Map<any> = {}
@@ -13,16 +19,27 @@ export default class Container {
     _timerId = null
     _definitionMap = {}
 
-    _isSynced = false
-
-    constructor(state: AbstractCursor, options: ?{isSynced: bool}) {
-        if (!(state instanceof AbstractCursor)) {
-            throw new TypeError('state is not an instance of AbstractCursor: ' + state)
+    constructor({
+        createValidator,
+        cursor,
+        annotations,
+        isSynced,
+        stateSpec
+    }: {
+        createValidator: ?IValidatorCreate<TSchema>,
+        cursor: AbstractCursor,
+        annotations: ?BaseAnnotations,
+        isSynced: ?bool,
+        stateSpec: IStateSpec
+    }) {
+        if (!stateSpec) {
+            throw new TypeError('Need stateSpec')
         }
-
-        const driver = new DefaultDefinitionDriver()
-        this._annotations = DefaultDefinitionDriver.annotations
-        this._loader = new MetaLoader(driver)
+        this._annotations = annotations || defaultAnnotations
+        const loader = new MetaLoader(this._annotations.driver)
+        this._getMeta = loader.getMeta
+        this._pathToIdsMap = loader.pathToIdsMap
+        this._isSynced = !!isSynced
 
         this.get = ::this.get
         this.once = ::this.once
@@ -30,16 +47,22 @@ export default class Container {
         this.unmount = ::this.unmount
         this.notify = ::this.notify
         this.__notify = ::this.__notify
-        // Store instance of AbstractCursor, our decorators uses them for Setter/Getter factories
-        this._cache[this._getMeta(this._annotations.Class()(AbstractCursor)).id] = state
-        state.setNotify(this.notify)
-        if (options) {
-            this._isSynced = options.isSynced
-        }
+
+        const selector = new Selector({
+            stateSpec,
+            createValidator,
+            cursor,
+            notify: this.notify
+        })
+
+        this._setCache(this._annotations.Class()(Selector), selector)
     }
 
-    _getMeta(def, debugCtx) {
-        return this._loader.getMeta(def, debugCtx)
+    _setCache(fn, instance) {
+        if (!fn) {
+            throw new Error('fn is undefined')
+        }
+        this._cache[this._getMeta(fn).id] = instance
     }
 
     override(fromDefinition: IDependency, toDefinition: IDependency) {
@@ -50,7 +73,7 @@ export default class Container {
 
     _clear(path: string[]) {
         let key = ''
-        const pathToIdsMap = this._loader.pathToIdsMap
+        const pathToIdsMap = this._pathToIdsMap
         for (let j = 0, l = path.length - 1; j <= l; j++) {
             key = key + '.' + path[j]
             const k =  key + (j === l ? '' : '.*')

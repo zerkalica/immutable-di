@@ -1,69 +1,64 @@
 /* eslint-env mocha */
 import {Factory} from '../define'
+import {struct, maybe, Str} from 'tcomb'
 import assert from 'power-assert'
 import Container from '../container'
 import NativeCursor from '../cursors/native'
-import {struct, maybe, Str} from 'tcomb'
-import buildState from '../model/buildState'
-import defaults from '../model/defaults'
-import typecheck from '../validate/tcomb/typecheck'
+
 import createTcombValidator from '../validate/tcomb/createTcombValidator'
 
-type ICursor = {$path: Array<string>}
+type IQuery = {
+    a: string,
+    b: ?string
+}
 
-@typecheck({
-    path: Str,
-    query: struct({
-        a: Str,
-        b: maybe(Str)
-    })
-})
-@defaults({
-    path: '3',
-    query: {
-        a: 'aaa',
-        b: null
-    }
-})
-class Test1Model {
-    static $: {
-        path: {
-            $: ICursor
-        },
+type ITest1Model = {
+    path: string,
+    query: IQuery
+}
+const Test1Model = {
+    _schema: struct({
+        path: Str,
+        query: struct({
+            a: Str,
+            b: maybe(Str)
+        })
+    }),
+    defaults: {
+        path: '3',
         query: {
-            $: ICursor,
-            a: {
-                $: ICursor
-            },
-            b: {
-                $: ICursor
-            }
+            a: 'aaa',
+            b: null
         }
-    };
-    path: string;
-    query: {
-        a: string,
-        b: ?string
-    };
+    },
+    cursor: {
+        $: {},
+        path: {$: {}},
+        query: {
+            $: {},
+            a: {$: {}},
+            b: {$: {}}
+        }
+    }
 }
 
 describe('modelTest', () => {
     it('should get whole model data', () => {
-        const stateSpec = {
-            route: Test1Model
-        }
+        const container = new Container({
+            stateSpec: {
+                route: Test1Model
+            },
+            cursor: NativeCursor,
+            createValidator: createTcombValidator
+        })
 
-        const {state, pathMap, validate} = buildState(stateSpec, createTcombValidator)
-        const cursor = new NativeCursor(state, {pathMap, validate})
-        const container = new Container(cursor, {synced: true})
-
-        function fn(query, queryCursor) {
+        function fn(query: IQuery, queryCursor: ICursor<IQuery>) {
             return query
         }
 
         const dep = Factory([
-            Test1Model.$.query,
-            Test1Model.$.query.$
+            Test1Model.cursor.query,
+            Test1Model.cursor.query.$
         ])(fn)
 
         assert.deepEqual(container.get(dep), {a: 'aaa', b: null})

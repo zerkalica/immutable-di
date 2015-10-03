@@ -1,17 +1,10 @@
 import AbstractCursor from './abstract'
 
-function pass() {
-    return []
-}
-
 export default class NativeCursor extends AbstractCursor {
     _selector = null
     _cnName = null
-    constructor(
-        state: object,
-        options
-) {
-        super(state, options)
+    constructor(options) {
+        super(options)
 
         const prefix = this._prefix
         if (prefix.length) {

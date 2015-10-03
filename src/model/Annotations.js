@@ -1,11 +1,14 @@
-import AbstractCursor from '../cursors/abstract'
+import BaseAnnotations from './BaseAnnotations'
+import AbstractDefinitionDriver from '../drivers/AbstractDefinitionDriver'
 
-export default class CreateAnnotations {
-    constructor(addMeta) {
-        this._addMeta = addMeta
-        this.Cursor = ::this.Cursor
-        this.Path = ::this.Path
+export default class Annotations extends BaseAnnotations {
+    driver: AbstractDefinitionDriver
+    constructor(driver: AbstractDefinitionDriver) {
+        super()
+        this.driver = driver
+        driver.setAnnotations(this)
 
+        this._addMeta = ::this._addMeta
         this.Class = ::this.Class
         this.Facet = ::this.Facet
         this.Factory = ::this.Factory
@@ -17,8 +20,8 @@ export default class CreateAnnotations {
         this.Assign = ::this.Assign
     }
 
-    _getName(prefix, path) {
-        return prefix + '@' + path.join('.')
+    _addMeta(fn, meta) {
+        return this.driver.add(fn, meta)
     }
 
     /**
@@ -30,27 +33,6 @@ export default class CreateAnnotations {
             displayName,
             id: displayName,
             deps: [this.Cursor(path)]
-        })
-    }
-
-    Cursor(path) {
-        const displayName = this._getName('cursor', path)
-        return this._addMeta(cursor => cursor.select(path), {
-            displayName,
-            id: displayName,
-            deps: [this.Class()(AbstractCursor)]
-        })
-    }
-
-    Path(path) {
-        const cur = this.Cursor(path)
-        const displayName = this._getName('path', path)
-        return this._addMeta(cursor => cursor.get(), {
-            displayName,
-            id: displayName,
-            isCachedTemporary: true,
-            path,
-            deps: [cur]
         })
     }
 

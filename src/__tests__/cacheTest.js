@@ -4,15 +4,35 @@ import Container from '../container'
 import NativeCursor from '../cursors/native'
 import {Factory} from '../define'
 import sinon from 'sinon'
+import Selector from '../model/Selector'
+
+function createContainer() {
+    return new Container({
+        stateSpec: {
+            a: {
+                defaults: {
+                    b: 123,
+                    c: 'test'
+                },
+
+                cursor: {
+                    $: {},
+                    b: {
+                        $: {}
+                    },
+                    c: {
+                        $: {}
+                    }
+                }
+            }
+        },
+        cursor: NativeCursor
+    })
+}
 
 describe('cacheTest', () => {
     it('should hit, if no changes', () => {
-        const cursor = new NativeCursor({
-            a: {
-                b: 123
-            }
-        })
-        const container = new Container(cursor)
+        const container = createContainer()
         const fn = sinon.spy(v => v)
         const MyDep = Factory([['a', 'b']])(fn)
         container.get(MyDep)
@@ -21,18 +41,13 @@ describe('cacheTest', () => {
     })
 
     it('should not hit, if a.b changed', () => {
-        const cursor = new NativeCursor({
-            a: {
-                b: 123
-            }
-        })
-        const container = new Container(cursor)
+        const container = createContainer()
         const fn = sinon.spy(v => {
             return v
         })
         const MyDep = Factory([['a', 'b']])(fn)
         container.get(MyDep)
-        const c = cursor.select(['a', 'b'])
+        const c = container.get(Selector).select(['a', 'b'])
         c.set(321).commit()
         container.get(MyDep)
         assert(fn.calledTwice)
@@ -41,33 +56,21 @@ describe('cacheTest', () => {
     })
 
     it('should hit, if a.c changed', () => {
-        const cursor = new NativeCursor({
-            a: {
-                b: 123,
-                c: 'test'
-            }
-        })
-        const container = new Container(cursor)
+        const container = createContainer()
         const fn = sinon.spy(v => v)
         const MyDep = Factory([['a', 'b']])(fn)
         container.get(MyDep)
-        cursor.select(['a', 'c']).set('test2').commit()
+        container.get(Selector).select(['a', 'c']).set('test2').commit()
         container.get(MyDep)
         assert(fn.calledOnce)
     })
 
     it('should not hit, if a changed', () => {
-        const cursor = new NativeCursor({
-            a: {
-                b: 123,
-                c: 'test'
-            }
-        })
-        const container = new Container(cursor)
+        const container = createContainer()
         const fn = sinon.spy(v => v)
         const MyDep = Factory([['a', 'b']])(fn)
         container.get(MyDep)
-        cursor.select(['a']).set({
+        container.get(Selector).select(['a']).set({
             b: 123,
             c: 'test2'
         }).commit()

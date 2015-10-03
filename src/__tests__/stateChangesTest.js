@@ -4,74 +4,74 @@ import Container from '../container'
 import NativeCursor from '../cursors/native'
 import {Factory} from '../define'
 import sinon from 'sinon'
+import Selector from '../model/Selector'
+
+function createContainer() {
+    return new Container({
+        stateSpec: {
+            a: {
+                defaults: {
+                    b: 123,
+                    c: 111
+                },
+
+                cursor: {
+                    $: {},
+                    b: {
+                        $: {}
+                    },
+                    c: {
+                        $: {}
+                    }
+                }
+            }
+        },
+        cursor: NativeCursor
+    })
+}
 
 describe('stateChangesTest', () => {
     it('should handle a.b, if a changed', () => {
-        const cursor = new NativeCursor({
-            a: {
-                b: 123
-            }
-        })
-        const container = new Container(cursor)
+        const container = createContainer()
         const MyDep = Factory([['a', 'b']])(v => v)
         container.get(MyDep)
-        cursor.select(['a']).set({b: 321}).commit()
+        container.get(Selector).select(['a']).set({b: 321}).commit()
         assert.equal(container.get(MyDep), 321)
     })
 
     it('should handle a, if a.b changed', () => {
-        const cursor = new NativeCursor({
-            a: {
-                b: 123
-            }
-        })
-        const container = new Container(cursor)
+        const container = createContainer()
         const MyDep = Factory([['a']])(v => v)
         container.get(MyDep)
-        cursor.select(['a', 'b']).set(321).commit()
+        container.get(Selector).select(['a', 'b']).set(321).commit()
         assert.deepEqual(container.get(MyDep), {
-            b: 321
+            b: 321,
+            c: 111
         })
     })
 
     it('should not handle a.c, if a.b changed', () => {
-        const cursor = new NativeCursor({
-            a: {
-                b: 123,
-                c: 'test'
-            }
-        })
-        const container = new Container(cursor)
+        const container = createContainer()
         const MyDep = Factory([['a', 'c']])(v => v)
         container.get(MyDep)
-        cursor.select(['a', 'b']).set(321).commit()
-        assert(container.get(MyDep) === 'test')
+        container.get(Selector).select(['a', 'b']).set(321).commit()
+        assert(container.get(MyDep) === 111)
     })
 
     it('should handle a.b, if a.b changed', () => {
-        const cursor = new NativeCursor({
-            a: {
-                b: 123
-            }
-        })
-        const container = new Container(cursor)
+        const container = createContainer()
         const MyDep = Factory([['a', 'b']])(v => v)
         container.get(MyDep)
-        cursor.select(['a', 'b']).set(321).commit()
+        container.get(Selector).select(['a', 'b']).set(321).commit()
         assert(container.get(MyDep) === 321)
     })
 
     it('should update state on next timer tick', done => {
-        const cursor = new NativeCursor({
-            a: {
-                b: 123
-            }
-        })
-        const container = new Container(cursor)
+        const container = createContainer()
         const fn = sinon.spy(v => v)
         const MyDep = Factory([['a', 'b']])(fn)
         container.get(MyDep)
-        cursor.select(['a', 'b']).set(321)
+        container.get(Selector).select(['a', 'b']).set(321)
         setTimeout(() => {
             container.get(MyDep)
             assert(MyDep.calledTwice)

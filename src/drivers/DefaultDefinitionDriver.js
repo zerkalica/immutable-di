@@ -1,5 +1,6 @@
+import Annotations from '../model/Annotations'
 import getFunctionName from '../utils/getFunctionName'
-import Annotations from '../utils/Annotations'
+import AbstractDefinitionDriver from './AbstractDefinitionDriver'
 
 let _lastId = 1
 const _ids = {}
@@ -15,35 +16,30 @@ function _idFromString(dn) {
     return _ids[dn]
 }
 
+export default class DefaultDefinitionDriver extends AbstractDefinitionDriver {
+    add(fn, definition) {
+        if (!fn.__di) {
+            let id = definition.id
+            if (!id) {
+                id = _createId()
+            } else if (typeof id === 'string') {
+                id = _idFromString(id)
+            }
 
-function addDefinition(fn, definition) {
-    if (!fn.__di) {
-        let id = definition.id
-        if (!id) {
-            id = _createId()
-        } else if (typeof id === 'string') {
-            id = _idFromString(id)
+            const displayName = definition.displayName || fn.displayName || getFunctionName(fn) || 'id@' + id
+            fn.__di = {
+                ...definition,
+                id,
+                displayName
+            }
+            fn.displayName = displayName
         }
-
-        const displayName = definition.displayName || fn.displayName || getFunctionName(fn) || 'id@' + id
-        fn.__di = {
-            ...definition,
-            id,
-            displayName
-        }
-        fn.displayName = displayName
+        return fn
     }
-    return fn
-}
-
-const annotations: Annotations = new Annotations(addDefinition)
-
-export default class DefaultDefinitionDriver {
-    static annotations = annotations
 
     getId(fn, debugCtx) {
         if (!fn || !fn.__di) {
-            throw new Error('Property .__id not exist in ', debugCtx)
+            throw new Error('Property .__di not exist in ' + fn)
         }
 
         return fn.__di.id
@@ -54,7 +50,7 @@ export default class DefaultDefinitionDriver {
         const isArray = Array.isArray(deps)
         const names = isArray ? [] : Object.keys(deps)
         const len = isArray ? deps.length : names.length
-        const {Cursor, Path} = annotations
+        const {Path, Cursor} = this._annotations
         for (let i = 0; i < len; i++) {
             const name = names.length ? names[i] : undefined
             const dep = deps[name || i]

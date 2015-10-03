@@ -5,23 +5,46 @@ import NativeCursor from '../cursors/native'
 import {Factory, Class} from '../define'
 import sinon from 'sinon'
 
+function createContainer() {
+    return new Container({
+        stateSpec: {
+            a: {
+                defaults: {
+                    b: 123,
+                    c: 'test'
+                },
+
+                cursor: {
+                    $: {},
+                    b: {
+                        $: {}
+                    },
+                    c: {
+                        $: {}
+                    }
+                }
+            }
+        },
+        cursor: NativeCursor
+    })
+}
+
+
 describe('containerTest', () => {
     describe('basics', () => {
         it('should throws exception if incorrect data passed to constructor', () => {
-            assert.throws(() => new Container(), /instance/)
+            assert.throws(() => new Container({}), /stateSpec/)
         })
     })
 
     describe('get', () => {
         it('should throws exception if no arguments passed', () => {
-            const cursor = new NativeCursor({})
-            const container = new Container(cursor)
+            const container = createContainer()
             assert.throws(() => container.get())
         })
 
         it('should throws exception if no decorated function passed', () => {
-            const cursor = new NativeCursor({})
-            const container = new Container(cursor)
+            const container = createContainer()
             function WrongDep() {
             }
 
@@ -30,8 +53,7 @@ describe('containerTest', () => {
 
         /* eslint-disable padded-blocks */
         it('should return class instance', () => {
-            const cursor = new NativeCursor({})
-            const container = new Container(cursor)
+            const container = createContainer()
             @Class()
             class Test {
             }
@@ -42,8 +64,7 @@ describe('containerTest', () => {
 
         /* eslint-disable padded-blocks */
         it('should cache class instance', () => {
-            const cursor = new NativeCursor({})
-            const container = new Container(cursor)
+            const container = createContainer()
             @Class()
             class TestBase {
 
@@ -60,8 +81,7 @@ describe('containerTest', () => {
         /* eslint-enable padded-blocks */
 
         it('should cache factory return value', () => {
-            const cursor = new NativeCursor({})
-            const container = new Container(cursor)
+            const container = createContainer()
             const MyDep = Factory()(function _MyDep() {
                 return 123
             })
@@ -71,8 +91,7 @@ describe('containerTest', () => {
         })
 
         it('should handle simple deps from array definition', () => {
-            const cursor = new NativeCursor({})
-            const container = new Container(cursor)
+            const container = createContainer()
             const MyDep = Factory()(function _MyDep() {
                 return 123
             })
@@ -86,8 +105,7 @@ describe('containerTest', () => {
         })
 
         it('should handle simple deps from object definition', () => {
-            const cursor = new NativeCursor({})
-            const container = new Container(cursor)
+            const container = createContainer()
             const MyDep = Factory()(function _MyDep() {
                 return 123
             })
