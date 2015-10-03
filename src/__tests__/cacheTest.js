@@ -1,7 +1,7 @@
 /* eslint-env mocha */
 import assert from 'power-assert'
 import Container from '../container'
-import NativeCursor from '../cursors/native'
+import NativeCursor from '../cursors/NativeCursor'
 import {Factory} from '../define'
 import sinon from 'sinon'
 import Selector from '../model/Selector'
@@ -47,7 +47,7 @@ describe('cacheTest', () => {
         })
         const MyDep = Factory([['a', 'b']])(fn)
         container.get(MyDep)
-        const c = container.get(Selector).select(['a', 'b'])
+        const c = container.get(Selector)(['a', 'b'])
         c.set(321).commit()
         container.get(MyDep)
         assert(fn.calledTwice)
@@ -60,7 +60,7 @@ describe('cacheTest', () => {
         const fn = sinon.spy(v => v)
         const MyDep = Factory([['a', 'b']])(fn)
         container.get(MyDep)
-        container.get(Selector).select(['a', 'c']).set('test2').commit()
+        container.get(Selector)(['a', 'c']).set('test2').commit()
         container.get(MyDep)
         assert(fn.calledOnce)
     })
@@ -70,7 +70,7 @@ describe('cacheTest', () => {
         const fn = sinon.spy(v => v)
         const MyDep = Factory([['a', 'b']])(fn)
         container.get(MyDep)
-        container.get(Selector).select(['a']).set({
+        container.get(Selector)(['a']).set({
             b: 123,
             c: 'test2'
         }).commit()

@@ -1,4 +1,4 @@
-import AbstractCursor from './abstract'
+import AbstractCursor from './AbstractCursor'
 
 export default class NativeCursor extends AbstractCursor {
     _selector = null

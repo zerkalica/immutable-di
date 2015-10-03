@@ -2,7 +2,7 @@
 import {Factory} from '../define'
 import assert from 'power-assert'
 import Container from '../container'
-import NativeCursor from '../cursors/native'
+import NativeCursor from '../cursors/NativeCursor'
 import sinon from 'sinon'
 import Selector from '../model/Selector'
 
@@ -36,8 +36,8 @@ describe('eventsTest', () => {
         const fn = sinon.spy(v => v)
         const MyDep = Factory([['a', 'b']])(fn)
         container.mount(MyDep)
-        container.get(Selector).select(['a', 'b']).set(321).commit()
-        container.get(Selector).select(['a', 'b']).set(333).commit()
+        container.get(Selector)(['a', 'b']).set(321).commit()
+        container.get(Selector)(['a', 'b']).set(333).commit()
         assert(fn.calledTwice)
         assert(MyDep.firstCall.calledWith(321))
         assert(MyDep.secondCall.calledWith(333))
@@ -48,7 +48,7 @@ describe('eventsTest', () => {
         const fn = sinon.spy(v => v)
         const MyDep = Factory([['a', 'b']])(fn)
         container.mount(MyDep)
-        container.get(Selector).select(['a', 'c']).set(321).commit()
+        container.get(Selector)(['a', 'c']).set(321).commit()
         assert(fn.notCalled)
     })
 
@@ -57,8 +57,8 @@ describe('eventsTest', () => {
         const fn = sinon.spy(v => v)
         const MyDep = Factory([['a', 'b']])(fn)
         container.once([['a', 'b']], MyDep)
-        container.get(Selector).select(['a', 'b']).set(321).commit()
-        container.get(Selector).select(['a', 'b']).set(432).commit()
+        container.get(Selector)(['a', 'b']).set(321).commit()
+        container.get(Selector)(['a', 'b']).set(432).commit()
         assert(fn.calledOnce)
         assert(fn.calledWith(321))
     })
@@ -69,9 +69,9 @@ describe('eventsTest', () => {
         const MyDep = Factory([['a', 'b']])(fn)
 
         container.mount(MyDep)
-        container.get(Selector).select(['a', 'b']).set(321).commit()
+        container.get(Selector)(['a', 'b']).set(321).commit()
         container.unmount(MyDep)
-        container.get(Selector).select(['a', 'b']).set(333).commit()
+        container.get(Selector)(['a', 'b']).set(333).commit()
 
         assert(fn.calledOnce)
         assert(fn.calledWith(321))

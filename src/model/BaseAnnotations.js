@@ -1,11 +1,5 @@
-import Selector from './Selector'
 
 export default class BaseAnnotations {
-    constructor() {
-        this.Cursor = ::this.Cursor
-        this.Path = ::this.Path
-    }
-
     _addMeta() {
         throw new Error('implement')
     }
@@ -16,10 +10,10 @@ export default class BaseAnnotations {
 
     Cursor(path) {
         const displayName = this._getName('cursor', path)
-        return this._addMeta(selector => selector.select(path), {
+        return this._addMeta(select => select(path), {
             displayName,
             id: displayName,
-            deps: [this.Class()(Selector)]
+            deps: [this._Selector]
         })
     }
 

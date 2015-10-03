@@ -1,7 +1,7 @@
 /* eslint-env mocha */
 import assert from 'power-assert'
 import Container from '../container'
-import NativeCursor from '../cursors/native'
+import NativeCursor from '../cursors/NativeCursor'
 import {Factory, Getter, Setter} from '../define'
 import sinon from 'sinon'
 import Selector from '../model/Selector'
@@ -38,7 +38,7 @@ describe('settersGettersTest', () => {
 
         container.get(MyDep)
         assert(container.get(MyDep)() === 123)
-        container.get(Selector).select(['a', 'b']).set(321).commit()
+        container.get(Selector)(['a', 'b']).set(321).commit()
         assert(container.get(MyDep)() === 321)
     })
 
@@ -49,18 +49,18 @@ describe('settersGettersTest', () => {
         })
         const MyDep = Factory([Setter(['a', 'b'])])(fn)
 
-        assert(container.get(Selector).select(['a', 'b']).get() === 123)
+        assert(container.get(Selector)(['a', 'b']).get() === 123)
         container.get(MyDep)(321)
-        assert(container.get(Selector).select(['a', 'b']).get() === 321)
+        assert(container.get(Selector)(['a', 'b']).get() === 321)
     })
 
     it('select should return instance of Cursor', () => {
         const container = createContainer()
-        assert(container.get(Selector).select(['a', 'b']) instanceof NativeCursor)
+        assert(container.get(Selector)(['a', 'b']) instanceof NativeCursor)
     })
 
     it('should throw error if node does not exists in the middle of path', () => {
         const container = createContainer()
-        assert.throws(() => container.get(Selector).select(['d', 'b', 'a']).get(), /path/)
+        assert.throws(() => container.get(Selector)(['d', 'b', 'a']).get(), /path/)
     })
 })

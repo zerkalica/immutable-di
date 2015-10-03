@@ -1,7 +1,7 @@
 /* eslint-env mocha */
 import assert from 'power-assert'
 import Container from '../container'
-import NativeCursor from '../cursors/native'
+import NativeCursor from '../cursors/NativeCursor'
 import {Factory} from '../define'
 import sinon from 'sinon'
 import Selector from '../model/Selector'
@@ -35,7 +35,7 @@ describe('stateChangesTest', () => {
         const container = createContainer()
         const MyDep = Factory([['a', 'b']])(v => v)
         container.get(MyDep)
-        container.get(Selector).select(['a']).set({b: 321}).commit()
+        container.get(Selector)(['a']).set({b: 321}).commit()
         assert.equal(container.get(MyDep), 321)
     })
 
@@ -43,7 +43,7 @@ describe('stateChangesTest', () => {
         const container = createContainer()
         const MyDep = Factory([['a']])(v => v)
         container.get(MyDep)
-        container.get(Selector).select(['a', 'b']).set(321).commit()
+        container.get(Selector)(['a', 'b']).set(321).commit()
         assert.deepEqual(container.get(MyDep), {
             b: 321,
             c: 111
@@ -54,7 +54,7 @@ describe('stateChangesTest', () => {
         const container = createContainer()
         const MyDep = Factory([['a', 'c']])(v => v)
         container.get(MyDep)
-        container.get(Selector).select(['a', 'b']).set(321).commit()
+        container.get(Selector)(['a', 'b']).set(321).commit()
         assert(container.get(MyDep) === 111)
     })
 
@@ -62,7 +62,7 @@ describe('stateChangesTest', () => {
         const container = createContainer()
         const MyDep = Factory([['a', 'b']])(v => v)
         container.get(MyDep)
-        container.get(Selector).select(['a', 'b']).set(321).commit()
+        container.get(Selector)(['a', 'b']).set(321).commit()
         assert(container.get(MyDep) === 321)
     })
 
@@ -71,7 +71,7 @@ describe('stateChangesTest', () => {
         const fn = sinon.spy(v => v)
         const MyDep = Factory([['a', 'b']])(fn)
         container.get(MyDep)
-        container.get(Selector).select(['a', 'b']).set(321)
+        container.get(Selector)(['a', 'b']).set(321)
         setTimeout(() => {
             container.get(MyDep)
             assert(MyDep.calledTwice)

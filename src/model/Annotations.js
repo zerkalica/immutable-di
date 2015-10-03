@@ -1,14 +1,20 @@
 import BaseAnnotations from './BaseAnnotations'
 import AbstractDefinitionDriver from '../drivers/AbstractDefinitionDriver'
+import Selector from './Selector'
 
 export default class Annotations extends BaseAnnotations {
     driver: AbstractDefinitionDriver
     constructor(driver: AbstractDefinitionDriver) {
         super()
+        this._addMeta = ::this._addMeta
+        this.Cursor = ::this.Cursor
+        this.Path = ::this.Path
+
+
         this.driver = driver
         driver.setAnnotations(this)
+        this._Selector = this.Factory()(Selector)
 
-        this._addMeta = ::this._addMeta
         this.Class = ::this.Class
         this.Facet = ::this.Facet
         this.Factory = ::this.Factory

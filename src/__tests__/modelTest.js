@@ -3,7 +3,7 @@ import {Factory} from '../define'
 import {struct, maybe, Str} from 'tcomb'
 import assert from 'power-assert'
 import Container from '../container'
-import NativeCursor from '../cursors/native'
+import NativeCursor from '../cursors/NativeCursor'
 
 import createTcombValidator from '../validate/tcomb/createTcombValidator'
 

@@ -48,14 +48,14 @@ export default class Container {
         this.notify = ::this.notify
         this.__notify = ::this.__notify
 
-        const selector = new Selector({
+        const selector = Selector({
             stateSpec,
             createValidator,
-            cursor,
+            Cursor: cursor,
             notify: this.notify
         })
 
-        this._setCache(this._annotations.Class()(Selector), selector)
+        this._setCache(this._annotations.Factory()(Selector), selector)
     }
 
     _setCache(fn, instance) {

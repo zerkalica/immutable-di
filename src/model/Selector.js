@@ -58,43 +58,26 @@ export default function buildState(
     }
 }
 
-export default class Selector {
-    _state: object
-    _pathMap: {[name: string]: string}
-    validate: ?IValidator
+export default function Selector({
+    stateSpec,
+    createValidator,
+    Cursor,
+    notify
+}): (pth: IPath) => AbstractCursor {
+    const {state, pathMap, validate} = buildState(stateSpec, createValidator)
 
-    constructor({
-        stateSpec,
-        createValidator,
-        cursor,
-        notify
-    }): {
-        stateSpec: IStateSpec<TSchema>,
-        createValidator: IValidatorCreate<TSchema>,
-        cursor: AbstractCursor,
-        notify: func
-    } {
-        const {state, pathMap, validate} = buildState(stateSpec, createValidator)
-        this._state = state
-        this._pathMap = pathMap
-        this._validate = validate
-        this._cursor = cursor
-        this._notify = notify
-
-        this.select = ::this.select
-    }
-
-    select(path: PathType = []): AbstractCursor<State> {
-        const mappedId = this._pathMap[path[0]]
+    return function selector(pth: IPath): AbstractCursor {
+        const path = pth || []
+        const mappedId = pathMap[path[0]]
         const prefix = mappedId
             ? [mappedId].concat(path.slice(1))
             : path
 
-        return new this._cursor({
-            state: this._state,
+        return new Cursor({
+            state,
             prefix,
-            validate: this._validate ? this._validate(prefix) : undefined,
-            notify: this._notify
+            validate: validate ? validate(prefix) : undefined,
+            notify
         })
     }
 }

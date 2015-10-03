@@ -1,7 +1,7 @@
 /* eslint-env mocha */
 import assert from 'power-assert'
 import Container from '../container'
-import NativeCursor from '../cursors/native'
+import NativeCursor from '../cursors/NativeCursor'
 import {Factory, Class} from '../define'
 import sinon from 'sinon'
 
