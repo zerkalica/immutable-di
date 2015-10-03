@@ -15,13 +15,12 @@ function makeFlatTcombSchema(schema, flattenSchema, path) {
 
 export default function createTcombValidator(schema) {
     const flattenSchema = {}
-    makeFlatTcombSchema(struct(schema, 'IAppState'), flattenSchema, [])
-
+    makeFlatTcombSchema(struct(schema, 'state'), flattenSchema, ['state'])
     return function createValidator(path) {
-        const key = path.length ? path.join('.') : 'IAppState'
-        const schemaPart = flattenSchema[key]
-        return function _validate(data) {
-            return schemaPart ? validate(schemaPart, data) : null
+        const rootKey = path.length ? path.join('.') : 'state'
+        return function _validate(data, key) {
+            const schemaPart = flattenSchema[rootKey + (key ? '.' + key : '')]
+            return schemaPart ? validate(data, schemaPart).errors : []
         }
     }
 }

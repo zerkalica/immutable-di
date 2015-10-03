@@ -1,5 +1,9 @@
 import AbstractCursor from './abstract'
 
+function pass() {
+    return []
+}
+
 export default class NativeCursor extends AbstractCursor {
     _selector = null
     _cnName = null

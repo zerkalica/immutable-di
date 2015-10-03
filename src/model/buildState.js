@@ -1,3 +1,4 @@
+/* @flow */
 type IPath = Array<string>
 
 type IStateSpec<TSchema> = {
@@ -26,13 +27,17 @@ export default function buildState(
     const state = {}
     const pathMap = {}
     const schemas = {}
+    let hasSchema = false
 
     const keys = Object.keys(stateSpec)
     for (let i = 0; i < keys.length; i++) {
         const key = keys[i]
         const {$schema, $default, $} = stateSpec[key]
         state[key] = $default
-        schemas[key] = $schema
+        if ($schema) {
+            hasSchema = true
+            schemas[key] = $schema
+        }
         const id = $.$.$path[0]
         pathMap[id] = key
     }
@@ -40,6 +45,6 @@ export default function buildState(
     return {
         state,
         pathMap,
-        validate: createValidator(schemas)
+        validate: hasSchema ? createValidator(schemas) : undefined
     }
 }

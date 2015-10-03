@@ -19,10 +19,10 @@ type ICursor = {$path: Array<string>}
     })
 })
 @defaults({
-    path: 'test',
+    path: '3',
     query: {
         a: 'aaa',
-        b: ''
+        b: null
     }
 })
 class Test1Model {
@@ -66,6 +66,6 @@ describe('modelTest', () => {
             Test1Model.$.query.$
         ])(fn)
 
-        assert.deepEqual(container.get(dep), {a: 'aaa', b: ''})
+        assert.deepEqual(container.get(dep), {a: 'aaa', b: null})
     })
 })

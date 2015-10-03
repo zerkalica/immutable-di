@@ -1,9 +1,5 @@
 export type PathType = Array<string>
 
-function pass() {
-    return []
-}
-
 export default class AbstractCursor<State> {
     __notify: (path: string, isSynced: ?bool) => void = null
     _prefix: PathType
@@ -17,9 +13,8 @@ export default class AbstractCursor<State> {
         this._pathMap = opts.pathMap || {}
         this._prefix = opts.prefix || []
         this._state = state || {}
-        this._validate = opts.validate
-            ? opts.validate(this._prefix)
-            : pass
+        this._validate = opts.validate ? opts.validate(this._prefix) : undefined
+        this._assert(this._state)
         this.commit = ::this.commit
         this.get = ::this.get
         this.set = ::this.set
@@ -37,7 +32,12 @@ export default class AbstractCursor<State> {
     }
 
     _assert(value, key) {
-        this._validate(value)
+        if (this._validate) {
+            const errors = this._validate(value, key)
+            if (errors.length) {
+                throw new TypeError(errors.map(e => e.message).join('\n'))
+            }
+        }
     }
 
     _update(isSynced) {
