@@ -1,4 +1,3 @@
-import Annotations from '../model/Annotations'
 import getFunctionName from '../utils/getFunctionName'
 import AbstractDefinitionDriver from './AbstractDefinitionDriver'
 
