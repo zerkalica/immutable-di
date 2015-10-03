@@ -40,14 +40,14 @@ export default function buildState(
     const keys = Object.keys(stateSpec)
     for (let i = 0; i < keys.length; i++) {
         const key = keys[i]
-        const {_schema, defaults, cursor} = stateSpec[key]
+        const {_schema, defaults, $} = stateSpec[key]
         state[key] = defaults
         if (_schema) {
             hasSchema = true
             schemas[key] = _schema
         }
-        updateCursor(cursor, [key])
-        const id = cursor.$.$path[0]
+        updateCursor($, [key])
+        const id = $.$.$path[0]
         pathMap[id] = key
     }
 

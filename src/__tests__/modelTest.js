@@ -31,7 +31,7 @@ const Test1Model = {
             b: null
         }
     },
-    cursor: {
+    $: {
         $: {},
         path: {$: {}},
         query: {
@@ -52,13 +52,14 @@ describe('modelTest', () => {
             createValidator: createTcombValidator
         })
 
-        function fn(query: IQuery, queryCursor: ICursor<IQuery>) {
+        function fn(model: ITest1Model, query: IQuery, queryCursor: ICursor<IQuery>) {
             return query
         }
 
         const dep = Factory([
-            Test1Model.cursor.query,
-            Test1Model.cursor.query.$
+            Test1Model.$,
+            Test1Model.$.query,
+            Test1Model.$.query.$
         ])(fn)
 
         assert.deepEqual(container.get(dep), {a: 'aaa', b: null})

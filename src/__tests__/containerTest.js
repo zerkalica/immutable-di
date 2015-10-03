@@ -14,7 +14,7 @@ function createContainer() {
                     c: 'test'
                 },
 
-                cursor: {
+                $: {
                     $: {},
                     b: {
                         $: {}
