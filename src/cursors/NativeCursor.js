@@ -66,7 +66,7 @@ export default class NativeCursor<T> extends AbstractCursor<T> {
 
     apply(fn: (v: T) => T): NativeCursor<T> {
         const newValue = fn(this.get())
-        this._assert(newValue)
+    this._assert(newValue)
         this.set(newValue)
         return this
     }

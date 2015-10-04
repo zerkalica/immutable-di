@@ -44,7 +44,7 @@ export default class DefaultDefinitionDriver extends AbstractDefinitionDriver {
         return fn.__di.id
     }
 
-    _normalizeDeps(deps) {
+    _normalizeDeps(deps, debugCtx) {
         const resultDeps = []
         const isArray = Array.isArray(deps)
         const names = isArray ? [] : Object.keys(deps)
@@ -52,13 +52,23 @@ export default class DefaultDefinitionDriver extends AbstractDefinitionDriver {
         const {Path, Cursor} = this._annotations
         for (let i = 0; i < len; i++) {
             const name = names.length ? names[i] : undefined
-            const dep = deps[name || i]
+            const key = name || i
+            const dep = deps[key]
             let definition
             if (Array.isArray(dep)) {
                 definition = Path(dep)
             } else if (dep.$path) {
+                if (!Array.isArray(dep.$path)) {
+                    throw new Error(
+                        'Path not found in ' + JSON.stringify(dep)
+                        + ': ' + debugCtx.concat(key)
+                    )
+                }
                 definition = Cursor(dep.$path)
             } else if (dep.$) {
+                if (!Array.isArray(dep.$.$path)) {
+                    throw new Error('Model not registered in stateSpec: ' + debugCtx.concat(key))
+                }
                 definition = Path(dep.$.$path)
             } else {
                 definition = dep
@@ -73,7 +83,8 @@ export default class DefaultDefinitionDriver extends AbstractDefinitionDriver {
         return resultDeps
     }
 
-    getMeta(fn, debugCtx) {
+    getMeta(fn, debCtx) {
+        const debugCtx = (debCtx || []).concat('@' + fn.displayName)
         const id = this.getId(fn, debugCtx)
         const def = fn.__di
         const deps = def.deps || []
@@ -82,7 +93,7 @@ export default class DefaultDefinitionDriver extends AbstractDefinitionDriver {
             fn,
             id,
             isOptions: !Array.isArray(deps),
-            deps: this._normalizeDeps(deps)
+            deps: this._normalizeDeps(deps, debugCtx)
         }
     }
 }

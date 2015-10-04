@@ -1,10 +1,10 @@
 /* eslint-env mocha */
 import assert from 'power-assert'
-import Container from '../Container'
-import NativeCursor from '../cursors/NativeCursor'
-import {Factory} from '../define'
+import Container from '../../Container'
+import NativeCursor from '../../cursors/NativeCursor'
+import {Factory} from '../../define'
 import sinon from 'sinon'
-import Selector from '../model/Selector'
+import Selector from '../../model/Selector'
 
 function createContainer() {
     return new Container({

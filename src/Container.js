@@ -1,11 +1,12 @@
 import {cancelAnimationFrame, requestAnimationFrame} from './utils/animationFrame'
 import {IDep} from './asserts'
 import BaseAnnotations from './model/BaseAnnotations'
+import defaultAnnotations from './define'
 import getFunctionName from './utils/getFunctionName'
 import MetaLoader from './utils/MetaLoader'
+import NativeCursor from './cursors/NativeCursor'
 import Selector from './model/Selector'
 import type {IDependency} from './utils/Dep'
-import defaultAnnotations from './define'
 
 import type {
     IStateSpec,
@@ -27,7 +28,7 @@ export default class Container {
         stateSpec
     }: {
         createValidator: ?IValidatorCreate<TSchema>,
-        cursor: AbstractCursor,
+        cursor: ?AbstractCursor,
         annotations: ?BaseAnnotations,
         isSynced: ?bool,
         stateSpec: IStateSpec
@@ -51,7 +52,7 @@ export default class Container {
         const selector = Selector({
             stateSpec,
             createValidator,
-            Cursor: cursor,
+            Cursor: cursor || NativeCursor,
             notify: this.notify
         })
 

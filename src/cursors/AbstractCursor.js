@@ -25,15 +25,13 @@ export default class AbstractCursor<T> {
         this.diff = ::this.diff
         this.patch = ::this.patch
         this._update = ::this._update
-
-        this._assert(this._state)
     }
 
     _assert(value, key) {
         if (this._validate) {
             const errors = this._validate(value, key)
             if (errors.length) {
-                throw new TypeError(errors.map(e => e.message).join('\n'))
+                throw new TypeError(errors.join('\n'))
             }
         }
     }

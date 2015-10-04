@@ -1,12 +1,12 @@
 /* eslint-env mocha */
-import {Factory} from '../define'
+import {Factory} from '../../define'
 import {struct, maybe, Str} from 'tcomb'
 import assert from 'power-assert'
-import Container from '../Container'
-import NativeCursor from '../cursors/NativeCursor'
-import AbstractCursor from '../cursors/AbstractCursor'
+import Container from '../../Container'
+import NativeCursor from '../../cursors/NativeCursor'
+import AbstractCursor from '../../cursors/AbstractCursor'
 
-import createTcombValidator from '../validate/tcomb/createTcombValidator'
+import createTcombValidator from '../../validate/tcomb/createTcombValidator'
 
 type IQuery = {
     a: string,
@@ -18,7 +18,7 @@ type ITest1Model = {
     query: IQuery
 }
 const Test1Model = {
-    _schema: struct({
+    schema: struct({
         path: Str,
         query: struct({
             a: Str,

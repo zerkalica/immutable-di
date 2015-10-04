@@ -5,9 +5,10 @@ class PathMapUpdater {
     _pathsSets: {[id: string]: {[path: string]: bool}} = {}
     _ids: Array<string> = []
 
-    constructor(pathToIdsMap: IPathToIdsMap, idToDef: IIdToDef) {
+    constructor(pathToIdsMap: IPathToIdsMap, idToDef: IIdToDef, debugCtx) {
         this._pathToIdsMap = pathToIdsMap
         this._idToDef = idToDef
+        this.debugCtx = debugCtx
     }
 
     updateParents(pth) {
@@ -56,11 +57,11 @@ export default class MetaLoader {
         this.getMeta = ::this.getMeta
     }
 
-    getMeta(definition) {
+    getMeta(definition, debugCtx) {
         const id = this._driver.getId(definition)
         let result = this._idToDef[id]
         if (!result) {
-            this._scan(definition, new PathMapUpdater(this.pathToIdsMap, this._idToDef))
+            this._scan(definition, new PathMapUpdater(this.pathToIdsMap, this._idToDef, debugCtx))
             result = this._idToDef[id]
         }
         return result
@@ -72,7 +73,7 @@ export default class MetaLoader {
             return acc.updateParents(this._idToDef[id].paths)
         }
 
-        const meta = this._driver.getMeta(definition)
+        const meta = this._driver.getMeta(definition, acc.debugCtx)
         const {path, deps} = meta
         let paths = []
         if (path) {

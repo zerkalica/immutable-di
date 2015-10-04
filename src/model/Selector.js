@@ -40,11 +40,11 @@ export default function buildState(
     const keys = Object.keys(stateSpec)
     for (let i = 0; i < keys.length; i++) {
         const key = keys[i]
-        const {_schema, defaults, $} = stateSpec[key]
+        const {schema, defaults, $} = stateSpec[key]
         state[key] = defaults
-        if (_schema) {
+        if (schema) {
             hasSchema = true
-            schemas[key] = _schema
+            schemas[key] = schema
         }
         updateCursor($, [key])
         const id = $.$.$path[0]
@@ -65,7 +65,10 @@ export default function Selector({
     notify
 }): (pth: IPath) => AbstractCursor {
     const {state, pathMap, validate} = buildState(stateSpec, createValidator)
-
+    const errors = validate ? validate([])(state) : []
+    if (errors.length) {
+        throw new Error('State errors: ' + errors.join('\n'))
+    }
     return function selector(pth: IPath): AbstractCursor {
         const path = pth || []
         const mappedId = pathMap[path[0]]
