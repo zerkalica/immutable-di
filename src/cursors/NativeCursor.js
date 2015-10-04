@@ -1,6 +1,6 @@
 import AbstractCursor from './AbstractCursor'
 
-export default class NativeCursor extends AbstractCursor {
+export default class NativeCursor<T> extends AbstractCursor<T> {
     _selector = null
     _cnName = null
     constructor(options) {
@@ -49,11 +49,11 @@ export default class NativeCursor extends AbstractCursor {
         throw new Error('implement')
     }
 
-    get() {
+    get(): T {
         return this._selector(this._state)[this._cnName]
     }
 
-    set(newState) {
+    set(newState: T): NativeCursor<T> {
         const node = this._selector(this._state)
         if (newState !== node[this._cnName]) {
             this._assert(newState)
@@ -64,14 +64,14 @@ export default class NativeCursor extends AbstractCursor {
         return this
     }
 
-    apply(fn: (v: State) => State) {
+    apply(fn: (v: T) => T): NativeCursor<T> {
         const newValue = fn(this.get())
         this._assert(newValue)
         this.set(newValue)
         return this
     }
 
-    assign(newState) {
+    assign(newState: Any): NativeCursor<T> {
         const node = this._selector(this._state)[this._cnName]
         let isUpdated = false
         const keys = Object.keys(newState)

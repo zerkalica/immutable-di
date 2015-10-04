@@ -2,8 +2,9 @@
 import {Factory} from '../define'
 import {struct, maybe, Str} from 'tcomb'
 import assert from 'power-assert'
-import Container from '../container'
+import Container from '../Container'
 import NativeCursor from '../cursors/NativeCursor'
+import AbstractCursor from '../cursors/AbstractCursor'
 
 import createTcombValidator from '../validate/tcomb/createTcombValidator'
 
@@ -52,7 +53,11 @@ describe('modelTest', () => {
             createValidator: createTcombValidator
         })
 
-        function fn(model: ITest1Model, query: IQuery, queryCursor: ICursor<IQuery>) {
+        function fn(
+            model: ITest1Model,
+            query: IQuery,
+            queryCursor: AbstractCursor<IQuery>
+        ) {
             return query
         }
 

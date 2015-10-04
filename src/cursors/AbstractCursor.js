@@ -1,9 +1,7 @@
-export type PathType = Array<string>
-
-export default class AbstractCursor<State> {
+export default class AbstractCursor<T> {
     __notify: (path: string, isSynced: ?bool) => void = null
-    _prefix: PathType
-    _pathMap: Map<string, string>
+    _prefix: Array<string>
+    _pathMap: {[path: string]: string}
 
     constructor({
         pathMap,
@@ -66,19 +64,19 @@ export default class AbstractCursor<State> {
         throw new Error('implement')
     }
 
-    get(): State {
+    get(): T {
         throw new Error('implement')
     }
 
-    set(newState: State) {
+    set(newState: T): AbstractCursor<T> {
         throw new Error('implement')
     }
 
-    apply(fn: (v: State) => State) {
+    apply(fn: (v: T) => T): AbstractCursor<T> {
         throw new Error('implement')
     }
 
-    assign(newState: State) {
+    assign(newState: Any): AbstractCursor<T> {
         throw new Error('implement')
     }
     /* eslint-enable no-unused-vars */
