@@ -148,8 +148,8 @@ describe('funcTest', () => {
 
         const container = new Container({
             stateSpec: {
-                user: UserModel,
-                todos: TodoModel
+                userModel: UserModel,
+                todoModel: TodoModel
             },
             isSynced: true,
             createValidator: createTcombValidator
@@ -160,7 +160,7 @@ describe('funcTest', () => {
             container.get(addTodo)({
                 title: 'todo title'
             })
-        }, new RegExp('Invalid value undefined supplied to /todos/todos/1/isCompleted: Boolean'))
+        }, new RegExp('Invalid value undefined supplied to /todoModel/todos/1/isCompleted: Boolean'))
 
         container.get(addTodo)({
             title: 'todo title',
@@ -216,7 +216,7 @@ describe('funcTest', () => {
                 name: 123123,
                 email: true
             })
-        }, new RegExp('Invalid value 123123 supplied to /user/name: String\nInvalid value true supplied to /user/email: String'))
+        }, new RegExp('Invalid value 123123 supplied to /userModel/name: String\nInvalid value true supplied to /userModel/email: String'))
 
         container.unmount(showUserInfo)
         assert(showUserInfo.callCount === 4)
