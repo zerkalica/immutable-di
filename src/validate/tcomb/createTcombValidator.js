@@ -1,33 +1,25 @@
 import {struct} from 'tcomb'
 import {validate} from 'tcomb-validation'
 
-function makeFlatTcombSchema(schema, flattenSchema, path) {
-    const props = schema.meta.props
-    if (props) {
-        const keys = Object.keys(props)
-        for (let i = 0; i < keys.length; i++) {
-            const key = keys[i]
-            makeFlatTcombSchema(props[key], flattenSchema, path.concat(key))
-        }
+function formatErrors(errors) {
+    return errors.map(error => error.message)
+}
+
+function getSubSchema(schema, path) {
+    let ptr = schema
+    for (let i = 0; i < path.length; i++) {
+        ptr = ptr.meta.props[path[i]]
     }
-    flattenSchema[path.join('.')] = schema
+    return ptr
 }
 
-function formatErrors(prefix, errors) {
-    return errors.map(error => prefix + ': ' + error.message)
-}
-
-export default function createTcombValidator(schema) {
-    const flattenSchema = {}
-    const rootName = 'state'
-    makeFlatTcombSchema(struct(schema, rootName), flattenSchema, [rootName])
+export default function createTcombValidator(rawSchema) {
+    const schema = struct(rawSchema, 'State')
     return function createValidator(path) {
-        const p = (path.length ? path.join('.') : '')
-        const rootKey = rootName + '.' + p
+        const subSchema = getSubSchema(schema, path)
         return function _validate(data, key) {
-            const k = rootKey + (key ? '.' + key : '')
-            const schemaPart = flattenSchema[k]
-            return schemaPart ? formatErrors(k, validate(data, schemaPart).errors) : []
+            const schemaPart = getSubSchema(subSchema, key ? [key] : [])
+            return schemaPart ? formatErrors(validate(data, schemaPart, path).errors) : []
         }
     }
 }

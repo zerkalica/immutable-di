@@ -160,7 +160,7 @@ describe('funcTest', () => {
             container.get(addTodo)({
                 title: 'todo title'
             })
-        }, new RegExp('state\.todos\.todos: Invalid value undefined supplied to /1/isCompleted: Boolean'))
+        }, new RegExp('Invalid value undefined supplied to /todos/todos/1/isCompleted: Boolean'))
 
         container.get(addTodo)({
             title: 'todo title',
@@ -214,9 +214,9 @@ describe('funcTest', () => {
         assert.throws(() => {
             container.get(changeUserName)({
                 name: 123123,
-                email: 'test@tt.ru'
+                email: true
             })
-        }, new RegExp('Invalid value 123123 supplied to /name: String'))
+        }, new RegExp('Invalid value 123123 supplied to /user/name: String\nInvalid value true supplied to /user/email: String'))
 
         container.unmount(showUserInfo)
         assert(showUserInfo.callCount === 4)
