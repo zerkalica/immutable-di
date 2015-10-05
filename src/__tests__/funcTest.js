@@ -3,7 +3,7 @@ import AbstractCursor from '../cursors/AbstractCursor'
 import {Factory} from '../define'
 
 // tcomb is optional validation layer
-import {struct, list, maybe, Num, Bool, Str} from 'tcomb'
+import {struct, list, dict, maybe, Num, Bool, Str} from 'tcomb'
 import createTcombValidator from '../validate/tcomb/createTcombValidator'
 
 import sinon from 'sinon'
@@ -50,7 +50,7 @@ type ITodos = Array<ITodo>
 
 const TodoModel = {
     schema: struct({
-        todos: list(struct({
+        todos: dict(Str, struct({
             id: Num,
             title: Str,
             isCompleted: Bool
@@ -58,7 +58,7 @@ const TodoModel = {
     }),
 
     defaults: {
-        todos: []
+        todos: {}
     },
 
     $: {
@@ -81,9 +81,9 @@ const getUserFullName = Factory({
 })(GetUserFullName)
 
 function GetUserTodos(
-    {todoIds, todos}: {todoIds: Array<number>, todos: Array<ITodos>}
+    {todoIds, todos}: {todoIds: Array<number>, todos: {[id: number]: ITodos}}
 ) {
-    return todos.filter(todo => todoIds.indexOf(todo.id) !== -1)
+    return todoIds.map(todoId => todos[todoId])
 }
 
 const getUserTodos = Factory({
@@ -97,9 +97,11 @@ function AddTodo(
 ): (rec: ITodo) => void {
     let lastId = 1
     return function addTodo({title, isCompleted}) {
-        const id = lastId++
-        todoCursor.apply(todos => todos.concat({id, title, isCompleted}))
+        const id = lastId
+        todoCursor.assign({[id]: {id, title, isCompleted}})
         userTodosCursor.apply(todoIds => todoIds.concat(id))
+        // Increment, only if validation passed and assign and apply does't throw exception
+        lastId++
     }
 }
 
@@ -126,11 +128,7 @@ function SetCompleted(
     todosCursor: AbstractCursor<Array<ITodo>>
 ) {
     return function setCompleted(id, isCompleted) {
-        todosCursor.apply(todos => todos.map(todo =>
-            todo.id === id
-            ? {...todo, isCompleted}
-            : todo
-        ))
+        todosCursor.assign({[id]: {...todosCursor.get()[id], isCompleted}})
     }
 }
 const setIsCompleted = Factory([TodoCursor.todos.$])(SetCompleted)
@@ -158,12 +156,17 @@ describe('funcTest', () => {
         })
 
         container.mount(showUserInfo)
+        assert.throws(() => {
+            container.get(addTodo)({
+                title: 'todo title'
+            })
+        }, new RegExp('state\.todos\.todos: Invalid value undefined supplied to /1/isCompleted: Boolean'))
 
         container.get(addTodo)({
             title: 'todo title',
             isCompleted: false
         })
-        // State updates in synced, addTodo writes to todoCursor and UserTodoCursor
+        // State updates is synced, addTodo writes to todoCursor and UserTodoCursor
         // first update: todoCursor.apply(todos => todos.concat({id, title, isCompleted}))
         assert(showUserInfo.getCall(0).calledWith({
             fullName: 'John Doe (john@example.com)',
@@ -213,7 +216,7 @@ describe('funcTest', () => {
                 name: 123123,
                 email: 'test@tt.ru'
             })
-        }, /Invalid value 123123 supplied to String/)
+        }, new RegExp('Invalid value 123123 supplied to /name: String'))
 
         container.unmount(showUserInfo)
         assert(showUserInfo.callCount === 4)

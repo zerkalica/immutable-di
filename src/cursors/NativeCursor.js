@@ -66,7 +66,7 @@ export default class NativeCursor<T> extends AbstractCursor<T> {
 
     apply(fn: (v: T) => T): NativeCursor<T> {
         const newValue = fn(this.get())
-    this._assert(newValue)
+        this._assert(newValue)
         this.set(newValue)
         return this
     }
@@ -78,12 +78,12 @@ export default class NativeCursor<T> extends AbstractCursor<T> {
         for (let i = 0, j = keys.length; i < j; i++) {
             const k = keys[i]
             if (node[k] !== newState[k]) {
-                this._assert(newState[k], k)
                 node[k] = newState[k]
                 isUpdated = true
             }
         }
         if (isUpdated) {
+            this._assert(node)
             this._update()
         }
 

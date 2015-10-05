@@ -10,7 +10,6 @@ export default class Annotations extends BaseAnnotations {
         this.Cursor = ::this.Cursor
         this.Path = ::this.Path
 
-
         this.driver = driver
         driver.setAnnotations(this)
         this._Selector = this.Factory()(Selector)
