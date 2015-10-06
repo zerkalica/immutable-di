@@ -3,7 +3,7 @@ type IIdToDef = {[id: string]: {deps: IDependency, paths: Array<string>}}
 
 class PathMapUpdater {
     _pathsSets: {[id: string]: {[path: string]: bool}} = {}
-    _ids: Array<string> = []
+    _parents: Array<string> = []
 
     constructor(pathToIdsMap: IPathToIdsMap, idToDef: IIdToDef, debugCtx) {
         this._pathToIdsMap = pathToIdsMap
@@ -18,12 +18,12 @@ class PathMapUpdater {
     }
 
     begin(id: string) {
-        this._ids.push(id)
+        this._parents.push(id)
         this._pathsSets[id] = {}
     }
 
     addPath(pathKey: string) {
-        const ids = this._ids
+        const ids = this._parents
         const pathsSets = this._pathsSets
         for (let i = 0; i < ids.length; i++) {
             pathsSets[ids[i]][pathKey] = true
@@ -41,9 +41,11 @@ class PathMapUpdater {
             pathToIdsMap[k].push(id)
         }
         delete this._pathsSets[id]
-        this._ids.pop()
 
-        return paths
+        const parents = [].concat(this._parents)
+        this._parents.pop()
+
+        return {parents, paths}
     }
 }
 
@@ -78,6 +80,7 @@ export default class MetaLoader {
         const meta = this._driver.getMeta(definition, acc.debugCtx)
         const {path, deps} = meta
         let paths = []
+        let parents = []
         if (path) {
             let key = ''
             const p = path.concat('*')
@@ -94,12 +97,19 @@ export default class MetaLoader {
                 }
                 this._scan(dep, acc)
             }
-            paths = acc.end(id)
+            const rec = acc.end(id)
+            paths = rec.paths
+            parents = rec.parents
         }
 
-        this._idToDef[id] = this._middlewares.reduce(fn, {
+        this._idToDef[id] = this._middlewares.reduce(this._reducer, {
             ...meta,
-            paths
+            paths,
+            parents
         })
+    }
+
+    _reducer(acc, reducer) {
+        return reducer(acc)
     }
 }
