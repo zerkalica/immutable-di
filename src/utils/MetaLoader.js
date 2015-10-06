@@ -51,9 +51,11 @@ export default class MetaLoader {
     pathToIdsMap = {}
     _idToDef = {}
     _driver
+    _middlewares: Array<func>
 
-    constructor(driver) {
+    constructor(driver, middlewares: ?Array<func>) {
         this._driver = driver
+        this._middlewares = middlewares || []
         this.getMeta = ::this.getMeta
     }
 
@@ -95,9 +97,9 @@ export default class MetaLoader {
             paths = acc.end(id)
         }
 
-        this._idToDef[id] = {
+        this._idToDef[id] = this._middlewares.reduce(fn, {
             ...meta,
             paths
-        }
+        })
     }
 }

@@ -25,19 +25,21 @@ export default class Container {
         cursor,
         annotations,
         isSynced,
-        stateSpec
+        stateSpec,
+        middlewares
     }: {
         createValidator: ?IValidatorCreate<TSchema>,
         cursor: ?AbstractCursor,
         annotations: ?BaseAnnotations,
         isSynced: ?bool,
-        stateSpec: IStateSpec
+        stateSpec: IStateSpec,
+        middlewares: ?Array<func>
     }) {
         if (!stateSpec) {
             throw new TypeError('Need stateSpec')
         }
         this._annotations = annotations || defaultAnnotations
-        const loader = new MetaLoader(this._annotations.driver)
+        const loader = new MetaLoader(this._annotations.driver, middlewares || [])
         this._getMeta = loader.getMeta
         this._pathToIdsMap = loader.pathToIdsMap
         this._isSynced = !!isSynced

@@ -19,7 +19,9 @@ export default function createTcombValidator(rawSchema) {
         const subSchema = getSubSchema(schema, path)
         return function _validate(data, key) {
             const schemaPart = getSubSchema(subSchema, key ? [key] : [])
-            return schemaPart ? formatErrors(validate(data, schemaPart, path).errors) : []
+            return schemaPart
+                ? formatErrors(validate(data, schemaPart, path).errors)
+                : []
         }
     }
 }
