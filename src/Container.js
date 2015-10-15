@@ -144,6 +144,7 @@ export default class Container {
         const {id, isCachedTemporary, displayName} = def
         const cache = isCachedTemporary ? tempCache : this._cache
         let result = cache[id]
+
         if (result === undefined) {
             const mappedDef = this._definitionMap[id] || def
             const {deps, isClass, isOptions, fn} = mappedDef

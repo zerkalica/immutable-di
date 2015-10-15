@@ -47,7 +47,12 @@ export default class TcombCursor<T> extends AbstractCursor<T> {
     _setState(spec) {
         const {root, pointer, lastName} = this._selectorSpec
         pointer[lastName] = spec
-        this._stateRoot.state = update(this._stateRoot.state, lastName ? root : spec)
+        const oldState = this._stateRoot.state
+        const newState = update(oldState, lastName ? root : spec)
+        if (newState !== oldState) {
+            this._stateRoot.state = newState
+            this._update()
+        }
     }
 
     set(newState: T): AbstractCursor<T> {

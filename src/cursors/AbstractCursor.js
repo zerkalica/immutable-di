@@ -1,3 +1,6 @@
+function noop() {
+}
+
 export default class AbstractCursor<T> {
     __notify: (path: string, isSynced: ?bool) => void = null
     _prefix: Array<string>
@@ -12,7 +15,7 @@ export default class AbstractCursor<T> {
         this._prefix = prefix
         this._stateRoot = stateRoot
         this._validate = validate
-        this._notify = notify
+        this._notify = notify || noop
 
         this.commit = ::this.commit
         this.get = ::this.get
