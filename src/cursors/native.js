@@ -58,6 +58,11 @@ export default class NativeCursor extends AbstractCursor {
     set(newState) {
         const node = this._selector(this._state)
         if (newState !== node[this._cnName]) {
+            if (node === this) {
+                Object.keys(newState).forEach(k => {
+                    this._state[k] = newState[k]
+                })
+            }
             node[this._cnName] = newState
             this._update()
         }

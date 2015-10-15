@@ -49,6 +49,15 @@ export default class Container {
 
     _clear(path: string[]) {
         let key = ''
+        if (path.length === 0) {
+            const cursorId = AbstractCursor.__di.id
+            const cursorInstance = this._cache[cursorId]
+            this._cache = {
+                [cursorId]: cursorInstance
+            }
+            return
+        }
+
         for (let j = 0, l = path.length - 1; j <= l; j++) {
             key = key + '.' + path[j]
             const k =  key + (j === l ? '' : '.*')
