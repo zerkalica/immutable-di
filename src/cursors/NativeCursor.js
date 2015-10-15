@@ -7,6 +7,7 @@ export default class NativeCursor<T> extends AbstractCursor<T> {
         super(options)
 
         const prefix = this._prefix
+        this._state = this._stateRoot.state
         if (prefix.length) {
             this._cnName = prefix[prefix.length - 1]
             /* eslint-disable no-new-func */

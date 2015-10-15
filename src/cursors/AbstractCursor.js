@@ -4,15 +4,13 @@ export default class AbstractCursor<T> {
     _pathMap: {[path: string]: string}
 
     constructor({
-        pathMap,
         prefix,
-        state,
         validate,
-        notify
+        notify,
+        stateRoot
     }) {
-        this._pathMap = pathMap
         this._prefix = prefix
-        this._state = state
+        this._stateRoot = stateRoot
         this._validate = validate
         this._notify = notify
 
@@ -50,7 +48,7 @@ export default class AbstractCursor<T> {
         throw new Error('implement')
     }
 
-    snap(): object {
+    toJS(): object {
         throw new Error('implement')
     }
 

@@ -69,6 +69,11 @@ export default function Selector({
     if (errors.length) {
         throw new Error('State errors: ' + errors.join('\n'))
     }
+
+    const stateRoot = {
+        state
+    }
+
     return function selector(pth: IPath): AbstractCursor {
         const path = pth || []
         const mappedId = pathMap[path[0]]
@@ -78,6 +83,7 @@ export default function Selector({
 
         return new Cursor({
             state,
+            stateRoot,
             prefix,
             validate: validate ? validate(prefix) : undefined,
             notify
