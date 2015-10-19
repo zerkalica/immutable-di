@@ -30,22 +30,18 @@ function updateCursor(cursor, path) {
 
 export default function buildState(
     stateSpec: IStateSpec<TSchema>,
-    createValidator: IValidatorCreate<TSchema>
+    createValidator: ?IValidatorCreate<TSchema>
 ): IState {
     const state = {}
     const pathMap = {}
     const schemas = {}
-    let hasSchema = false
 
     const keys = Object.keys(stateSpec)
     for (let i = 0; i < keys.length; i++) {
         const key = keys[i]
         const {schema, defaults, $} = stateSpec[key]
         state[key] = defaults
-        if (schema) {
-            hasSchema = true
-            schemas[key] = schema
-        }
+        schemas[key] = schema
         updateCursor($, [key])
         const id = $.$.$path[0]
         pathMap[id] = key
@@ -54,7 +50,7 @@ export default function buildState(
     return {
         state,
         pathMap,
-        validate: hasSchema ? createValidator(schemas) : undefined
+        validate: createValidator ? createValidator(schemas) : null
     }
 }
 
@@ -65,7 +61,7 @@ export default function Selector({
     notify
 }): (pth: IPath) => AbstractCursor {
     const {state, pathMap, validate} = buildState(stateSpec, createValidator)
-    const errors = validate ? validate([])(state) : []
+    const errors = validate ? validate(state) : []
     if (errors.length) {
         throw new Error('State errors: ' + errors.join('\n'))
     }
@@ -85,7 +81,7 @@ export default function Selector({
             state,
             stateRoot,
             prefix,
-            validate: validate ? validate(prefix) : undefined,
+            validate,
             notify
         })
     }

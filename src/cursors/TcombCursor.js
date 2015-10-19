@@ -50,6 +50,7 @@ export default class TcombCursor<T> extends AbstractCursor<T> {
         const oldState = this._stateRoot.state
         const newState = update(oldState, lastName ? root : spec)
         if (newState !== oldState) {
+            this._assert(newState)
             this._stateRoot.state = newState
             this._update()
         }

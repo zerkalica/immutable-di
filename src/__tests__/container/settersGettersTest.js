@@ -61,6 +61,6 @@ describe('settersGettersTest', () => {
 
     it('should throw error if node does not exists in the middle of path', () => {
         const container = createContainer()
-        assert.throws(() => container.get(Selector)(['d', 'b', 'a']).get(), /path/)
+        assert.throws(() => container.get(Selector)(['d', 'b', 'a']).get())
     })
 })

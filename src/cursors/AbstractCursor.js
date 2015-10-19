@@ -28,9 +28,9 @@ export default class AbstractCursor<T> {
         this._update = ::this._update
     }
 
-    _assert(value, key) {
+    _assert(value) {
         if (this._validate) {
-            const errors = this._validate(value, key)
+            const errors = this._validate(value)
             if (errors.length) {
                 throw new TypeError(errors.join('\n'))
             }

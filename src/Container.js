@@ -1,4 +1,4 @@
-import {cancelAnimationFrame, requestAnimationFrame} from './utils/animationFrame'
+ import {cancelAnimationFrame, requestAnimationFrame} from './utils/animationFrame'
 import {IDep} from './asserts'
 import BaseAnnotations from './model/BaseAnnotations'
 import defaultAnnotations from './define'
