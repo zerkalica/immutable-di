@@ -43,13 +43,15 @@ describe('eventsTest', () => {
         assert(MyDep.secondCall.calledWith(333))
     })
 
-    it('should not update listener, if changed another path', () => {
+    it('should update listener, if changed another path and first call', () => {
         const container = createContainer()
-        const fn = sinon.spy(v => v)
+        const fn = sinon.spy(v => {
+            return v
+        })
         const MyDep = Factory([['a', 'b']])(fn)
         container.mount(MyDep)
         container.get(Selector)(['a', 'c']).set(321).commit()
-        assert(fn.notCalled)
+        assert(fn.calledOnce)
     })
 
     it('should call listener once', () => {

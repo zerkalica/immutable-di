@@ -25,7 +25,6 @@ export default class AbstractCursor<T> {
         this.toJSON = ::this.toJSON
         this.diff = ::this.diff
         this.patch = ::this.patch
-        this._update = ::this._update
     }
 
     _assert(value) {
@@ -37,12 +36,8 @@ export default class AbstractCursor<T> {
         }
     }
 
-    _update(isSynced) {
-        this._notify(this._prefix, isSynced)
-    }
-
     commit() {
-        this._update(true)
+        this._notify(true)
         return this
     }
 

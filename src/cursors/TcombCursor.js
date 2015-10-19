@@ -52,7 +52,7 @@ export default class TcombCursor<T> extends AbstractCursor<T> {
         if (newState !== oldState) {
             this._assert(newState)
             this._stateRoot.state = newState
-            this._update()
+            this._notify()
         }
     }
 

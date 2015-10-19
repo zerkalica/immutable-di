@@ -71,10 +71,10 @@ describe('cacheTest', () => {
         const MyDep = Factory([['a', 'b']])(fn)
         container.get(MyDep)
         container.get(Selector)(['a']).set({
-            b: 123,
+            b: 321,
             c: 'test2'
         }).commit()
-        container.get(MyDep)
+        assert(container.get(MyDep) === 321)
         assert(fn.calledTwice)
     })
 })
