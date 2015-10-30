@@ -58,13 +58,24 @@ export default class NativeCursor extends AbstractCursor {
     set(newState) {
         const node = this._selector(this._state)
         if (newState !== node[this._cnName]) {
+            let isUpdated = false
             if (node === this) {
                 Object.keys(newState).forEach(k => {
-                    this._state[k] = newState[k]
+                    if (newState[k] !== this._state[k]) {
+                        isUpdated = true
+                        this._state[k] = newState[k]
+                    }
                 })
+            } else if (typeof newState === 'object') {
+                isUpdated = JSON.stringify(newState) !== JSON.stringify(node[this._cnName])
+            } else {
+                isUpdated = true
             }
-            node[this._cnName] = newState
-            this._update()
+
+            if (isUpdated) {
+                node[this._cnName] = newState
+                this._update()
+            }
         }
 
         return this
