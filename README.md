@@ -1,6 +1,8 @@
 immutable-di [![Build Status](https://secure.travis-ci.org/zerkalica/immutable-di.png)](http://travis-ci.org/zerkalica/immutable-di)
 ====================================================================================================================================
 
+DEPRECATED, use [reactive-di](https://github.com/zerkalica/reactive-di)
+
 [![NPM](https://nodei.co/npm/immutable-di.png?downloads=true&stars=true)](https://nodei.co/npm/immutable-di/)
 
 Simple, dependency injection container with some state handling functions.
